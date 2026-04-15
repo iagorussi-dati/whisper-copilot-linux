@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Whisper Copilot</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+  <style>
+    body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; }
+    .vu-bar { transition: width 150ms ease; }
+    .fade-in { animation: fadeIn 0.3s ease; }
+    @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
+    .pulse { animation: pulse 1.5s infinite; }
+    #transcript-area { scroll-behavior: smooth; }
+    .markdown-body h2 { font-size: 1.25rem; font-weight: 700; margin-top: 1.5rem; margin-bottom: 0.5rem; color: #f1f5f9; }
+    .markdown-body p { margin-bottom: 0.5rem; }
+    .markdown-body ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
+    .markdown-body li { margin-bottom: 0.25rem; }
+  </style>
+</head>
+<body class="min-h-screen">
+
+<!-- Event bus -->
+<script>
+  window.__emit = function(event, data) {
+    window.dispatchEvent(new CustomEvent('backend:' + event, { detail: data }));
+  };
+</script>
+
+<div id="app" class="max-w-3xl mx-auto p-4"></div>
+
+<script>
+// ── State ──
+const state = {
+  page: 'setup', // setup | meeting | summary
+  config: {
+    transcription_provider: 'groq', diarization_provider: 'local',
+    groq_api_key: '', aws_profile: 'poc_iago', aws_region: 'us-east-1',
+    bedrock_model_id: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
+    whisper_model: 'whisper-large-v3-turbo', language: 'pt',
+    chunk_seconds: 120, diarization_threshold: 0.5,
+    mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
+  },
+  devices: [],
+  micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
+  tab: 'admin',
+  // Meeting
+  transcript: [],
+  suggestions: [],
+  roles: {},
+  isAnalyzing: false,
+  timerStart: null, timerDisplay: '00:00:00',
+  micLevel: 0, monitorLevel: 0,
+  // Summary
+  summary: '', summaryLoading: false,
+};
+
+let timerInterval = null;
+
+// ── API helpers ──
+const api = () => window.pywebview?.api;
+
+async function callApi(method, ...args) {
+  const a = api();
+  if (!a) { console.warn('API not ready'); return null; }
+  try { return await a[method](...args); }
+  catch (e) { console.error(`API ${method} error:`, e); throw e; }
+}
+
+// ── Render ──
+function render() {
+  const app = document.getElementById('app');
+  if (state.page === 'setup') app.innerHTML = renderSetup();
+  else if (state.page === 'meeting') app.innerHTML = renderMeeting();
+  else if (state.page === 'summary') app.innerHTML = renderSummary();
+  bindEvents();
+}
+
+// ── SETUP PAGE ──
+function renderSetup() {
+  const c = state.config;
+  const inputDevs = state.devices.filter(d => d.deviceType === 'input');
+  const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
+  const isAdmin = state.tab === 'admin';
+  const canStart = c.mic_device_id && state.awsValid === 'ok';
+
+  return `
+    <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
+
+    <!-- Tab -->
+    <div class="flex gap-1 bg-slate-800 rounded p-1 mb-6">
+      <button data-action="setTab" data-val="admin" class="flex-1 py-2 text-sm rounded transition-colors ${state.tab === 'admin' ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-300'}">🔧 Admin</button>
+      <button data-action="setTab" data-val="client" class="flex-1 py-2 text-sm rounded transition-colors ${state.tab === 'client' ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-300'}">👤 Cliente</button>
+    </div>
+    ${isAdmin ? '<p class="text-xs text-slate-500 mb-4">Usa as API keys do .env automaticamente.</p>' : ''}
+
+    <!-- Transcription provider -->
+    <h2 class="text-lg font-semibold mb-2">Transcrição</h2>
+    <div class="flex gap-2 mb-4">
+      ${['groq'].map(p => `
+        <button data-action="setProvider" data-val="${p}" class="flex-1 py-2 text-xs rounded border transition-colors ${c.transcription_provider === p ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+          ${p === 'groq' ? 'Groq Whisper' : p}
+        </button>
+      `).join('')}
+    </div>
+    ${!isAdmin ? `
+      <div class="mb-4">
+        <label class="text-xs text-slate-400">Groq API Key</label>
+        <input type="password" data-bind="groq_api_key" value="${c.groq_api_key}" placeholder="Cole sua API key aqui"
+          class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1" />
+      </div>
+    ` : ''}
+    <p class="text-xs text-amber-400/70 mb-4">⚠️ Groq: limite de 20 req/min. Chunk recomendado: 10s+</p>
+
+    <!-- Diarization -->
+    <h2 class="text-lg font-semibold mb-2">Diarização (quem falou)</h2>
+    <div class="flex gap-2 mb-2">
+      ${[{id:'local',label:'Ativado'},{id:'none',label:'Desativado'}].map(d => `
+        <button data-action="setDiar" data-val="${d.id}" class="flex-1 py-2 text-xs rounded border transition-colors ${c.diarization_provider === d.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">${d.label}</button>
+      `).join('')}
+    </div>
+    ${c.diarization_provider === 'local' ? `
+      <div class="mb-4">
+        <div class="flex justify-between text-xs text-slate-400">
+          <span>Sensibilidade:</span><span>${c.diarization_threshold.toFixed(2)}</span>
+        </div>
+        <input type="range" min="0.1" max="0.9" step="0.05" value="${c.diarization_threshold}" data-bind="diarization_threshold"
+          class="w-full mt-1 accent-slate-400" />
+        <p class="text-xs text-slate-500 mt-1">↓ agrupa mais vozes, ↑ separa mais vozes</p>
+      </div>
+    ` : ''}
+
+    <!-- Audio devices -->
+    <h2 class="text-lg font-semibold mb-2">Dispositivos de Áudio</h2>
+    ${renderDeviceSelector('mic', '🎙️ Microfone', inputDevs, c.mic_device_id, state.micTest)}
+    ${renderDeviceSelector('monitor', '🔊 Autofalante', monitorDevs, c.monitor_device_id, state.monitorTest)}
+
+    <!-- AWS -->
+    <h2 class="text-lg font-semibold mb-2">Sugestões IA (Bedrock)</h2>
+    <div class="flex gap-2 items-center mb-2">
+      <button data-action="validateAws" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">Validar AWS</button>
+      ${state.awsValid !== 'idle' ? `<span class="text-sm">${state.awsValid === 'testing' ? '⏳' : state.awsValid === 'ok' ? '✅' : '❌'}</span>` : ''}
+      ${state.awsInfo ? `<span class="text-xs text-slate-400">${state.awsInfo}</span>` : ''}
+    </div>
+
+    <!-- Participants -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Participantes (opcional)</h2>
+    <p class="text-xs text-slate-500 mb-2">A IA identifica quem é quem com base nas falas.</p>
+    <div class="mb-2">
+      <label class="text-xs text-slate-400">Seu nome (microfone)</label>
+      <input type="text" data-bind="my_name" value="${c.my_name}" placeholder="Ex: Iago"
+        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1" />
+    </div>
+    ${c.participants.map((p, i) => `
+      <div class="flex gap-2 mb-2 items-center">
+        <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
+          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+        <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Descrição"
+          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+        <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1">×</button>
+      </div>
+    `).join('')}
+    <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-slate-300 mb-4">+ Adicionar participante</button>
+
+    <!-- Settings -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
+    <div class="grid grid-cols-2 gap-4 mb-4">
+      <div>
+        <label class="text-xs text-slate-400">Idioma</label>
+        <input type="text" data-bind="language" value="${c.language}"
+          class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+      </div>
+      <div>
+        <label class="text-xs text-slate-400">Chunk: ${c.chunk_seconds}s</label>
+        <input type="range" min="10" max="300" step="10" value="${c.chunk_seconds}" data-bind="chunk_seconds"
+          class="w-full mt-3 accent-slate-400" />
+      </div>
+    </div>
+
+    <!-- Start -->
+    <button data-action="startMeeting" ${!canStart ? 'disabled' : ''}
+      class="w-full py-3 rounded font-semibold text-lg transition-colors ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}">
+      Iniciar Reunião
+    </button>
+  `;
+}
+
+function renderDeviceSelector(type, label, devices, selected, testState) {
+  // Auto-select recommended device if nothing selected
+  const recommendedDev = devices.find(d => d.recommended);
+  const effectiveSelected = selected || (recommendedDev ? recommendedDev.id : '');
+  const level = type === 'mic' ? state.micLevel : state.monitorLevel;
+  
+  return `
+    <div class="mb-4">
+      <label class="text-xs text-slate-400">${label}</label>
+      <div class="flex gap-2 mt-1">
+        <select data-action="selectDevice" data-type="${type}"
+          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+          <option value="">Selecione...</option>
+          ${devices.map(d => `<option value="${d.id}" ${d.id === effectiveSelected ? 'selected' : ''} ${d.recommended ? 'data-recommended="true"' : ''}>${d.recommended ? '⭐ ' : ''}${d.name}</option>`).join('')}
+        </select>
+        <button data-action="testDevice" data-type="${type}" ${!effectiveSelected ? 'disabled' : ''}
+          class="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors ${!effectiveSelected ? 'opacity-50 cursor-not-allowed' : ''}">
+          ${testState === 'testing' ? '⏳ Testando...' : testState === 'ok' ? '✅ OK' : testState === 'fail' ? '❌ Falha' : 'Testar'}
+        </button>
+      </div>
+      ${testState === 'testing' ? `
+        <div class="mt-2 bg-slate-800 rounded p-2">
+          <div class="flex items-center gap-2 text-xs text-slate-400 mb-1">
+            <span>Volume:</span>
+            <div class="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
+              <div class="h-full ${type === 'mic' ? 'bg-emerald-500' : 'bg-blue-500'} transition-all duration-150" style="width: ${Math.min(level * 500, 100)}%"></div>
+            </div>
+          </div>
+          <p class="text-xs text-slate-500">Fale no microfone ou toque um som no autofalante...</p>
+        </div>
+      ` : ''}
+      ${recommendedDev ? `<p class="text-xs text-slate-500 mt-1">💡 Recomendado: ${recommendedDev.name}</p>` : ''}
+      ${testState === 'fail' ? `<p class="text-xs text-red-400 mt-1">⚠️ Nenhum áudio detectado. Verifique o dispositivo e tente novamente.</p>` : ''}
+    </div>
+  `;
+}
+
+// ── MEETING PAGE ──
+function renderMeeting() {
+  return `
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-4 bg-slate-800/50 rounded-lg p-3">
+      <div class="flex items-center gap-3">
+        <span class="w-3 h-3 bg-red-500 rounded-full pulse"></span>
+        <span class="text-sm font-mono">${state.timerDisplay}</span>
+      </div>
+      <div class="flex gap-4 text-xs text-slate-400">
+        <span>Mic: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-emerald-500 rounded" style="width:${Math.min(state.micLevel * 500, 100)}%"></span></span></span>
+        <span>Mon: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-blue-500 rounded" style="width:${Math.min(state.monitorLevel * 500, 100)}%"></span></span></span>
+      </div>
+      <button data-action="stopMeeting" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors">Encerrar</button>
+    </div>
+
+    <!-- Transcript -->
+    <div class="bg-slate-800/30 rounded-lg p-4 mb-4" style="height: 350px;">
+      <h2 class="text-sm font-semibold text-slate-400 mb-2">TRANSCRIÇÃO</h2>
+      <div id="transcript-area" class="overflow-y-auto space-y-1" style="height: calc(100% - 2rem);">
+        ${state.transcript.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando transcrição...</p>' : ''}
+        ${state.transcript.map(e => `
+          <div class="text-sm fade-in">
+            <span class="font-semibold ${e.speaker === state.config.my_name || e.speaker === 'EU' ? 'text-emerald-400' : 'text-blue-400'}">[${e.speaker}]</span>
+            <span class="text-slate-300">${e.text}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+
+    <!-- Suggestions -->
+    <div class="bg-slate-800/30 rounded-lg p-4" style="height: 180px;">
+      <h2 class="text-sm font-semibold text-slate-400 mb-2">SUGESTÕES DO COPILOTO</h2>
+      <div class="overflow-y-auto space-y-1" style="height: calc(100% - 2rem);">
+        ${state.suggestions.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando sugestões...</p>' : ''}
+        ${state.suggestions.map((s, i) => `
+          <div class="text-sm fade-in ${i < state.suggestions.length - 2 ? 'opacity-50' : ''}">
+            <span class="text-amber-400">→</span> <span class="text-slate-300">${s}</span>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+}
+
+// ── SUMMARY PAGE ──
+function renderSummary() {
+  return `
+    <h1 class="text-2xl font-bold mb-4">Resumo da Reunião</h1>
+    ${state.summaryLoading ? `
+      <div class="flex items-center gap-2 text-slate-400 mb-4">
+        <span class="pulse">⏳</span> Gerando resumo...
+      </div>
+    ` : `
+      <div class="bg-slate-800/30 rounded-lg p-6 mb-4 markdown-body" id="summary-content">
+        ${marked.parse(state.summary || 'Nenhum resumo disponível.')}
+      </div>
+    `}
+    <div class="flex gap-3">
+      <button data-action="copySummary" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">📋 Copiar</button>
+      <button data-action="newMeeting" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-medium transition-colors">Nova Reunião</button>
+    </div>
+  `;
+}
+
+// ── Event binding ──
+function bindEvents() {
+  // Data bindings
+  document.querySelectorAll('[data-bind]').forEach(el => {
+    el.addEventListener('input', () => {
+      const key = el.dataset.bind;
+      const val = el.type === 'range' ? Number(el.value) : el.value;
+      state.config[key] = val;
+      render();
+    });
+  });
+
+  // Actions
+  document.querySelectorAll('[data-action]').forEach(el => {
+    const action = el.dataset.action;
+    const handler = el.tagName === 'SELECT' ? 'change' : 'click';
+
+    if (action === 'updateParticipant') {
+      el.addEventListener('input', () => {
+        const i = parseInt(el.dataset.idx);
+        state.config.participants[i][el.dataset.field] = el.value;
+      });
+      return;
+    }
+
+    el.addEventListener(handler, async () => {
+      switch (action) {
+        case 'setTab':
+          state.tab = el.dataset.val;
+          render();
+          break;
+        case 'setProvider':
+          state.config.transcription_provider = el.dataset.val;
+          render();
+          break;
+        case 'setDiar':
+          state.config.diarization_provider = el.dataset.val;
+          render();
+          break;
+        case 'selectDevice':
+          if (el.dataset.type === 'mic') {
+            state.config.mic_device_id = el.value;
+            state.micTest = 'idle';
+          } else {
+            state.config.monitor_device_id = el.value;
+            state.monitorTest = 'idle';
+          }
+          render();
+          break;
+        case 'testDevice': {
+          const type = el.dataset.type;
+          const devId = type === 'mic' ? state.config.mic_device_id : state.config.monitor_device_id;
+          if (type === 'mic') state.micTest = 'testing'; else state.monitorTest = 'testing';
+          
+          // Track audio levels during test
+          let testLevels = [];
+          const testLevelHandler = (e) => {
+            if (e.detail.deviceId === devId) {
+              testLevels.push(e.detail.level);
+              // Update visual feedback during test
+              if (type === 'mic') state.micLevel = e.detail.level;
+              else state.monitorLevel = e.detail.level;
+              // Update VU meter in real-time
+              const selector = type === 'mic' ? '[data-type="mic"] + button' : '[data-type="monitor"] + button';
+              const btn = document.querySelector(selector);
+              if (btn) {
+                const pct = Math.min(e.detail.level * 500, 100);
+                btn.style.background = `linear-gradient(to right, ${type === 'mic' ? '#10b981' : '#3b82f6'} ${pct}%, #334155 ${pct}%)`;
+              }
+            }
+          };
+          window.addEventListener('backend:test_level', testLevelHandler);
+          
+          render();
+          try {
+            const level = await callApi('test_device', devId, type === 'mic' ? 'input' : 'monitor');
+            window.removeEventListener('backend:test_level', testLevelHandler);
+            
+            // Check if we got consistent audio - different thresholds for mic vs monitor
+            const significantLevels = testLevels.filter(l => l > (type === 'mic' ? 0.003 : 0.01));
+            const hasAudio = significantLevels.length >= (type === 'mic' ? 8 : 5);
+            
+            if (type === 'mic') {
+              state.micTest = hasAudio ? 'ok' : 'fail';
+              state.micLevel = 0;
+            } else {
+              state.monitorTest = hasAudio ? 'ok' : 'fail';
+              state.monitorLevel = 0;
+            }
+          } catch (e) { 
+            window.removeEventListener('backend:test_level', testLevelHandler);
+            if (type === 'mic') { state.micTest = 'fail'; state.micLevel = 0; }
+            else { state.monitorTest = 'fail'; state.monitorLevel = 0; }
+          }
+          render();
+          break;
+        }
+        case 'validateAws':
+          state.awsValid = 'testing'; state.awsInfo = ''; render();
+          try {
+            const info = await callApi('validate_aws', state.config.aws_profile, state.config.aws_region);
+            state.awsValid = 'ok'; state.awsInfo = info || 'OK';
+          } catch (e) { state.awsValid = 'fail'; state.awsInfo = String(e); }
+          render();
+          break;
+        case 'addParticipant':
+          state.config.participants.push({ name: '', role: '' });
+          render();
+          break;
+        case 'removeParticipant':
+          state.config.participants.splice(parseInt(el.dataset.idx), 1);
+          render();
+          break;
+        case 'startMeeting':
+          await callApi('save_config', state.config);
+          await callApi('start_meeting', state.config);
+          state.page = 'meeting';
+          state.transcript = [];
+          state.suggestions = [];
+          state.timerStart = Date.now();
+          startTimer();
+          render();
+          break;
+        case 'stopMeeting':
+          stopTimer();
+          const result = await callApi('stop_meeting');
+          state.summary = result?.summary || '';
+          state.summaryLoading = false;
+          state.page = 'summary';
+          render();
+          break;
+        case 'copySummary':
+          navigator.clipboard.writeText(state.summary);
+          break;
+        case 'newMeeting':
+          state.page = 'setup';
+          state.transcript = [];
+          state.suggestions = [];
+          state.summary = '';
+          render();
+          break;
+      }
+    });
+  });
+}
+
+// ── Timer ──
+function startTimer() {
+  timerInterval = setInterval(() => {
+    if (!state.timerStart) return;
+    const elapsed = Math.floor((Date.now() - state.timerStart) / 1000);
+    const h = String(Math.floor(elapsed / 3600)).padStart(2, '0');
+    const m = String(Math.floor((elapsed % 3600) / 60)).padStart(2, '0');
+    const s = String(elapsed % 60).padStart(2, '0');
+    state.timerDisplay = `${h}:${m}:${s}`;
+    // Update timer display without full re-render
+    const timerEl = document.querySelector('.font-mono');
+    if (timerEl) timerEl.textContent = state.timerDisplay;
+  }, 1000);
+}
+
+function stopTimer() {
+  if (timerInterval) { clearInterval(timerInterval); timerInterval = null; }
+}
+
+// ── Backend events ──
+window.addEventListener('backend:transcript', (e) => {
+  state.transcript.push(e.detail);
+  if (state.page === 'meeting') {
+    const area = document.getElementById('transcript-area');
+    if (area) {
+      const entry = e.detail;
+      const isMe = entry.speaker === state.config.my_name || entry.speaker === 'EU';
+      const div = document.createElement('div');
+      div.className = 'text-sm fade-in';
+      div.innerHTML = `<span class="font-semibold ${isMe ? 'text-emerald-400' : 'text-blue-400'}">[${entry.speaker}]</span> <span class="text-slate-300">${entry.text}</span>`;
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;
+    }
+  }
+});
+
+window.addEventListener('backend:suggestions', (e) => {
+  const data = e.detail;
+  if (data.suggestions) {
+    state.suggestions.push(...data.suggestions);
+    if (data.roles) Object.assign(state.roles, data.roles);
+    if (state.page === 'meeting') render();
+  }
+});
+
+window.addEventListener('backend:speaker_map', (e) => {
+  const map = e.detail;
+  state.transcript = state.transcript.map(entry => {
+    const resolved = map[entry.speaker];
+    return resolved ? { ...entry, speaker: resolved } : entry;
+  });
+  if (state.page === 'meeting') render();
+});
+
+window.addEventListener('backend:audio_level', (e) => {
+  const { source, deviceId, level } = e.detail;
+  const src = source || (deviceId?.includes('monitor') || deviceId?.includes('.monitor') ? 'monitor' : 'mic');
+  if (src === 'mic') state.micLevel = level;
+  else state.monitorLevel = level;
+  // Update VU meters without full re-render
+  if (state.page === 'meeting') {
+    const bars = document.querySelectorAll('.vu-bar');
+    if (bars[0] && src === 'mic') bars[0].style.width = Math.min(level * 500, 100) + '%';
+    if (bars[1] && src === 'monitor') bars[1].style.width = Math.min(level * 500, 100) + '%';
+  }
+  // Update test VU meters on setup page
+  if (state.page === 'setup' && (state.micTest === 'testing' || state.monitorTest === 'testing')) {
+    render();
+  }
+});
+
+window.addEventListener('backend:test_level', (e) => {
+  const { deviceId, level } = e.detail;
+  // Update level for the device being tested
+  const isMic = !deviceId.includes('monitor') && !deviceId.includes('loopback');
+  if (isMic) state.micLevel = level;
+  else state.monitorLevel = level;
+  
+  // Update test VU meter in real-time
+  if (state.page === 'setup' && (state.micTest === 'testing' || state.monitorTest === 'testing')) {
+    render();
+  }
+});
+
+window.addEventListener('backend:error', (e) => {
+  console.error('Backend error:', e.detail);
+  // Show toast
+  const toast = document.createElement('div');
+  toast.className = 'fixed top-4 right-4 bg-red-900/90 border border-red-700 text-red-200 px-4 py-2 rounded-lg text-sm z-50 fade-in';
+  toast.textContent = e.detail.message;
+  document.body.appendChild(toast);
+  setTimeout(() => toast.remove(), 5000);
+});
+
+// Keyboard shortcut
+window.addEventListener('keydown', (e) => {
+  if (e.ctrlKey && e.shiftKey && e.key === 'S' && state.page === 'meeting') {
+    e.preventDefault();
+    document.querySelector('[data-action="stopMeeting"]')?.click();
+  }
+});
+
+// ── Init ──
+window.addEventListener('pywebviewready', async () => {
+  // Load saved config
+  try {
+    const saved = await callApi('load_config');
+    if (saved) Object.assign(state.config, saved);
+  } catch {}
+
+  // Load devices
+  try {
+    state.devices = await callApi('list_audio_devices') || [];
+  } catch {}
+
+  // Auto-select recommended device if none selected
+  const inputDevs = state.devices.filter(d => d.deviceType === 'input');
+  const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
+  
+  const recommendedInput = inputDevs.find(d => d.recommended);
+  if (recommendedInput && !state.config.mic_device_id) {
+    state.config.mic_device_id = recommendedInput.id;
+  }
+  
+  const recommendedMonitor = monitorDevs.find(d => d.recommended);
+  if (recommendedMonitor && !state.config.monitor_device_id) {
+    state.config.monitor_device_id = recommendedMonitor.id;
+  }
+
+  render();
+});
+
+// Fallback if pywebviewready doesn't fire
+setTimeout(() => { if (!state.devices.length) render(); }, 1000);
+</script>
+
+</body>
+</html>
