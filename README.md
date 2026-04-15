@@ -1,172 +1,152 @@
 # Whisper Copilot Lite
 
-Copiloto de reuniões em tempo real — versão leve em Python.
-
-Captura áudio do microfone e autofalante, transcreve via Groq Whisper, identifica quem está falando por voz (SpeechBrain ECAPA-TDNN), e gera sugestões inteligentes via Claude (Bedrock proxy).
-
-## 🚀 Performance
-
-- **Transcrição**: ~1s por chunk de 10s (Groq Whisper API)
-- **Diarização**: ~5-8s por chunk (SpeechBrain ECAPA-TDNN, 6 workers)
-- **Total**: ~6-10s por chunk de áudio ✅
+Copiloto de reuniões em tempo real. Transcreve, identifica speakers e gera sugestões inteligentes.
 
 ## Stack
 
-| Camada | Tecnologia |
-|--------|-----------|
-| Janela nativa | pywebview (WebView2 no Windows, WebKitGTK no Linux) |
-| Frontend | HTML/JS/Tailwind CSS |
-| Captura de áudio | sounddevice + PyAudioWPatch (WASAPI loopback) |
-| Transcrição | Groq Whisper API (whisper-large-v3-turbo) |
-| Diarização | SpeechBrain ECAPA-TDNN (embeddings locais) |
-| Sugestões IA | Claude Sonnet 4 via API Gateway (proxy pro AWS Bedrock) |
+- **Frontend**: HTML + Tailwind CSS (single file)
+- **Backend**: Python + pywebview
+- **Transcrição**: Groq Whisper API (whisper-large-v3-turbo)
+- **IA**: Amazon Bedrock (Nova 2 Pro) — via long-term API key
+- **Áudio**: sounddevice (mic) + parec/pw-cat (monitor Linux) / PyAudioWPatch (monitor Windows)
 
-## Instalação
+## Setup (Linux)
 
-### Windows
+```bash
+# Dependências do sistema
+sudo pacman -S python python-pip   # Arch
+# sudo apt install python3 python3-pip  # Ubuntu
 
-```powershell
-# 1. Instalar Python 3.10+ (https://python.org)
-
-# 2. Clonar repositório
-git clone <repo-url>
-cd whisper-copilot-lite
-
-# 3. Instalar dependências
+# Dependências Python
 pip install -r requirements.txt
 
-# 4. IMPORTANTE: Ativar Modo Desenvolvedor do Windows
-# Para permitir symlinks sem admin:
-# Configurações → Privacidade e segurança → Para desenvolvedores → Ativar "Modo de desenvolvedor"
+# Configurar .env
+cp .env.example .env
+# Editar: GROQ_API_KEY e AWS_BEARER_TOKEN_BEDROCK
 
-# 5. Configurar .env
-copy .env.example .env
-# Editar .env com suas API keys:
-# - GROQ_API_KEY (obrigatório)
-# - BEDROCK_PROXY_URL (opcional, usa default)
-# - BEDROCK_PROXY_KEY (opcional, usa default)
-
-# 6. Rodar
+# Rodar
 python main.py
 ```
 
-### Linux (Ubuntu/Arch)
+## Setup (Windows)
 
+```powershell
+# Dependências Python
+pip install -r requirements-windows.txt
+
+# Configurar .env
+copy .env.example .env
+# Editar: GROQ_API_KEY e AWS_BEARER_TOKEN_BEDROCK
+
+# Rodar
+python main.py
+```
+
+## Configuração (.env)
+
+```
+GROQ_API_KEY=gsk_...                    # API key do Groq (https://console.groq.com/keys)
+AWS_BEARER_TOKEN_BEDROCK=bedrock_...     # Long-term API key do Bedrock
+AWS_REGION=us-east-1
+```
+
+## Como funciona
+
+### Fluxo principal
+
+```
+Microfone (você) → Groq transcreve → [EU] "texto..."
+Autofalante (outros) → Groq transcreve → Claude identifica speakers + gera sugestões
+```
+
+### Modos de transcrição
+
+- **Automático**: transcreve a cada X segundos (configurável, mínimo 30s)
+- **Manual**: pressione Espaço ou T para transcrever quando quiser
+
+### Identificação de speakers
+
+O Claude analisa o conteúdo das falas e identifica quem é quem:
+- Se participantes foram informados no Setup → identifica pelo nome
+- Se não → deduz pelo papel (organizador, cliente, apresentador)
+
+### System Prompt customizável
+
+Templates prontos:
+- 📋 **Discovery Comercial (Dati)** — sugestões de discovery baseadas em Problem Canvas e 5W2H
+- 🎭 **Piadas e Humor** — sugere piadas baseadas no contexto
+- 💰 **Copiloto de Vendas** — técnicas de vendas e negociação
+
+Também aceita upload de arquivos .md/.txt ou texto livre.
+
+### Sugestões direcionadas
+
+Selecione para quem as sugestões são direcionadas (EU ou qualquer participante).
+
+## Arquitetura
+
+```
+backend/
+├── api.py              # API bridge (pywebview js_api)
+├── audio/
+│   ├── capture.py      # Captura de áudio (sounddevice + parec/pw-cat)
+│   ├── devices.py      # Listagem de dispositivos
+│   └── wav.py          # Conversão PCM → WAV
+├── diarization/        # (legado, não usado no fluxo atual)
+│   ├── engine.py       # Embeddings SpeechBrain
+│   └── voice_bank.py   # Banco de vozes
+├── transcription/
+│   └── groq.py         # Cliente Groq Whisper
+├── llm/
+│   └── bedrock.py      # Cliente Bedrock (boto3 direto, long-term API key)
+└── config/
+    └── settings.py     # Configuração persistente
+frontend/
+└── index.html          # UI completa (single file)
+prompts/
+├── piadas.md           # Template: piadas
+└── vendas.md           # Template: vendas
+Prompt_Modelo.md        # Template: Discovery Dati
+main.py                 # Entry point
+```
+
+## Pipeline por chunk
+
+1. **Groq transcreve** (~2s) — verbose_json com timestamps
+2. **Claude identifica speakers** + **gera sugestões** numa chamada só (~3-6s com cache)
+3. **Claude atribui falas** aos speakers (~3s)
+4. **Emite** transcript + sugestões pro frontend
+
+Total: **~8-12s por chunk** (com prompt caching ativo)
+
+## Custos
+
+| API | Preço | Uso típico (4 vendedores, 4 reuniões/dia, 30min) |
+|---|---|---|
+| Groq Whisper | $0.04/hora | ~R$24/mês |
+| Bedrock (Nova 2 Pro) | ~$0.80/1M tokens | ~R$15-30/mês |
+| **Total** | | **~R$40-55/mês** |
+
+## Prompt Caching
+
+O system prompt é cacheado no Bedrock na primeira chamada. Chamadas seguintes usam o cache (~30% mais rápido). O cache é pré-aquecido automaticamente ao iniciar a reunião.
+
+## Troubleshooting
+
+### Autofalante não captura (Linux)
 ```bash
-# 1. Dependências do sistema
-sudo apt install python3 python3-pip libportaudio2 gir1.2-webkit2-4.1  # Ubuntu
-sudo pacman -S python python-pip portaudio webkit2gtk-4.1              # Arch
-
-# 2. Clonar repositório
-git clone <repo-url>
-cd whisper-copilot-lite
-
-# 3. Instalar dependências Python
-pip install -r requirements.txt
-
-# 4. Configurar .env
-cp .env.example .env
-# Editar .env com suas API keys
-
-# 5. Rodar
-python3 main.py
+pactl list sources short  # Verificar se PipeWire/PulseAudio está rodando
 ```
 
-## 🎯 Uso
+### Autofalante não captura (Windows)
+- Ativar "Stereo Mix" nas configurações de som
+- Ou instalar VB-Audio Virtual Cable (gratuito)
 
-1. **Setup**: Selecione microfone e autofalante, valide AWS, configure participantes
-2. **Reunião**: Transcrição em tempo real com identificação de speakers + sugestões IA
-3. **Resumo**: Resumo automático em Markdown ao encerrar (Ctrl+Shift+S)
+### Sugestões não aparecem
+- Verificar se o template de System Prompt foi selecionado
+- Verificar logs: `[STEP 3] NENHUMA sugestão!`
+- O Claude pode achar que não tem nada relevante no trecho
 
-## 🔧 Troubleshooting
-
-### Windows: Erro de symlink ao carregar SpeechBrain
-
-**Erro**: `OSError: [WinError 1314] O cliente não tem o privilégio necessário`
-
-**Solução**: Ative o Modo Desenvolvedor do Windows:
-1. Abra Configurações (Win + I)
-2. Vá em "Privacidade e segurança" → "Para desenvolvedores"
-3. Ative "Modo de desenvolvedor"
-4. Reinicie o aplicativo
-
-**Alternativa**: Execute como administrador (não recomendado)
-
-### Áudio do monitor não captura
-
-**Windows**: Certifique-se de selecionar um device com "[Loopback]" no nome
-
-**Linux**: Use device com ".monitor" no nome (PulseAudio/PipeWire)
-
-## 📁 Estrutura
-
-```
-whisper-copilot-lite/
-├── main.py                          # Entry point — abre janela pywebview
-├── frontend/
-│   └── index.html                   # UI completa (Setup → Meeting → Summary)
-├── backend/
-│   ├── api.py                       # API bridge (pywebview js_api)
-│   ├── audio/
-│   │   ├── capture.py               # Captura mic + monitor (sounddevice/subprocess)
-│   │   ├── devices.py               # Listar e testar devices
-│   │   └── wav.py                   # Encode/decode WAV
-│   ├── transcription/
-│   │   └── groq.py                  # Cliente Groq Whisper API
-│   ├── diarization/
-│   │   ├── engine.py                # SpeechBrain ECAPA-TDNN embeddings
-│   │   └── voice_bank.py            # Banco de vozes + cosine similarity
-│   ├── llm/
-│   │   └── bedrock.py               # Cliente Bedrock proxy (Claude)
-│   └── config/
-│       └── settings.py              # Persistência de configuração
-├── requirements.txt
-└── .env.example
-```
-
-## 🔬 Melhorias Futuras
-
-### Diarização
-- [ ] Melhorar acurácia da identificação de speakers
-- [ ] Comparar com projeto original (Tauri) para validar qualidade
-- [ ] Ajustar threshold de similaridade (atualmente 0.20)
-- [ ] Testar modelos alternativos (pyannote.audio)
-- [ ] Implementar re-identificação de speakers ao longo da reunião
-
-### Performance
-- [ ] Testar GPU para SpeechBrain (CUDA)
-- [ ] Otimizar número de workers baseado em CPU cores
-- [ ] Cache de embeddings para speakers conhecidos
-
-### Features
-- [ ] Exportar transcrição em múltiplos formatos (JSON, TXT, SRT)
-- [ ] Suporte a múltiplos idiomas
-- [ ] Gravação de áudio raw para replay
-- [ ] Integração com calendário (Google/Outlook)
-
-## 📝 Notas Técnicas
-
-### Captura de Áudio no Windows
-
-O projeto usa uma abordagem híbrida:
-- **Microfone**: `sounddevice` (estável, sem GIL issues)
-- **Monitor/Loopback**: `PyAudioWPatch` em subprocess isolado
-
-Isso evita conflitos de GIL (Global Interpreter Lock) com pywebview que causavam crashes.
-
-### Diarização
-
-- Usa SpeechBrain ECAPA-TDNN para extrair embeddings de voz
-- Compara embeddings via cosine similarity
-- Threshold padrão: 0.20 (ajustável)
-- Processa apenas segmentos >= 1.5s para melhor acurácia
-- 6 workers paralelos para performance
-
-### Primeira Execução
-
-Na primeira execução, o SpeechBrain baixa ~90MB de modelos do HuggingFace:
-- `embedding_model.ckpt` (83.3MB)
-- `classifier.ckpt` (5.53MB)
-- Outros arquivos de configuração
-
-Execuções subsequentes usam cache local (~4s para carregar).
+### Encoding quebrado (caracteres estranhos)
+- Verificar que o .env está em UTF-8
+- Reiniciar o app

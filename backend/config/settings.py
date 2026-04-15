@@ -25,12 +25,14 @@ class AppConfig:
     bedrock_model_id: str = "us.anthropic.claude-sonnet-4-20250514-v1:0"
     whisper_model: str = "whisper-large-v3-turbo"
     language: str = "pt"
-    chunk_seconds: int = 120
-    diarization_threshold: float = 0.5
+    chunk_seconds: int = 60
+    diarization_threshold: float = 0.25
     mic_device_id: str = ""
     monitor_device_id: str = ""
     my_name: str = ""
     participants: list = field(default_factory=list)
+    suggestions_target: str = ""  # nome do participante que recebe as sugestões
+    custom_system_prompt: str = ""  # system prompt customizado para sugestões
 
     def to_dict(self) -> dict:
         d = asdict(self)

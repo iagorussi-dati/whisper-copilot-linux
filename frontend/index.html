@@ -8,6 +8,8 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; }
+    select { color: #f1f5f9 !important; background-color: #1e293b !important; -webkit-appearance: none; }
+    select option { color: #f1f5f9; background-color: #1e293b; }
     .vu-bar { transition: width 150ms ease; }
     .fade-in { animation: fadeIn 0.3s ease; }
     @keyframes fadeIn { from { opacity: 0; transform: translateY(4px); } to { opacity: 1; transform: translateY(0); } }
@@ -40,8 +42,9 @@ const state = {
     groq_api_key: '', aws_profile: 'poc_iago', aws_region: 'us-east-1',
     bedrock_model_id: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
     whisper_model: 'whisper-large-v3-turbo', language: 'pt',
-    chunk_seconds: 120, diarization_threshold: 0.5,
+    chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
+    suggestions_target: '', custom_system_prompt: '',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -51,6 +54,7 @@ const state = {
   suggestions: [],
   roles: {},
   isAnalyzing: false,
+  isProcessing: false,
   timerStart: null, timerDisplay: '00:00:00',
   micLevel: 0, monitorLevel: 0,
   // Summary
@@ -83,36 +87,18 @@ function renderSetup() {
   const c = state.config;
   const inputDevs = state.devices.filter(d => d.deviceType === 'input');
   const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
-  const isAdmin = state.tab === 'admin';
   const canStart = c.mic_device_id && state.awsValid === 'ok';
 
   return `
     <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
-
-    <!-- Tab -->
-    <div class="flex gap-1 bg-slate-800 rounded p-1 mb-6">
-      <button data-action="setTab" data-val="admin" class="flex-1 py-2 text-sm rounded transition-colors ${state.tab === 'admin' ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-300'}">🔧 Admin</button>
-      <button data-action="setTab" data-val="client" class="flex-1 py-2 text-sm rounded transition-colors ${state.tab === 'client' ? 'bg-slate-700 text-slate-100' : 'text-slate-400 hover:text-slate-300'}">👤 Cliente</button>
-    </div>
-    ${isAdmin ? '<p class="text-xs text-slate-500 mb-4">Usa as API keys do .env automaticamente.</p>' : ''}
+    <p class="text-xs text-slate-500 mb-4">Usa as API keys do .env automaticamente.</p>
 
     <!-- Transcription provider -->
     <h2 class="text-lg font-semibold mb-2">Transcrição</h2>
-    <div class="flex gap-2 mb-4">
-      ${['groq'].map(p => `
-        <button data-action="setProvider" data-val="${p}" class="flex-1 py-2 text-xs rounded border transition-colors ${c.transcription_provider === p ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
-          ${p === 'groq' ? 'Groq Whisper' : p}
-        </button>
-      `).join('')}
+    <div class="flex gap-2 mb-2">
+      <button class="flex-1 py-2 text-xs rounded border border-emerald-500 bg-emerald-500/10 text-emerald-400">Groq Whisper</button>
     </div>
-    ${!isAdmin ? `
-      <div class="mb-4">
-        <label class="text-xs text-slate-400">Groq API Key</label>
-        <input type="password" data-bind="groq_api_key" value="${c.groq_api_key}" placeholder="Cole sua API key aqui"
-          class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1" />
-      </div>
-    ` : ''}
-    <p class="text-xs text-amber-400/70 mb-4">⚠️ Groq: limite de 20 req/min. Chunk recomendado: 10s+</p>
+    <p class="text-xs text-amber-400/70 mb-4">⚠️ Groq: limite de 20 req/min. Chunk mínimo: 30s</p>
 
     <!-- Diarization -->
     <h2 class="text-lg font-semibold mb-2">Diarização (quem falou)</h2>
@@ -164,6 +150,37 @@ function renderSetup() {
     `).join('')}
     <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-slate-300 mb-4">+ Adicionar participante</button>
 
+    <!-- Suggestions target -->
+    <div class="mb-4">
+      <label class="text-xs text-slate-400">Sugestões direcionadas para:</label>
+      <select data-bind="suggestions_target"
+        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1">
+        <option value="" ${!c.suggestions_target ? 'selected' : ''}>EU (microfone)</option>
+        ${c.my_name ? `<option value="${c.my_name}" ${c.suggestions_target === c.my_name ? 'selected' : ''}>${c.my_name}</option>` : ''}
+        ${c.participants.filter(p => p.name).map(p => `<option value="${p.name}" ${c.suggestions_target === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
+      </select>
+      <p class="text-xs text-slate-500 mt-1">A IA vai gerar sugestões pensando nessa pessoa.</p>
+    </div>
+
+    <!-- System Prompt -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">System Prompt (opcional)</h2>
+    <p class="text-xs text-slate-500 mb-2">Define o comportamento das sugestões. Selecione um template ou carregue um arquivo.</p>
+    <div class="flex gap-2 mb-2">
+      <select data-action="selectTemplate"
+        class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+        <option value="">Selecione um template...</option>
+        <option value="discovery">📋 Discovery Comercial (Dati)</option>
+        <option value="piadas">🎭 Piadas e Humor</option>
+        <option value="vendas">💰 Copiloto de Vendas</option>
+        <option value="custom">📄 Carregar arquivo...</option>
+      </select>
+    </div>
+    <input type="file" data-action="loadPromptFile" accept=".md,.txt,.markdown"
+      class="text-xs text-slate-400 mb-2" style="display:none" id="promptFileInput" />
+    <textarea data-bind="custom_system_prompt" rows="6" placeholder="Ex: Você é um copiloto de vendas. Sugira técnicas de fechamento quando o cliente demonstrar interesse..."
+      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.custom_system_prompt}</textarea>
+    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ System prompt carregado (${c.custom_system_prompt.length} chars)</p>` : ''}
+
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
     <div class="grid grid-cols-2 gap-4 mb-4">
@@ -173,9 +190,24 @@ function renderSetup() {
           class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
       </div>
       <div>
-        <label class="text-xs text-slate-400">Chunk: ${c.chunk_seconds}s</label>
-        <input type="range" min="10" max="300" step="10" value="${c.chunk_seconds}" data-bind="chunk_seconds"
-          class="w-full mt-3 accent-slate-400" />
+        <label class="text-xs text-slate-400">Modo de transcrição</label>
+        <div class="flex gap-2 mt-1">
+          <button data-action="setChunkMode" data-val="auto" class="flex-1 py-2 text-xs rounded border transition-colors ${c.chunk_seconds > 0 ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 text-slate-400'}">⏱️ Automático</button>
+          <button data-action="setChunkMode" data-val="manual" class="flex-1 py-2 text-xs rounded border transition-colors ${c.chunk_seconds === 0 ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400'}">🎯 Manual (tecla)</button>
+        </div>
+        ${c.chunk_seconds > 0 ? `
+          <label class="text-xs text-slate-400 mt-2 block">Chunk: ${c.chunk_seconds}s</label>
+          <input type="range" min="30" max="300" step="10" value="${c.chunk_seconds}" data-bind="chunk_seconds"
+            class="w-full mt-1 accent-slate-400" />
+        ` : `
+          <p class="text-xs text-slate-500 mt-2">Pressione <kbd class="bg-slate-700 px-1 rounded">Espaço</kbd> ou <kbd class="bg-slate-700 px-1 rounded">T</kbd> durante a reunião para transcrever</p>
+          <div class="mt-2 bg-slate-800 rounded p-3 text-center">
+            <p class="text-xs text-slate-400 mb-2">Teste a tecla aqui:</p>
+            <div id="keyTestArea" tabindex="0" class="bg-slate-700 rounded p-4 text-sm text-slate-300 cursor-pointer outline-none focus:ring-2 focus:ring-violet-500"
+              >Clique aqui e pressione uma tecla...</div>
+            <p id="keyTestResult" class="text-xs text-slate-500 mt-1"></p>
+          </div>
+        `}
       </div>
     </div>
 
@@ -239,9 +271,17 @@ function renderMeeting() {
       </div>
       <button data-action="stopMeeting" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors">Encerrar</button>
     </div>
+    ${state.config.chunk_seconds == 0 ? `
+    <div class="flex justify-center mb-3">
+      <button id="triggerBtn" data-action="triggerTranscription" ${state.isProcessing ? 'disabled' : ''}
+        class="px-6 py-2 rounded text-sm font-medium transition-all ${state.isProcessing ? 'bg-violet-800 text-violet-400 cursor-wait animate-pulse' : 'bg-violet-600 hover:bg-violet-500 text-white'}">
+        ${state.isProcessing ? '⏳ Processando...' : '🎯 Transcrever agora (Espaço/T)'}
+      </button>
+    </div>
+    ` : ''}
 
     <!-- Transcript -->
-    <div class="bg-slate-800/30 rounded-lg p-4 mb-4" style="height: 350px;">
+    <div class="bg-slate-800/30 rounded-lg p-4 mb-4" style="height: 45vh;">
       <h2 class="text-sm font-semibold text-slate-400 mb-2">TRANSCRIÇÃO</h2>
       <div id="transcript-area" class="overflow-y-auto space-y-1" style="height: calc(100% - 2rem);">
         ${state.transcript.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando transcrição...</p>' : ''}
@@ -255,12 +295,12 @@ function renderMeeting() {
     </div>
 
     <!-- Suggestions -->
-    <div class="bg-slate-800/30 rounded-lg p-4" style="height: 180px;">
+    <div class="bg-slate-800/30 rounded-lg p-4" style="height: 35vh;">
       <h2 class="text-sm font-semibold text-slate-400 mb-2">SUGESTÕES DO COPILOTO</h2>
-      <div class="overflow-y-auto space-y-1" style="height: calc(100% - 2rem);">
+      <div id="suggestions-area" class="overflow-y-auto space-y-2" style="height: calc(100% - 2rem);">
         ${state.suggestions.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando sugestões...</p>' : ''}
-        ${state.suggestions.map((s, i) => `
-          <div class="text-sm fade-in ${i < state.suggestions.length - 2 ? 'opacity-50' : ''}">
+        ${state.suggestions.map(s => `
+          <div class="text-sm fade-in mb-2">
             <span class="text-amber-400">→</span> <span class="text-slate-300">${s}</span>
           </div>
         `).join('')}
@@ -291,20 +331,36 @@ function renderSummary() {
 
 // ── Event binding ──
 function bindEvents() {
+  // Key test area
+  const keyTest = document.getElementById('keyTestArea');
+  if (keyTest) {
+    keyTest.addEventListener('keydown', (e) => {
+      e.preventDefault();
+      const result = document.getElementById('keyTestResult');
+      const isValid = e.key === ' ' || e.key === 't' || e.key === 'T';
+      keyTest.textContent = `Tecla: "${e.key === ' ' ? 'Espaço' : e.key}" (code: ${e.code})`;
+      if (result) {
+        result.textContent = isValid ? '✅ Tecla reconhecida! Vai funcionar na reunião.' : `⚠️ Use Espaço ou T`;
+        result.className = `text-xs mt-1 ${isValid ? 'text-emerald-400' : 'text-amber-400'}`;
+      }
+    });
+  }
+
   // Data bindings
   document.querySelectorAll('[data-bind]').forEach(el => {
-    el.addEventListener('input', () => {
+    const evt = el.tagName === 'TEXTAREA' ? 'change' : 'input';
+    el.addEventListener(evt, () => {
       const key = el.dataset.bind;
       const val = el.type === 'range' ? Number(el.value) : el.value;
       state.config[key] = val;
-      render();
+      if (el.tagName !== 'TEXTAREA') render();
     });
   });
 
   // Actions
   document.querySelectorAll('[data-action]').forEach(el => {
     const action = el.dataset.action;
-    const handler = el.tagName === 'SELECT' ? 'change' : 'click';
+    const handler = el.tagName === 'SELECT' || el.type === 'file' ? 'change' : 'click';
 
     if (action === 'updateParticipant') {
       el.addEventListener('input', () => {
@@ -402,6 +458,29 @@ function bindEvents() {
           state.config.participants.splice(parseInt(el.dataset.idx), 1);
           render();
           break;
+        case 'selectTemplate': {
+          const tpl = el.value;
+          if (tpl === 'custom') {
+            document.getElementById('promptFileInput')?.click();
+          } else if (tpl) {
+            const content = await callApi('load_prompt_template', tpl);
+            if (content) {
+              state.config.custom_system_prompt = content;
+              render();
+            }
+          }
+          break;
+        }
+        case 'loadPromptFile':
+          if (el.files && el.files[0]) {
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+              state.config.custom_system_prompt = ev.target.result;
+              render();
+            };
+            reader.readAsText(el.files[0]);
+          }
+          break;
         case 'startMeeting':
           await callApi('save_config', state.config);
           await callApi('start_meeting', state.config);
@@ -411,6 +490,27 @@ function bindEvents() {
           state.timerStart = Date.now();
           startTimer();
           render();
+          break;
+        case 'setChunkMode':
+          state.config.chunk_seconds = el.dataset.val === 'manual' ? 0 : 60;
+          render();
+          break;
+        case 'triggerTranscription':
+          if (!state.isProcessing) {
+            state.isProcessing = true;
+            const btn = document.getElementById('triggerBtn');
+            if (btn) { btn.disabled = true; btn.className = 'px-6 py-2 rounded text-sm font-medium bg-violet-800 text-violet-400 cursor-wait animate-pulse'; btn.innerHTML = '⏳ Processando...'; }
+            // Add loading indicators
+            const tArea = document.getElementById('transcript-area');
+            if (tArea) {
+              const ld = document.createElement('div');
+              ld.className = 'loading-indicator text-sm text-violet-400 animate-pulse';
+              ld.textContent = '⏳ Transcrevendo e analisando...';
+              tArea.appendChild(ld);
+              tArea.scrollTop = tArea.scrollHeight;
+            }
+            await callApi('trigger_transcription');
+          }
           break;
         case 'stopMeeting':
           stopTimer();
@@ -460,13 +560,30 @@ window.addEventListener('backend:transcript', (e) => {
   if (state.page === 'meeting') {
     const area = document.getElementById('transcript-area');
     if (area) {
+      const loading = area.querySelector('.loading-indicator');
+      if (loading) loading.remove();
+      
       const entry = e.detail;
       const isMe = entry.speaker === state.config.my_name || entry.speaker === 'EU';
       const div = document.createElement('div');
       div.className = 'text-sm fade-in';
-      div.innerHTML = `<span class="font-semibold ${isMe ? 'text-emerald-400' : 'text-blue-400'}">[${entry.speaker}]</span> <span class="text-slate-300">${entry.text}</span>`;
+      const speakerSpan = `<span class="font-semibold ${isMe ? 'text-emerald-400' : 'text-blue-400'}">[${entry.speaker}]</span> `;
+      div.innerHTML = speakerSpan + '<span class="text-slate-300 typewriter"></span>';
       area.appendChild(div);
-      area.scrollTop = area.scrollHeight;
+      // Typewriter effect
+      const tw = div.querySelector('.typewriter');
+      let i = 0;
+      const text = entry.text;
+      const interval = setInterval(() => {
+        if (i < text.length) {
+          tw.textContent += text.charAt(i);
+          i += Math.min(3, text.length - i); // 3 chars at a time for speed
+          area.scrollTop = area.scrollHeight;
+        } else {
+          tw.textContent = text;
+          clearInterval(interval);
+        }
+      }, 8);
     }
   }
 });
@@ -476,7 +593,51 @@ window.addEventListener('backend:suggestions', (e) => {
   if (data.suggestions) {
     state.suggestions.push(...data.suggestions);
     if (data.roles) Object.assign(state.roles, data.roles);
-    if (state.page === 'meeting') render();
+    
+    // Reset processing state
+    state.isProcessing = false;
+    const btn = document.getElementById('triggerBtn');
+    if (btn) { btn.disabled = false; btn.className = 'px-6 py-2 rounded text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-all'; btn.innerHTML = '🎯 Transcrever agora (Espaço/T)'; }
+    
+    if (state.page === 'meeting') {
+      const area = document.getElementById('suggestions-area');
+      if (area) {
+        const placeholder = area.querySelector('.italic');
+        if (placeholder) placeholder.remove();
+        
+        // Fade old suggestions
+        area.querySelectorAll('.suggestion-item').forEach(el => {
+          el.classList.add('opacity-30');
+          el.classList.remove('opacity-100');
+        });
+        
+        // Add new suggestions with highlight
+        for (const s of data.suggestions) {
+          const div = document.createElement('div');
+          div.className = 'suggestion-item text-sm fade-in mb-2 opacity-100 transition-opacity duration-500';
+          div.innerHTML = `<span class="text-amber-400">→</span> <span class="text-slate-100 font-medium">${s}</span>`;
+          area.appendChild(div);
+        }
+        area.scrollTop = area.scrollHeight;
+      }
+    }
+  }
+});
+
+window.addEventListener('backend:processing_done', (e) => {
+  state.isProcessing = false;
+  const btn = document.getElementById('triggerBtn');
+  if (btn) { btn.disabled = false; btn.className = 'px-6 py-2 rounded text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-all'; btn.innerHTML = '🎯 Transcrever agora (Espaço/T)'; }
+  
+  if (!e.detail.had_suggestions && state.page === 'meeting') {
+    const area = document.getElementById('suggestions-area');
+    if (area) {
+      const div = document.createElement('div');
+      div.className = 'text-sm text-slate-500 italic fade-in mb-2';
+      div.textContent = '— IA não gerou sugestões neste trecho —';
+      area.appendChild(div);
+      area.scrollTop = area.scrollHeight;
+    }
   }
 });
 
@@ -531,9 +692,20 @@ window.addEventListener('backend:error', (e) => {
 
 // Keyboard shortcut
 window.addEventListener('keydown', (e) => {
-  if (e.ctrlKey && e.shiftKey && e.key === 'S' && state.page === 'meeting') {
+  if (state.page !== 'meeting') return;
+  if (e.ctrlKey && e.shiftKey && e.key === 'S') {
     e.preventDefault();
     document.querySelector('[data-action="stopMeeting"]')?.click();
+  }
+  // Space = trigger manual transcription
+  if (e.key === ' ' && state.config.chunk_seconds == 0 && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.querySelector('[data-action="triggerTranscription"]')?.click();
+  }
+  // Also support T key
+  if ((e.key === 't' || e.key === 'T') && state.config.chunk_seconds == 0 && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+    e.preventDefault();
+    document.querySelector('[data-action="triggerTranscription"]')?.click();
   }
 });
 

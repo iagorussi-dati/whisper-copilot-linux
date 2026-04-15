@@ -1,8 +1,12 @@
-"""Bedrock proxy client — replicates the Rust BedrockClient."""
+"""Bedrock client — direct API via boto3 with long-term API key."""
 import json
+import logging
+import os
 import threading
 
-import httpx
+import boto3
+
+log = logging.getLogger("whisper-copilot")
 
 COPILOT_SYSTEM_PROMPT = """Você é um copiloto de reuniões em tempo real.
 "EU" é o usuário. Outros participantes são identificados por voz.
@@ -20,61 +24,84 @@ REGRAS:
 - Só sugira quando for realmente útil
 - Baseie-se apenas no contexto recebido"""
 
-SUMMARY_SYSTEM_PROMPT = """Gere um resumo da reunião em Markdown com:
-## Participantes
-## Pontos discutidos
-## Decisões tomadas
-## Próximos passos
-## Sugestões do copiloto que foram relevantes"""
-
-SPEAKER_ID_SYSTEM = """Você é um especialista em identificar participantes de reuniões a partir de transcrições.
-
-Regras:
-- Quando alguém cumprimenta dizendo um nome ("Oi Maria", "Olá João"), quem FALA está chamando a outra pessoa. Quem fala NÃO é a pessoa nomeada.
-- Quem organiza/conduz a reunião geralmente fala primeiro e apresenta a pauta.
-- Quem apresenta conteúdo técnico detalhado geralmente é o especialista/consultor.
-- Quem faz perguntas ou confirma ("tá bom", "beleza", "sim") geralmente é o cliente/ouvinte.
-- Se duas Vozes parecem ser a mesma pessoa, mapeie ambas pro mesmo nome.
-- Responda APENAS com JSON válido, sem markdown, sem explicação."""
+SPEAKER_ID_SYSTEM = """Você é um especialista em identificar participantes de reuniões.
+Quando alguém diz "Oi X", quem fala NÃO é X.
+Quem conduz a reunião é o organizador. Quem apresenta conteúdo técnico é o especialista.
+Responda APENAS com JSON válido, sem markdown."""
 
 
 class BedrockClient:
-    def __init__(self, proxy_url: str, proxy_key: str):
-        self.proxy_url = proxy_url
-        self.proxy_key = proxy_key
-        self._http = httpx.Client(timeout=60)
+    def __init__(self, model_id: str = "us.amazon.nova-2-pro-preview-20251202-v1:0"):
+        region = os.getenv("AWS_REGION", "us-east-1")
+        api_key = os.getenv("AWS_BEARER_TOKEN_BEDROCK", "")
+
+        if api_key:
+            # Use bearer token auth — no SigV4, no credentials needed
+            from botocore.config import Config
+            from botocore import UNSIGNED
+            self._client = boto3.client(
+                "bedrock-runtime",
+                region_name=region,
+                config=Config(signature_version=UNSIGNED),
+            )
+            # Monkey-patch: add bearer token to every request
+            self._api_key = api_key
+            self._client.meta.events.register("before-sign.*", self._add_bearer_token)
+        else:
+            self._client = boto3.client("bedrock-runtime", region_name=region)
+            self._api_key = None
+
+        self.model_id = model_id
         self._calling = threading.Event()
+
+    def _add_bearer_token(self, request, **kwargs):
+        request.headers["Authorization"] = f"Bearer {self._api_key}"
 
     def _call(self, system: str, user_msg: str, max_tokens: int = 1024,
               temperature: float = 0.3) -> str:
-        body = {
-            "messages": [{"role": "user", "content": user_msg}],
-            "system": system,
-            "maxTokens": max_tokens,
-            "temperature": temperature,
+        params = {
+            "modelId": self.model_id,
+            "messages": [{"role": "user", "content": [{"text": user_msg}]}],
+            "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature},
         }
-        resp = self._http.post(
-            self.proxy_url,
-            headers={"Authorization": f"Bearer {self.proxy_key}"},
-            json=body,
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        if data.get("error"):
-            raise Exception(data["error"])
-        return data.get("text", "")
+        if system:
+            params["system"] = [
+                {"text": system},
+                {"cachePoint": {"type": "default"}},
+            ]
+
+        response = self._client.converse(**params)
+        text = ""
+        for block in response.get("output", {}).get("message", {}).get("content", []):
+            if "text" in block:
+                text += block["text"]
+
+        usage = response.get("usage", {})
+        cr = usage.get("cacheReadInputTokens", 0)
+        cw = usage.get("cacheWriteInputTokens", 0)
+        if cr or cw:
+            log.info(f"[Bedrock] cache read={cr} write={cw}")
+
+        return text
+
+    def call_raw(self, system: str, user_msg: str, max_tokens: int = 1024,
+                 temperature: float = 0.3) -> str:
+        return self._call(system, user_msg, max_tokens, temperature)
 
     def validate(self) -> str:
-        text = self._call("", "Responda apenas: OK", max_tokens=10)
-        return f"Proxy OK" if text else "Proxy sem resposta"
+        try:
+            text = self._call("", "Responda apenas: OK", max_tokens=10)
+            return f"Bedrock OK ({self.model_id})" if text else "Sem resposta"
+        except Exception as e:
+            raise Exception(f"Bedrock error: {e}")
 
-    def suggest(self, context: str) -> dict | None:
-        """Returns {"roles": {...}, "suggestions": [...]} or None."""
+    def suggest(self, context: str, custom_system_prompt: str = "") -> dict | None:
         if not context or self._calling.is_set():
             return None
         self._calling.set()
         try:
-            text = self._call(COPILOT_SYSTEM_PROMPT, context)
+            system = custom_system_prompt or COPILOT_SYSTEM_PROMPT
+            text = self._call(system, context)
             clean = text.strip().strip("`").removeprefix("json").strip()
             try:
                 result = json.loads(clean)
@@ -82,6 +109,8 @@ class BedrockClient:
                     return result
             except json.JSONDecodeError:
                 pass
+            if clean and len(clean) > 10:
+                return {"suggestions": [clean]}
             return None
         finally:
             self._calling.clear()
@@ -97,6 +126,9 @@ class BedrockClient:
             return None
 
     def generate_summary(self, transcript: str, suggestions: list[str]) -> str:
-        sug_text = "\n".join(f"{i+1}. {s}" for i, s in enumerate(suggestions)) or "Nenhuma sugestão."
-        user_msg = f"## Transcrição:\n{transcript}\n\n## Sugestões:\n{sug_text}"
-        return self._call(SUMMARY_SYSTEM_PROMPT, user_msg, max_tokens=4096)
+        sug_text = "\n".join(f"{i+1}. {s}" for i, s in enumerate(suggestions)) or "Nenhuma."
+        return self._call(
+            "Gere um resumo da reunião em Markdown com: Participantes, Pontos discutidos, Decisões, Próximos passos.",
+            f"## Transcrição:\n{transcript}\n\n## Sugestões:\n{sug_text}",
+            max_tokens=4096,
+        )

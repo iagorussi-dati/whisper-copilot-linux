@@ -1,4 +1,4 @@
-"""Voice bank — cosine similarity matching, replicates Rust VoiceBank."""
+"""Voice bank — cosine similarity matching using MAX similarity."""
 import numpy as np
 
 
@@ -10,19 +10,20 @@ class VoiceMatch:
 
 
 class VoiceBank:
-    def __init__(self, threshold: float = 0.20):
+    def __init__(self, threshold: float = 0.30):
         self.threshold = threshold
-        self._voices: list[tuple[str, list[np.ndarray]]] = []  # (label, embeddings)
+        self._voices: list[tuple[str, list[np.ndarray]]] = []
         self._next_id = 1
-        self._name_map: dict[str, str] = {}  # voice_label -> real name
+        self._name_map: dict[str, str] = {}
 
     def match_or_create(self, embedding: np.ndarray) -> VoiceMatch:
         best_idx, best_sim = None, 0.0
         for i, (_, embs) in enumerate(self._voices):
-            avg = np.mean(embs, axis=0)
-            sim = self._cosine_sim(embedding, avg)
-            if sim > self.threshold and sim > best_sim:
-                best_idx, best_sim = i, sim
+            # MAX similarity: compare against each individual embedding
+            for bank_emb in embs:
+                sim = self._cosine_sim(embedding, bank_emb)
+                if sim > self.threshold and sim > best_sim:
+                    best_idx, best_sim = i, sim
 
         if best_idx is not None:
             label = self._voices[best_idx][0]

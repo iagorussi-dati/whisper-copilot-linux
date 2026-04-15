@@ -40,6 +40,8 @@ class Api:
         self._my_label: str = "EU"
         self._start_time: float | None = None
         self._diarization_enabled: bool = True
+        self._custom_system_prompt: str = ""
+        self._suggestions_target: str = ""
         self._lock = threading.Lock()
         self._monitor_threads: dict[str, threading.Event] = {}
 
@@ -49,7 +51,7 @@ class Api:
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js."""
         if self._window:
-            payload = json.dumps(data, ensure_ascii=False)
+            payload = json.dumps(data, ensure_ascii=True)
             self._window.evaluate_js(f"window.__emit('{event}', {payload})")
 
     # ── Device management ──
@@ -91,10 +93,7 @@ class Api:
         return client.validate()
 
     def validate_aws(self, profile: str = "", region: str = "") -> str:
-        proxy_url = os.getenv("BEDROCK_PROXY_URL",
-                              "https://i1pktfzmo0.execute-api.us-east-1.amazonaws.com/chat")
-        proxy_key = os.getenv("BEDROCK_PROXY_KEY", "whisper-copilot-2026")
-        client = BedrockClient(proxy_url, proxy_key)
+        client = BedrockClient()
         return client.validate()
 
     # ── Config ──
@@ -107,6 +106,20 @@ class Api:
         cfg = load_config()
         return cfg.to_dict() if cfg else None
 
+    def load_prompt_template(self, name: str) -> str:
+        """Load a built-in prompt template by name."""
+        import pathlib
+        base = pathlib.Path(__file__).parent.parent
+        paths = {
+            "discovery": base / "Prompt_Modelo.md",
+            "piadas": base / "prompts" / "piadas.md",
+            "vendas": base / "prompts" / "vendas.md",
+        }
+        path = paths.get(name)
+        if path and path.exists():
+            return path.read_text(encoding="utf-8")
+        return ""
+
     # ── Meeting lifecycle ──
 
     def start_meeting(self, config_dict: dict):
@@ -117,30 +130,18 @@ class Api:
         self._groq = GroqClient(api_key, cfg.whisper_model, cfg.language)
 
         # Init Bedrock
-        proxy_url = os.getenv("BEDROCK_PROXY_URL",
-                              "https://i1pktfzmo0.execute-api.us-east-1.amazonaws.com/chat")
-        proxy_key = os.getenv("BEDROCK_PROXY_KEY", "whisper-copilot-2026")
-        self._bedrock = BedrockClient(proxy_url, proxy_key)
+        self._bedrock = BedrockClient()
 
-        # Init voice bank
-        self._diarization_enabled = cfg.diarization_provider != "none"
-        self._voice_bank = VoiceBank(cfg.diarization_threshold)
-        
-        # Pre-load SpeechBrain model if diarization enabled (in background)
-        if self._diarization_enabled:
-            def preload_model():
-                log.info("Pre-loading SpeechBrain model...")
+        # Pre-warm prompt cache in background
+        if self._custom_system_prompt:
+            def prewarm():
+                log.info("Pre-warming prompt cache...")
                 try:
-                    from .diarization.engine import _get_model
-                    import time
-                    start = time.time()
-                    _get_model()
-                    elapsed = time.time() - start
-                    log.info(f"SpeechBrain model loaded in {elapsed:.1f}s")
+                    self._bedrock.call_raw(self._custom_system_prompt, "Aguarde.", max_tokens=10)
+                    log.info("Prompt cache warmed")
                 except Exception as e:
-                    log.warning(f"Failed to pre-load SpeechBrain: {e}. Will load on first use.")
-            
-            threading.Thread(target=preload_model, daemon=True).start()
+                    log.warning(f"Cache warm failed: {e}")
+            threading.Thread(target=prewarm, daemon=True).start()
 
         # Build participants context
         ctx_parts = []
@@ -156,6 +157,8 @@ class Api:
         )
 
         self._my_label = cfg.my_name or "EU"
+        self._suggestions_target = cfg.suggestions_target or self._my_label
+        self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
         self._transcript = []
         self._suggestions = []
         self._start_time = time.time()
@@ -163,12 +166,16 @@ class Api:
         chunk_dur = cfg.chunk_seconds
 
         # Start mic capture
+        manual_mode = cfg.chunk_seconds == 0  # 0 = manual mode
+        chunk_dur = cfg.chunk_seconds if not manual_mode else 9999
+
         if cfg.mic_device_id:
             self._mic_capture = AudioCapture(
                 cfg.mic_device_id, "mic", chunk_dur,
                 on_chunk=self._on_mic_chunk,
                 on_level=lambda src, lvl: self._emit("audio_level", {"source": src, "level": lvl}),
                 on_status=lambda src, st: self._emit("status", {"source": src, "status": st}),
+                manual_mode=manual_mode,
             )
             self._mic_capture.start()
 
@@ -179,8 +186,17 @@ class Api:
                 on_chunk=self._on_monitor_chunk,
                 on_level=lambda src, lvl: self._emit("audio_level", {"source": src, "level": lvl}),
                 on_status=lambda src, st: self._emit("status", {"source": src, "status": st}),
+                manual_mode=manual_mode,
             )
             self._monitor_capture.start()
+
+    def trigger_transcription(self):
+        """Manual mode: flush audio buffers and process."""
+        log.info("[Manual] Trigger transcription requested")
+        if self._mic_capture:
+            self._mic_capture.flush()
+        if self._monitor_capture:
+            self._monitor_capture.flush()
 
     def _on_mic_chunk(self, wav_bytes: bytes, source: str):
         """Process mic chunk: transcribe and emit as [EU]."""
@@ -207,127 +223,136 @@ class Api:
         start_time = time.time()
         
         try:
-            # Step 1: Groq verbose transcription
+            # Step 1: Groq transcription
             t1 = time.time()
+            log.info("[STEP 1] Enviando áudio pro Groq...")
             segments = self._groq.transcribe_verbose(wav_bytes)
             if not segments:
+                log.warning("[STEP 1] Groq retornou 0 segmentos, pulando")
                 return
-            log.info(f"Transcription took {time.time() - t1:.2f}s")
+            transcript_text = "\n".join(s.text.strip() for s in segments if s.text.strip())
+            if not transcript_text:
+                log.warning("[STEP 1] Transcrição vazia, pulando")
+                return
+            log.info(f"[STEP 1] Groq OK: {len(segments)} segs, {len(transcript_text)} chars, {time.time() - t1:.2f}s")
+            log.info(f"[STEP 1] Primeiras 150 chars: {transcript_text[:150]}")
 
-            # Step 2: Extract embeddings per segment (parallelized)
+            # Step 2: Claude — identify speakers + generate suggestions
             t2 = time.time()
-            pcm = wav_to_pcm(wav_bytes)
-            voice_labels: list[str | None] = []
+            participants_str = self._participants_context or "Participantes não informados. Deduza pelos conteúdos."
+            earlier = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
+            earlier_ctx = f"\nContexto anterior:\n{earlier}\n" if earlier else ""
 
-            if self._diarization_enabled and len(pcm) > 0:
-                # Process embeddings in parallel for speed
-                import concurrent.futures
+            user_msg = (
+                f"{participants_str}{earlier_ctx}\n"
+                f"[INSTRUÇÃO] Sugestões direcionadas para: {self._suggestions_target}\n\n"
+                f"Transcrição do trecho atual:\n{transcript_text}"
+            )
+
+            log.info(f"[STEP 2] System prompt: {len(self._custom_system_prompt)} chars ({'VAZIO!' if not self._custom_system_prompt else 'OK'})")
+            log.info(f"[STEP 2] User msg: {len(user_msg)} chars, target={self._suggestions_target}")
+            log.info(f"[STEP 2] Enviando pro Claude Haiku...")
+
+            result_text = self._bedrock.call_raw(self._custom_system_prompt, user_msg)
+
+            log.info(f"[STEP 2] Claude respondeu em {time.time() - t2:.2f}s")
+            log.info(f"[STEP 2] Resposta ({len(result_text)} chars): {repr(result_text[:300])}")
+
+            # Step 3: Parse response — handle both JSON and free-form
+            speakers_map = {}
+            suggestions = []
+
+            if result_text and result_text.strip() != "{}":
+                clean = result_text.strip().strip("`").removeprefix("json").strip()
                 
-                # Filter and prepare segments (skip very short ones)
-                segments_to_process = []
-                for i, seg in enumerate(segments):
-                    dur = seg.end - seg.start
-                    if dur >= 1.5:  # Only >= 1.5s for better accuracy
-                        s = int(seg.start * 16000)
-                        e = min(int(seg.end * 16000), len(pcm))
-                        if e > s and e - s >= 12000:
-                            segments_to_process.append((i, seg, s, e))
-                
-                log.info(f"Processing {len(segments_to_process)}/{len(segments)} segments")
-                
-                def process_segment(item):
-                    idx, seg, s, e = item
-                    emb = extract_embedding(pcm[s:e])
-                    return (idx, emb)
-                
-                # Use 6 workers for better performance
-                embeddings_map = {}
-                if segments_to_process:
-                    with concurrent.futures.ThreadPoolExecutor(max_workers=6) as executor:
-                        results = executor.map(process_segment, segments_to_process)
-                        for idx, emb in results:
-                            if emb is not None:
-                                embeddings_map[idx] = emb
-                
-                # Assign voice labels
-                for i, seg in enumerate(segments):
-                    if i in embeddings_map:
-                        emb = embeddings_map[i]
-                        dur = seg.end - seg.start
-                        with self._lock:
-                            match = self._voice_bank.match_or_create(emb)
-                            if not match.is_new and dur >= 2.0:
-                                self._voice_bank.update_embedding(match.voice_label, emb)
-                        voice_labels.append(match.voice_label)
-                    else:
-                        voice_labels.append(None)
-                
-                log.info(f"Diarization took {time.time() - t2:.2f}s ({len(embeddings_map)} embeddings)")
-            else:
-                voice_labels = [None] * len(segments)
-
-            # Step 3: Build and emit transcript entries
-            entries: list[tuple[str, str]] = []
-            for i, seg in enumerate(segments):
-                text = seg.text.strip()
-                if not text:
-                    continue
-                if self._diarization_enabled:
-                    raw = voice_labels[i] or "OUTROS"
-                    with self._lock:
-                        speaker = self._voice_bank.display_name(raw)
-                else:
-                    speaker = "OUTROS"
-                entries.append((speaker, text))
-
-            # Merge consecutive same-speaker
-            merged: list[tuple[str, str]] = []
-            for sp, text in entries:
-                if merged and merged[-1][0] == sp:
-                    merged[-1] = (sp, merged[-1][1] + " " + text)
-                else:
-                    merged.append((sp, text))
-
-            for speaker, text in merged:
-                self._emit_transcript(speaker, text)
-            
-            log.info(f"Monitor chunk processed in {time.time() - start_time:.2f}s total")
-
-            # Step 4: Ask Claude to identify speakers if needed
-            if (self._diarization_enabled and self._participants_context
-                    and self._voice_bank.has_unnamed()):
-                voice_ctx = self._voice_bank.build_context()
-                existing = {k: v for k, v in self._voice_bank.speakers() if v}
-                existing_str = f"\nMapeamento já identificado: {existing}\n" if existing else ""
-
-                recent = "\n".join(f"[{sp}] {txt}" for sp, txt in merged)
-                earlier = "\n".join(
-                    f"[{e['speaker']}] {e['text']}"
-                    for e in self._transcript[-30:]
-                )
-
-                prompt = (
-                    f"{self._participants_context}\n\n{voice_ctx}{existing_str}"
-                    f"Transcrição:\n{earlier}\n{recent}\n\n"
-                    f'Identifique cada Voz. JSON: {{"Voz 1": "Nome", "Voz 2": "Nome"}}'
-                )
-
+                # Try JSON format first (Haiku sometimes returns JSON)
                 try:
-                    mapping = self._bedrock.identify_speakers(prompt)
-                    if mapping:
-                        with self._lock:
-                            self._voice_bank.set_name_map(mapping)
-                        self._emit("speaker_map", mapping)
-                except Exception as e:
-                    log.error(f"Speaker ID error: {e}")
+                    parsed = json.loads(clean)
+                    if isinstance(parsed, dict):
+                        if "suggestions" in parsed:
+                            suggestions = parsed["suggestions"]
+                        if "speakers" in parsed:
+                            speakers_map = parsed["speakers"]
+                except json.JSONDecodeError:
+                    pass
+                
+                # If no JSON, try free-form with emojis
+                if not suggestions:
+                    for line in result_text.strip().split("\n"):
+                        line = line.strip()
+                        if not line: continue
+                        if any(line.startswith(e) for e in ["💡", "⚠", "🔴", "✅"]):
+                            suggestions.append(line)
+                
+                # Last resort: treat whole response as suggestion
+                if not suggestions and len(clean) > 20:
+                    suggestions = [clean]
+            
+            log.info(f"[STEP 3] Parse: {len(speakers_map)} speakers, {len(suggestions)} sugestões")
+            if suggestions:
+                for i, s in enumerate(suggestions):
+                    log.info(f"[STEP 3] Sugestão {i+1}: {s[:100]}")
+            else:
+                log.warning(f"[STEP 3] NENHUMA sugestão! Claude retornou: {repr(result_text[:200])}")
 
-            # Step 5: Suggestions
-            self._request_suggestions()
+            # Step 4: Emit transcript with speaker attribution
+            log.info(f"[STEP 4] Atribuindo speakers...")
+            if speakers_map:
+                log.info(f"[STEP 4] Speakers do Claude: {speakers_map}")
+                self._emit("speaker_map", speakers_map)
+
+            # Use participants context if available, otherwise use Claude's identification
+            known_speakers = speakers_map
+            if not known_speakers and self._participants_context:
+                # Extract names from participants context
+                import re
+                names = re.findall(r'- (\w+)', self._participants_context)
+                if names:
+                    known_speakers = {f"speaker{i}": n for i, n in enumerate(names)}
+
+            try:
+                speaker_hint = json.dumps(known_speakers) if known_speakers else "desconhecidos"
+                attr_system = (
+                    "Atribua cada fala ao speaker correto baseado no conteúdo. "
+                    "Quem conduz/organiza a reunião é o representante. Quem responde sobre sua empresa é o cliente. "
+                    "Responda APENAS JSON: [{\"speaker\":\"Nome\",\"text\":\"fala\"}]. "
+                    "Agrupe falas consecutivas do mesmo speaker."
+                )
+                attr_text = self._bedrock.call_raw(
+                    attr_system,
+                    f"Participantes: {speaker_hint}\n\nTranscrição:\n{transcript_text}",
+                    max_tokens=2048, temperature=0.1)
+                log.info(f"[STEP 4] Atribuição: {len(attr_text)} chars")
+                parsed = json.loads(attr_text.strip().strip("`").removeprefix("json").strip())
+                log.info(f"[STEP 4] {len(parsed)} entradas de transcript")
+                for item in parsed:
+                    sp = item.get("speaker", "OUTROS")
+                    txt = item.get("text", "").strip()
+                    if txt:
+                        self._emit_transcript(sp, txt)
+            except Exception as e:
+                log.warning(f"[STEP 4] Atribuição falhou: {e}, emitindo como OUTROS")
+                for seg in segments:
+                    txt = seg.text.strip()
+                    if txt:
+                        self._emit_transcript("OUTROS", txt)
+
+            # Step 5: Emit suggestions or done signal
+            if suggestions:
+                log.info(f"[STEP 5] Emitindo {len(suggestions)} sugestões pro frontend")
+                self._suggestions.extend(suggestions)
+                self._emit("suggestions", {"suggestions": suggestions})
+            else:
+                log.info("[STEP 5] IA não gerou sugestões neste trecho")
+                self._emit("processing_done", {"had_suggestions": False})
+            
+            log.info(f"[DONE] Chunk processado em {time.time() - start_time:.2f}s total")
 
         except GroqError as e:
+            log.error(f"[ERRO] Groq: {e}")
             self._emit("error", {"code": "groq_error", "message": str(e)})
         except Exception as e:
-            log.error(f"Monitor chunk error: {e}")
+            log.error(f"[ERRO] Monitor chunk: {e}", exc_info=True)
 
     def _emit_transcript(self, speaker: str, text: str):
         entry = {"speaker": speaker, "text": text, "timestamp": int(time.time())}
@@ -339,12 +364,29 @@ class Api:
         if not context or not self._bedrock:
             return
         try:
-            result = self._bedrock.suggest(context)
+            # Prepend target info to context
+            target_info = f"[INSTRUÇÃO] As sugestões são direcionadas para: {self._suggestions_target}\n\n"
+            full_context = target_info + context
+            result = self._bedrock.suggest(full_context, self._custom_system_prompt)
             if result and result.get("suggestions"):
                 self._suggestions.extend(result["suggestions"])
                 self._emit("suggestions", result)
         except Exception as e:
             log.error(f"Bedrock suggest error: {e}")
+
+    def _build_system_prompt(self, custom_prompt: str) -> str:
+        if not custom_prompt:
+            return ""
+        # Se o prompt já define formato de resposta, usar direto
+        if '"suggestions"' in custom_prompt:
+            return custom_prompt
+        return (
+            f"{custom_prompt}\n\n"
+            f"FORMATO DE RESPOSTA (obrigatório):\n"
+            f"Se não tiver nada relevante, responda exatamente: {{}}\n"
+            f'Quando responder, use este JSON:\n'
+            f'{{"suggestions": ["sugestão 1", "sugestão 2"]}}\n'
+        )
 
     def _build_context(self) -> str:
         start = max(0, len(self._transcript) - MAX_CONTEXT_LINES)
@@ -372,7 +414,7 @@ class Api:
             except Exception as e:
                 summary = f"Erro ao gerar resumo: {e}"
 
-        self._voice_bank = VoiceBank(0.20)
+        self._voice_bank = VoiceBank(0.30)
         self._start_time = None
 
         return {"transcript": transcript, "suggestions": suggestions, "summary": summary}
