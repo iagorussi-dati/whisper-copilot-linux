@@ -44,9 +44,76 @@ class Api:
         self._suggestions_target: str = ""
         self._lock = threading.Lock()
         self._monitor_threads: dict[str, threading.Event] = {}
+        self._recording = False
+        self._hotkey_stop = threading.Event()
+        self._start_hotkey_watcher()
 
     def set_window(self, window):
         self._window = window
+
+    HOTKEY_FILE = "/tmp/whisper-copilot-toggle"
+    _hotkey_key: str = ""
+
+    def _start_hotkey_watcher(self):
+        """Watch /tmp/whisper-copilot-toggle for global hotkey signals."""
+        import pathlib
+        pathlib.Path(self.HOTKEY_FILE).unlink(missing_ok=True)
+
+        def watch():
+            while not self._hotkey_stop.is_set():
+                try:
+                    p = pathlib.Path(self.HOTKEY_FILE)
+                    if p.exists():
+                        p.unlink(missing_ok=True)
+                        log.info("[Hotkey] Global toggle received")
+                        self.toggle_recording()
+                except Exception as e:
+                    log.error(f"[Hotkey] Error: {e}")
+                self._hotkey_stop.wait(0.2)
+
+        threading.Thread(target=watch, daemon=True).start()
+
+    def register_global_hotkey(self, key: str):
+        """Register SUPER+key as global hotkey via hyprctl."""
+        self.unregister_global_hotkey()
+        if not key:
+            return
+        self._hotkey_key = key
+        import subprocess
+        toggle_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "whisper-toggle.sh")
+        cmd = f"SUPER,{key},exec,{toggle_script}"
+        try:
+            subprocess.run(["hyprctl", "keyword", "bind", cmd],
+                           capture_output=True, timeout=3)
+            log.info(f"[Hotkey] Registered SUPER+{key}")
+        except Exception as e:
+            log.error(f"[Hotkey] Failed to register: {e}")
+
+    def unregister_global_hotkey(self):
+        """Remove global hotkey bind."""
+        if not self._hotkey_key:
+            return
+        import subprocess
+        try:
+            subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
+                           capture_output=True, timeout=3)
+            log.info(f"[Hotkey] Unregistered SUPER+{self._hotkey_key}")
+        except Exception:
+            pass
+        self._hotkey_key = ""
+
+    def toggle_recording(self):
+        """Toggle recording state (called from JS or global hotkey)."""
+        if not self._start_time:
+            return
+        if self._recording:
+            self._recording = False
+            self._emit("recording_state", {"recording": False})
+            self.stop_recording()
+        else:
+            self._recording = True
+            self._emit("recording_state", {"recording": True})
+            self.start_recording()
 
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js."""
@@ -145,11 +212,11 @@ class Api:
 
         # Build participants context
         ctx_parts = []
-        if cfg.my_name:
-            ctx_parts.append(f"- EU (microfone): {cfg.my_name}")
         for p in cfg.participants:
             name = p.name if isinstance(p, Participant) else p.get("name", "")
             role = p.role if isinstance(p, Participant) else p.get("role", "")
+            if not name:
+                continue
             desc = f"{name} - {role}" if role else name
             ctx_parts.append(f"- {desc}")
         self._participants_context = (
@@ -169,7 +236,7 @@ class Api:
         manual_mode = cfg.chunk_seconds == 0  # 0 = manual mode
         chunk_dur = cfg.chunk_seconds if not manual_mode else 9999
 
-        if cfg.mic_device_id:
+        if cfg.mic_device_id and cfg.mic_device_id != "none":
             self._mic_capture = AudioCapture(
                 cfg.mic_device_id, "mic", chunk_dur,
                 on_chunk=self._on_mic_chunk,
@@ -177,10 +244,11 @@ class Api:
                 on_status=lambda src, st: self._emit("status", {"source": src, "status": st}),
                 manual_mode=manual_mode,
             )
-            self._mic_capture.start()
+            if not manual_mode:
+                self._mic_capture.start()
 
         # Start monitor capture
-        if cfg.monitor_device_id:
+        if cfg.monitor_device_id and cfg.monitor_device_id != "none":
             self._monitor_capture = AudioCapture(
                 cfg.monitor_device_id, "monitor", chunk_dur,
                 on_chunk=self._on_monitor_chunk,
@@ -188,15 +256,52 @@ class Api:
                 on_status=lambda src, st: self._emit("status", {"source": src, "status": st}),
                 manual_mode=manual_mode,
             )
+            if not manual_mode:
+                self._monitor_capture.start()
+
+        # Register global hotkey
+        if cfg.global_hotkey:
+            self.register_global_hotkey(cfg.global_hotkey)
+
+    def start_recording(self):
+        """Manual mode: start capturing audio."""
+        log.info("[Manual] Start recording")
+        if self._mic_capture:
+            self._mic_capture.start()
+        if self._monitor_capture:
             self._monitor_capture.start()
 
-    def trigger_transcription(self):
-        """Manual mode: flush audio buffers and process."""
-        log.info("[Manual] Trigger transcription requested")
+    def stop_recording(self):
+        """Manual mode: stop capturing and transcribe."""
+        log.info("[Manual] Stop recording, flushing...")
+        mic_pcm = None
+        mon_pcm = None
         if self._mic_capture:
-            self._mic_capture.flush()
+            mic_pcm = self._mic_capture.flush_pcm()
+            self._mic_capture.stop()
         if self._monitor_capture:
-            self._monitor_capture.flush()
+            mon_pcm = self._monitor_capture.flush_pcm()
+            self._monitor_capture.stop()
+
+        if mic_pcm is None and mon_pcm is None:
+            log.info("[Manual] No audio captured")
+            self._emit("recording_done", {"had_audio": False})
+            return
+
+        if mic_pcm is not None and mon_pcm is not None:
+            max_len = max(len(mic_pcm), len(mon_pcm))
+            mic_f = np.zeros(max_len, dtype=np.float32)
+            mon_f = np.zeros(max_len, dtype=np.float32)
+            mic_f[:len(mic_pcm)] = mic_pcm.astype(np.float32)
+            mon_f[:len(mon_pcm)] = mon_pcm.astype(np.float32)
+            mixed = np.clip(mic_f + mon_f, -32768, 32767).astype(np.int16)
+        else:
+            mixed = mic_pcm if mic_pcm is not None else mon_pcm
+
+        from .audio.wav import pcm_to_wav
+        wav_bytes = pcm_to_wav(mixed, 16000)
+        log.info(f"[Manual] Audio: {len(mixed)} samples ({len(mixed)/16000:.1f}s)")
+        threading.Thread(target=self._process_monitor_chunk, args=(wav_bytes,), daemon=True).start()
 
     def _on_mic_chunk(self, wav_bytes: bytes, source: str):
         """Process mic chunk: transcribe and emit as [EU]."""
@@ -237,122 +342,119 @@ class Api:
             log.info(f"[STEP 1] Groq OK: {len(segments)} segs, {len(transcript_text)} chars, {time.time() - t1:.2f}s")
             log.info(f"[STEP 1] Primeiras 150 chars: {transcript_text[:150]}")
 
-            # Step 2: Claude — identify speakers + generate suggestions
-            t2 = time.time()
-            participants_str = self._participants_context or "Participantes não informados. Deduza pelos conteúdos."
-            earlier = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
-            earlier_ctx = f"\nContexto anterior:\n{earlier}\n" if earlier else ""
-
-            user_msg = (
-                f"{participants_str}{earlier_ctx}\n"
-                f"[INSTRUÇÃO] Sugestões direcionadas para: {self._suggestions_target}\n\n"
-                f"Transcrição do trecho atual:\n{transcript_text}"
-            )
-
-            log.info(f"[STEP 2] System prompt: {len(self._custom_system_prompt)} chars ({'VAZIO!' if not self._custom_system_prompt else 'OK'})")
-            log.info(f"[STEP 2] User msg: {len(user_msg)} chars, target={self._suggestions_target}")
-            log.info(f"[STEP 2] Enviando pro Claude Haiku...")
-
-            result_text = self._bedrock.call_raw(self._custom_system_prompt, user_msg)
-
-            log.info(f"[STEP 2] Claude respondeu em {time.time() - t2:.2f}s")
-            log.info(f"[STEP 2] Resposta ({len(result_text)} chars): {repr(result_text[:300])}")
-
-            # Step 3: Parse response — handle both JSON and free-form
-            speakers_map = {}
-            suggestions = []
-
-            if result_text and result_text.strip() != "{}":
-                clean = result_text.strip().strip("`").removeprefix("json").strip()
-                
-                # Try JSON format first (Haiku sometimes returns JSON)
-                try:
-                    parsed = json.loads(clean)
-                    if isinstance(parsed, dict):
-                        if "suggestions" in parsed:
-                            suggestions = parsed["suggestions"]
-                        if "speakers" in parsed:
-                            speakers_map = parsed["speakers"]
-                except json.JSONDecodeError:
-                    pass
-                
-                # If no JSON, try free-form with emojis
-                if not suggestions:
-                    for line in result_text.strip().split("\n"):
-                        line = line.strip()
-                        if not line: continue
-                        if any(line.startswith(e) for e in ["💡", "⚠", "🔴", "✅"]):
-                            suggestions.append(line)
-                
-                # Last resort: treat whole response as suggestion
-                if not suggestions and len(clean) > 20:
-                    suggestions = [clean]
-            
-            log.info(f"[STEP 3] Parse: {len(speakers_map)} speakers, {len(suggestions)} sugestões")
-            if suggestions:
-                for i, s in enumerate(suggestions):
-                    log.info(f"[STEP 3] Sugestão {i+1}: {s[:100]}")
-            else:
-                log.warning(f"[STEP 3] NENHUMA sugestão! Claude retornou: {repr(result_text[:200])}")
-
-            # Step 4: Emit transcript with speaker attribution
-            log.info(f"[STEP 4] Atribuindo speakers...")
-            if speakers_map:
-                log.info(f"[STEP 4] Speakers do Claude: {speakers_map}")
-                self._emit("speaker_map", speakers_map)
-
-            # Use participants context if available, otherwise use Claude's identification
-            known_speakers = speakers_map
-            if not known_speakers and self._participants_context:
-                # Extract names from participants context
-                import re
-                names = re.findall(r'- (\w+)', self._participants_context)
-                if names:
-                    known_speakers = {f"speaker{i}": n for i, n in enumerate(names)}
-
-            try:
-                speaker_hint = json.dumps(known_speakers) if known_speakers else "desconhecidos"
-                attr_system = (
-                    "Atribua cada fala ao speaker correto baseado no conteúdo. "
-                    "Quem conduz/organiza a reunião é o representante. Quem responde sobre sua empresa é o cliente. "
-                    "Responda APENAS JSON: [{\"speaker\":\"Nome\",\"text\":\"fala\"}]. "
-                    "Agrupe falas consecutivas do mesmo speaker."
-                )
-                attr_text = self._bedrock.call_raw(
-                    attr_system,
-                    f"Participantes: {speaker_hint}\n\nTranscrição:\n{transcript_text}",
-                    max_tokens=2048, temperature=0.1)
-                log.info(f"[STEP 4] Atribuição: {len(attr_text)} chars")
-                parsed = json.loads(attr_text.strip().strip("`").removeprefix("json").strip())
-                log.info(f"[STEP 4] {len(parsed)} entradas de transcript")
-                for item in parsed:
-                    sp = item.get("speaker", "OUTROS")
-                    txt = item.get("text", "").strip()
-                    if txt:
-                        self._emit_transcript(sp, txt)
-            except Exception as e:
-                log.warning(f"[STEP 4] Atribuição falhou: {e}, emitindo como OUTROS")
-                for seg in segments:
-                    txt = seg.text.strip()
-                    if txt:
-                        self._emit_transcript("OUTROS", txt)
-
-            # Step 5: Emit suggestions or done signal
-            if suggestions:
-                log.info(f"[STEP 5] Emitindo {len(suggestions)} sugestões pro frontend")
-                self._suggestions.extend(suggestions)
-                self._emit("suggestions", {"suggestions": suggestions})
-            else:
-                log.info("[STEP 5] IA não gerou sugestões neste trecho")
-                self._emit("processing_done", {"had_suggestions": False})
-            
-            log.info(f"[DONE] Chunk processado em {time.time() - start_time:.2f}s total")
+            self._process_monitor_text(transcript_text, segments)
 
         except GroqError as e:
             log.error(f"[ERRO] Groq: {e}")
             self._emit("error", {"code": "groq_error", "message": str(e)})
         except Exception as e:
             log.error(f"[ERRO] Monitor chunk: {e}", exc_info=True)
+
+    def _process_monitor_text(self, transcript_text: str, segments: list | None = None):
+        """Process transcribed text: Bedrock attributes speakers + generates suggestions."""
+        import time
+        start_time = time.time()
+
+        earlier_ctx = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
+
+        try:
+            participants_str = self._participants_context or "Participantes não informados. Deduza pelos conteúdos."
+            earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
+
+            # Single Bedrock call: attribute speakers + generate suggestions
+            speaker_instruction = (
+                "\n\nCOMO IDENTIFICAR QUEM FALA:\n"
+                "- Analise o PAPEL de cada participante para atribuir as falas\n"
+                "- Quem conduz a reunião (faz perguntas, propõe soluções) geralmente é o organizador\n"
+                "- Quem responde sobre sua empresa/situação geralmente é o cliente\n"
+                "- Quem PERGUNTA 'vocês são de [cidade]?' NÃO é dessa cidade\n"
+                "- Quem RESPONDE 'sim, somos de [cidade]' É dessa cidade\n"
+                "- Quem se apresenta ('eu sou...', 'moro em...') fala de si mesmo\n"
+                "- Frases de condução ('a ideia é entender', 'montar uma proposta') = organizador\n\n"
+                "IMPORTANTE: Inclua TODAS as falas, não pule nenhuma.\n"
+                "Agrupe APENAS falas consecutivas do mesmo speaker.\n"
+                'Formato JSON obrigatório: {"transcript": [{"speaker": "Nome", "text": "fala"}], "suggestions": ["sugestão"]}\n'
+                "Se não tiver sugestões relevantes, retorne suggestions como array vazio."
+            )
+
+            system = self._custom_system_prompt or ""
+            system += (
+                "\nVocê atribui falas aos participantes de reuniões e gera sugestões. "
+                "Responda SOMENTE JSON puro sem markdown, sem explicações."
+            )
+
+            user_msg = (
+                f"{participants_str}{earlier_block}\n"
+                f"[INSTRUÇÃO] Sugestões direcionadas para: {self._suggestions_target}\n"
+                f"{speaker_instruction}\n\n"
+                f"Transcrição do trecho atual:\n{transcript_text}"
+            )
+
+            log.info(f"[STEP 2] System prompt: {len(system)} chars")
+            log.info(f"[STEP 2] User msg: {len(user_msg)} chars, target={self._suggestions_target}")
+            log.info(f"[STEP 2] Enviando pro Bedrock...")
+
+            t2 = time.time()
+            result_text = self._bedrock.call_raw(system, user_msg, max_tokens=4096)
+
+            log.info(f"[STEP 2] Bedrock respondeu em {time.time() - t2:.2f}s")
+            log.info(f"[STEP 2] Resposta ({len(result_text)} chars): {repr(result_text[:300])}")
+
+            # Parse JSON response — find JSON object in response (may have markdown/text around it)
+            transcript_entries = []
+            suggestions = []
+            depth = 0
+            start = None
+            for i, c in enumerate(result_text):
+                if c == '{':
+                    if depth == 0: start = i
+                    depth += 1
+                elif c == '}':
+                    depth -= 1
+                    if depth == 0 and start is not None:
+                        try:
+                            parsed = json.loads(result_text[start:i+1])
+                            transcript_entries = parsed.get("transcript", [])
+                            suggestions = parsed.get("suggestions", [])
+                            break
+                        except json.JSONDecodeError:
+                            start = None
+            if not transcript_entries:
+                log.warning(f"[STEP 2] JSON parse failed, emitting raw")
+
+            # Emit transcript with speakers
+            if transcript_entries:
+                for item in transcript_entries:
+                    sp = item.get("speaker", "OUTROS")
+                    txt = item.get("text", "").strip()
+                    if txt:
+                        self._emit_transcript(sp, txt)
+                log.info(f"[STEP 3] {len(transcript_entries)} entradas com speakers")
+            else:
+                # Fallback: emit without speaker attribution
+                for line in transcript_text.split("\n"):
+                    line = line.strip()
+                    if line:
+                        self._emit_transcript("CONVERSA", line)
+
+            # Emit suggestions
+            if suggestions:
+                log.info(f"[STEP 4] {len(suggestions)} sugestões")
+                self._suggestions.extend(suggestions)
+                self._emit("suggestions", {"suggestions": suggestions})
+            else:
+                log.info("[STEP 4] Nenhuma sugestão neste trecho")
+                self._emit("processing_done", {"had_suggestions": False})
+
+            log.info(f"[DONE] Chunk processado em {time.time() - start_time:.2f}s total")
+
+        except Exception as e:
+            log.error(f"[ERRO] Process text: {e}", exc_info=True)
+            # Fallback: emit raw transcript
+            for line in transcript_text.split("\n"):
+                line = line.strip()
+                if line:
+                    self._emit_transcript("CONVERSA", line)
 
     def _emit_transcript(self, speaker: str, text: str):
         entry = {"speaker": speaker, "text": text, "timestamp": int(time.time())}
@@ -395,6 +497,7 @@ class Api:
         )
 
     def stop_meeting(self) -> dict:
+        self.unregister_global_hotkey()
         if self._mic_capture:
             self._mic_capture.stop()
             self._mic_capture = None

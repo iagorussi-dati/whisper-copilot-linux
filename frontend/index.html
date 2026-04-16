@@ -44,7 +44,7 @@ const state = {
     whisper_model: 'whisper-large-v3-turbo', language: 'pt',
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
-    suggestions_target: '', custom_system_prompt: '',
+    suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -55,6 +55,7 @@ const state = {
   roles: {},
   isAnalyzing: false,
   isProcessing: false,
+  isRecording: false,
   timerStart: null, timerDisplay: '00:00:00',
   micLevel: 0, monitorLevel: 0,
   // Summary
@@ -74,12 +75,26 @@ async function callApi(method, ...args) {
 }
 
 // ── Render ──
+let _rendering = false;
+let _renderCount = 0;
 function render() {
-  const app = document.getElementById('app');
-  if (state.page === 'setup') app.innerHTML = renderSetup();
-  else if (state.page === 'meeting') app.innerHTML = renderMeeting();
-  else if (state.page === 'summary') app.innerHTML = renderSummary();
-  bindEvents();
+  if (_rendering) { console.warn('RENDER BLOCKED (recursive)'); return; }
+  _rendering = true;
+  _renderCount++;
+  const n = _renderCount;
+  console.log(`[RENDER #${n}] page=${state.page}, mic=${state.config.mic_device_id}, mon=${state.config.monitor_device_id}`);
+  if (n > 50) { console.error('RENDER LOOP DETECTED, stopping'); _rendering = false; return; }
+  try {
+    const app = document.getElementById('app');
+    if (state.page === 'setup') app.innerHTML = renderSetup();
+    else if (state.page === 'meeting') app.innerHTML = renderMeeting();
+    else if (state.page === 'summary') app.innerHTML = renderSummary();
+    bindEvents();
+  } catch(e) {
+    console.error('[RENDER ERROR]', e);
+  }
+  _rendering = false;
+  console.log(`[RENDER #${n}] done`);
 }
 
 // ── SETUP PAGE ──
@@ -87,7 +102,8 @@ function renderSetup() {
   const c = state.config;
   const inputDevs = state.devices.filter(d => d.deviceType === 'input');
   const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
-  const canStart = c.mic_device_id && state.awsValid === 'ok';
+  const hasDevice = (c.mic_device_id && c.mic_device_id !== 'none') || (c.monitor_device_id && c.monitor_device_id !== 'none');
+  const canStart = hasDevice && state.awsValid === 'ok';
 
   return `
     <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
@@ -134,11 +150,6 @@ function renderSetup() {
     <!-- Participants -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Participantes (opcional)</h2>
     <p class="text-xs text-slate-500 mb-2">A IA identifica quem é quem com base nas falas.</p>
-    <div class="mb-2">
-      <label class="text-xs text-slate-400">Seu nome (microfone)</label>
-      <input type="text" data-bind="my_name" value="${c.my_name}" placeholder="Ex: Iago"
-        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1" />
-    </div>
     ${c.participants.map((p, i) => `
       <div class="flex gap-2 mb-2 items-center">
         <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
@@ -155,8 +166,7 @@ function renderSetup() {
       <label class="text-xs text-slate-400">Sugestões direcionadas para:</label>
       <select data-bind="suggestions_target"
         class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1">
-        <option value="" ${!c.suggestions_target ? 'selected' : ''}>EU (microfone)</option>
-        ${c.my_name ? `<option value="${c.my_name}" ${c.suggestions_target === c.my_name ? 'selected' : ''}>${c.my_name}</option>` : ''}
+        <option value="" ${!c.suggestions_target ? 'selected' : ''}>Todos</option>
         ${c.participants.filter(p => p.name).map(p => `<option value="${p.name}" ${c.suggestions_target === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
       </select>
       <p class="text-xs text-slate-500 mt-1">A IA vai gerar sugestões pensando nessa pessoa.</p>
@@ -211,19 +221,36 @@ function renderSetup() {
       </div>
     </div>
 
+    <!-- Global hotkey -->
+    <div class="mb-4">
+      <label class="text-xs text-slate-400">Atalho global (funciona fora do app): SUPER + </label>
+      <div class="flex gap-2 mt-1 items-center">
+        <select data-bind="global_hotkey"
+          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+          <option value="" ${!c.global_hotkey ? 'selected' : ''}>Desativado</option>
+          ${['space','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'].map(k =>
+            `<option value="${k}" ${c.global_hotkey === k ? 'selected' : ''}>SUPER + ${k === 'space' ? 'Espaço' : k}</option>`
+          ).join('')}
+        </select>
+        ${c.global_hotkey ? `<span class="text-xs text-emerald-400">SUPER+${c.global_hotkey === 'space' ? 'Espaço' : c.global_hotkey} para gravar/parar</span>` : ''}
+      </div>
+    </div>
+
     <!-- Start -->
+    ${!hasDevice ? '<p class="text-xs text-amber-400 mb-2">⚠️ Selecione pelo menos um dispositivo (microfone ou autofalante)</p>' : ''}
     <button data-action="startMeeting" ${!canStart ? 'disabled' : ''}
       class="w-full py-3 rounded font-semibold text-lg transition-colors ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}">
-      Iniciar Reunião
+      Iniciar
     </button>
   `;
 }
 
 function renderDeviceSelector(type, label, devices, selected, testState) {
-  // Auto-select recommended device if nothing selected
+  // Auto-select recommended device if nothing selected and not explicitly set to none
   const recommendedDev = devices.find(d => d.recommended);
-  const effectiveSelected = selected || (recommendedDev ? recommendedDev.id : '');
+  const effectiveSelected = selected === 'none' ? 'none' : (selected || (recommendedDev ? recommendedDev.id : ''));
   const level = type === 'mic' ? state.micLevel : state.monitorLevel;
+  const hasDevice = effectiveSelected && effectiveSelected !== 'none';
   
   return `
     <div class="mb-4">
@@ -232,10 +259,11 @@ function renderDeviceSelector(type, label, devices, selected, testState) {
         <select data-action="selectDevice" data-type="${type}"
           class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
           <option value="">Selecione...</option>
+          <option value="none" ${effectiveSelected === 'none' ? 'selected' : ''}>🚫 Não usar</option>
           ${devices.map(d => `<option value="${d.id}" ${d.id === effectiveSelected ? 'selected' : ''} ${d.recommended ? 'data-recommended="true"' : ''}>${d.recommended ? '⭐ ' : ''}${d.name}</option>`).join('')}
         </select>
-        <button data-action="testDevice" data-type="${type}" ${!effectiveSelected ? 'disabled' : ''}
-          class="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors ${!effectiveSelected ? 'opacity-50 cursor-not-allowed' : ''}">
+        <button data-action="testDevice" data-type="${type}" ${!hasDevice ? 'disabled' : ''}
+          class="px-3 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors ${!hasDevice ? 'opacity-50 cursor-not-allowed' : ''}">
           ${testState === 'testing' ? '⏳ Testando...' : testState === 'ok' ? '✅ OK' : testState === 'fail' ? '❌ Falha' : 'Testar'}
         </button>
       </div>
@@ -262,21 +290,32 @@ function renderMeeting() {
     <!-- Header -->
     <div class="flex items-center justify-between mb-4 bg-slate-800/50 rounded-lg p-3">
       <div class="flex items-center gap-3">
-        <span class="w-3 h-3 bg-red-500 rounded-full pulse"></span>
+        <span class="w-3 h-3 rounded-full ${state.isRecording ? 'bg-red-500 pulse' : 'bg-slate-600'}"></span>
         <span class="text-sm font-mono">${state.timerDisplay}</span>
       </div>
       <div class="flex gap-4 text-xs text-slate-400">
-        <span>Mic: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-emerald-500 rounded" style="width:${Math.min(state.micLevel * 500, 100)}%"></span></span></span>
-        <span>Mon: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-blue-500 rounded" style="width:${Math.min(state.monitorLevel * 500, 100)}%"></span></span></span>
+        ${state.config.mic_device_id && state.config.mic_device_id !== 'none' ? `<span>Mic: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-emerald-500 rounded" style="width:${Math.min(state.micLevel * 500, 100)}%"></span></span></span>` : ''}
+        ${state.config.monitor_device_id && state.config.monitor_device_id !== 'none' ? `<span>Mon: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-blue-500 rounded" style="width:${Math.min(state.monitorLevel * 500, 100)}%"></span></span></span>` : ''}
       </div>
       <button data-action="stopMeeting" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors">Encerrar</button>
     </div>
     ${state.config.chunk_seconds == 0 ? `
     <div class="flex justify-center mb-3">
-      <button id="triggerBtn" data-action="triggerTranscription" ${state.isProcessing ? 'disabled' : ''}
-        class="px-6 py-2 rounded text-sm font-medium transition-all ${state.isProcessing ? 'bg-violet-800 text-violet-400 cursor-wait animate-pulse' : 'bg-violet-600 hover:bg-violet-500 text-white'}">
-        ${state.isProcessing ? '⏳ Processando...' : '🎯 Transcrever agora (Espaço/T)'}
-      </button>
+      ${state.isProcessing ? `
+        <button disabled class="px-6 py-2 rounded text-sm font-medium bg-violet-800 text-violet-400 cursor-wait animate-pulse">
+          ⏳ Transcrevendo...
+        </button>
+      ` : state.isRecording ? `
+        <button id="triggerBtn" data-action="stopRecording"
+          class="px-6 py-2 rounded text-sm font-medium bg-red-600 hover:bg-red-500 text-white animate-pulse">
+          ⏹ Parar e Transcrever (Espaço/T)
+        </button>
+      ` : `
+        <button id="triggerBtn" data-action="startRecording"
+          class="px-6 py-2 rounded text-sm font-medium bg-emerald-600 hover:bg-emerald-500 text-white">
+          🎙️ Gravar (Espaço/T)
+        </button>
+      `}
     </div>
     ` : ''}
 
@@ -287,7 +326,7 @@ function renderMeeting() {
         ${state.transcript.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando transcrição...</p>' : ''}
         ${state.transcript.map(e => `
           <div class="text-sm fade-in">
-            <span class="font-semibold ${e.speaker === state.config.my_name || e.speaker === 'EU' ? 'text-emerald-400' : 'text-blue-400'}">[${e.speaker}]</span>
+            <span class="font-semibold ${e.speaker === state.config.suggestions_target ? 'text-emerald-400' : 'text-blue-400'}">[${e.speaker}]</span>
             <span class="text-slate-300">${e.text}</span>
           </div>
         `).join('')}
@@ -348,10 +387,11 @@ function bindEvents() {
 
   // Data bindings
   document.querySelectorAll('[data-bind]').forEach(el => {
-    const evt = el.tagName === 'TEXTAREA' ? 'change' : 'input';
+    const evt = (el.tagName === 'TEXTAREA' || el.tagName === 'SELECT') ? 'change' : 'input';
     el.addEventListener(evt, () => {
       const key = el.dataset.bind;
       const val = el.type === 'range' ? Number(el.value) : el.value;
+      console.log(`[BIND] ${key} = ${val} (tag=${el.tagName}, evt=${evt})`);
       state.config[key] = val;
       if (el.tagName !== 'TEXTAREA') render();
     });
@@ -385,6 +425,7 @@ function bindEvents() {
           render();
           break;
         case 'selectDevice':
+          console.log(`[SELECT DEVICE] type=${el.dataset.type}, value="${el.value}"`);
           if (el.dataset.type === 'mic') {
             state.config.mic_device_id = el.value;
             state.micTest = 'idle';
@@ -495,6 +536,10 @@ function bindEvents() {
           state.config.chunk_seconds = el.dataset.val === 'manual' ? 0 : 60;
           render();
           break;
+        case 'startRecording':
+        case 'stopRecording':
+          await callApi('toggle_recording');
+          break;
         case 'triggerTranscription':
           if (!state.isProcessing) {
             state.isProcessing = true;
@@ -564,10 +609,10 @@ window.addEventListener('backend:transcript', (e) => {
       if (loading) loading.remove();
       
       const entry = e.detail;
-      const isMe = entry.speaker === state.config.my_name || entry.speaker === 'EU';
+      const isTarget = entry.speaker === state.config.suggestions_target;
       const div = document.createElement('div');
       div.className = 'text-sm fade-in';
-      const speakerSpan = `<span class="font-semibold ${isMe ? 'text-emerald-400' : 'text-blue-400'}">[${entry.speaker}]</span> `;
+      const speakerSpan = `<span class="font-semibold ${isTarget ? 'text-emerald-400' : 'text-blue-400'}">[${entry.speaker}]</span> `;
       div.innerHTML = speakerSpan + '<span class="text-slate-300 typewriter"></span>';
       area.appendChild(div);
       // Typewriter effect
@@ -596,8 +641,7 @@ window.addEventListener('backend:suggestions', (e) => {
     
     // Reset processing state
     state.isProcessing = false;
-    const btn = document.getElementById('triggerBtn');
-    if (btn) { btn.disabled = false; btn.className = 'px-6 py-2 rounded text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-all'; btn.innerHTML = '🎯 Transcrever agora (Espaço/T)'; }
+    render();
     
     if (state.page === 'meeting') {
       const area = document.getElementById('suggestions-area');
@@ -626,9 +670,8 @@ window.addEventListener('backend:suggestions', (e) => {
 
 window.addEventListener('backend:processing_done', (e) => {
   state.isProcessing = false;
-  const btn = document.getElementById('triggerBtn');
-  if (btn) { btn.disabled = false; btn.className = 'px-6 py-2 rounded text-sm font-medium bg-violet-600 hover:bg-violet-500 text-white transition-all'; btn.innerHTML = '🎯 Transcrever agora (Espaço/T)'; }
-  
+  render();
+
   if (!e.detail.had_suggestions && state.page === 'meeting') {
     const area = document.getElementById('suggestions-area');
     if (area) {
@@ -639,6 +682,18 @@ window.addEventListener('backend:processing_done', (e) => {
       area.scrollTop = area.scrollHeight;
     }
   }
+});
+
+window.addEventListener('backend:recording_done', (e) => {
+  state.isProcessing = false;
+  state.isRecording = false;
+  render();
+});
+
+window.addEventListener('backend:recording_state', (e) => {
+  state.isRecording = e.detail.recording;
+  if (!e.detail.recording) state.isProcessing = true;
+  render();
 });
 
 window.addEventListener('backend:speaker_map', (e) => {
@@ -697,15 +752,14 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     document.querySelector('[data-action="stopMeeting"]')?.click();
   }
-  // Space = trigger manual transcription
-  if (e.key === ' ' && state.config.chunk_seconds == 0 && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+  // Space/T = toggle recording in manual mode
+  if ((e.key === ' ' || e.key === 't' || e.key === 'T') && state.page === 'meeting' && state.config.chunk_seconds == 0 && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault();
-    document.querySelector('[data-action="triggerTranscription"]')?.click();
-  }
-  // Also support T key
-  if ((e.key === 't' || e.key === 'T') && state.config.chunk_seconds == 0 && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
-    e.preventDefault();
-    document.querySelector('[data-action="triggerTranscription"]')?.click();
+    if (state.isRecording) {
+      document.querySelector('[data-action="stopRecording"]')?.click();
+    } else {
+      document.querySelector('[data-action="startRecording"]')?.click();
+    }
   }
 });
 

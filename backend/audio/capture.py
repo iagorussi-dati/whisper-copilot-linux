@@ -38,10 +38,14 @@ class AudioCapture:
         self._running = threading.Event()
         self._thread: threading.Thread | None = None
         self._pcm_buf: list[int] = []
+        self._buf_start_ts: float = 0.0
         self._buf_lock = threading.Lock()
 
     def start(self):
         self._running.set()
+        with self._buf_lock:
+            self._pcm_buf.clear()
+            self._buf_start_ts = 0.0
         self._thread = threading.Thread(target=self._run, daemon=True)
         self._thread.start()
 
@@ -51,19 +55,39 @@ class AudioCapture:
             self._thread.join(timeout=5)
 
     def flush(self):
-        """Manual mode: send accumulated buffer now."""
+        """Manual mode: send accumulated buffer now via callback."""
+        result = self.flush_collect()
+        if result:
+            self.on_chunk(result[0], self.source_type)
+
+    def flush_pcm(self) -> np.ndarray | None:
+        """Return raw PCM int16 samples, or None if too short/silent."""
         with self._buf_lock:
-            if len(self._pcm_buf) < SAMPLE_RATE:  # need at least 1s
-                return
+            if len(self._pcm_buf) < SAMPLE_RATE:
+                return None
             chunk = np.array(self._pcm_buf, dtype=np.int16)
             self._pcm_buf.clear()
-        
+            self._buf_start_ts = 0.0
+        if float(np.sqrt(np.mean((chunk.astype(np.float32) / 32768.0) ** 2))) < SILENCE_THRESHOLD:
+            return None
+        return chunk
+
+    def flush_collect(self) -> tuple[bytes, float] | None:
+        """Manual mode: return (wav_bytes, start_timestamp) or None."""
+        with self._buf_lock:
+            if len(self._pcm_buf) < SAMPLE_RATE:
+                return None
+            chunk = np.array(self._pcm_buf, dtype=np.int16)
+            ts = self._buf_start_ts
+            self._pcm_buf.clear()
+            self._buf_start_ts = 0.0
+
         chunk_rms = float(np.sqrt(np.mean((chunk.astype(np.float32) / 32768.0) ** 2)))
         if chunk_rms < SILENCE_THRESHOLD:
-            return
-        
+            return None
+
         wav_bytes = pcm_to_wav(chunk, SAMPLE_RATE)
-        self.on_chunk(wav_bytes, self.source_type)
+        return (wav_bytes, ts)
 
     def _run(self):
         # Linux: use parec/pw-cat for PulseAudio/PipeWire devices
@@ -102,6 +126,8 @@ class AudioCapture:
         # In manual mode, just accumulate — flush() sends it
         if self.manual_mode:
             with self._buf_lock:
+                if not self._pcm_buf:
+                    self._buf_start_ts = time.time()
                 self._pcm_buf.extend(pcm_buf)
             pcm_buf.clear()
             return

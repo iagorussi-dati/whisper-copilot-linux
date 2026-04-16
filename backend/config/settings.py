@@ -33,6 +33,7 @@ class AppConfig:
     participants: list = field(default_factory=list)
     suggestions_target: str = ""  # nome do participante que recebe as sugestões
     custom_system_prompt: str = ""  # system prompt customizado para sugestões
+    global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
 
     def to_dict(self) -> dict:
         d = asdict(self)
