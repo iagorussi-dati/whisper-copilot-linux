@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Whisper Chat</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; }
+  #messages { flex: 1; overflow-y: auto; padding: 12px; }
+  .msg { margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+  .msg-user .label { color: #a78bfa; font-weight: 600; }
+  .msg-bot .label { color: #fbbf24; font-weight: 600; }
+  .msg-bot .text { background: #1e293b; border-radius: 8px; padding: 8px 12px; margin-top: 4px; }
+  .msg-system { color: #64748b; font-style: italic; font-size: 13px; }
+  .msg-divider { border-top: 1px solid #1e293b; margin: 12px 0; padding-top: 8px; }
+  #input-bar { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #1e293b; background: #0f172a; }
+  #chat-input { flex: 1; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; color: #e2e8f0; font-size: 14px; outline: none; }
+  #chat-input:focus { border-color: #8b5cf6; }
+  #chat-input::placeholder { color: #64748b; }
+  #send-btn { background: #7c3aed; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+  #send-btn:hover { background: #6d28d9; }
+  #send-btn:disabled { background: #334155; cursor: wait; }
+</style>
+</head>
+<body>
+<div id="messages"></div>
+<div id="input-bar">
+  <input id="chat-input" type="text" placeholder="Instrução para o copiloto (Enter vazio = só transcrever)" autofocus />
+  <button id="send-btn">Enviar</button>
+</div>
+<script>
+  function getApi() { return window.pywebview ? window.pywebview.api : null; }
+
+  window.__emit = function(event, data) {
+    window.dispatchEvent(new CustomEvent('backend:' + event, { detail: data }));
+  };
+
+  const msgs = document.getElementById('messages');
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('send-btn');
+
+  function addMsg(cls, label, text) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + cls;
+    if (label) {
+      div.innerHTML = '<span class="label">' + label + '</span>' + (cls === 'msg-bot' ? '<div class="text">' + text + '</div>' : ' ' + text);
+    } else {
+      div.textContent = text;
+    }
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function clearProcessing() {
+    const last = msgs.querySelector('.msg-system:last-child');
+    if (last && last.textContent.includes('Processando')) last.remove();
+  }
+
+  function enableInput() {
+    input.disabled = false;
+    btn.disabled = false;
+    input.focus();
+  }
+
+  // Restore history on load
+  async function restoreHistory() {
+    const a = getApi();
+    if (!a) return;
+    try {
+      const history = await a.get_chat_history();
+      if (!history || !history.length) {
+        addMsg('msg-system', '', 'Aguardando gravação...');
+        return;
+      }
+      for (const entry of history) {
+        processEvent(entry.event, entry.data);
+      }
+    } catch(e) {
+      console.error('restore error:', e);
+    }
+  }
+
+  function processEvent(event, data) {
+    switch(event) {
+      case 'recording_state':
+        if (data.recording) {
+          addMsg('msg-system', '', '🔴 Gravando...');
+          input.disabled = true; btn.disabled = true;
+        } else {
+          addMsg('msg-system', '', '⏹ Gravação finalizada.');
+          enableInput();
+        }
+        break;
+      case 'transcript':
+        addMsg('msg-system', '', '[' + data.speaker + '] ' + data.text);
+        break;
+      case 'copilot_response':
+        clearProcessing();
+        if (data.response) addMsg('msg-bot', 'Copiloto:', data.response);
+        enableInput();
+        break;
+      case 'user_instruction':
+        addMsg('msg-user', 'Você:', data.text);
+        break;
+      case 'recording_stopped':
+        enableInput();
+        break;
+    }
+  }
+
+  async function send() {
+    const msg = input.value.trim();
+    input.value = '';
+    input.disabled = true;
+    btn.disabled = true;
+    if (msg) addMsg('msg-user', 'Você:', msg);
+    addMsg('msg-system', '', '⏳ Processando...');
+    try {
+      const a = getApi();
+      if (a) await a.submit_recording(msg);
+    } catch(e) {
+      addMsg('msg-system', '', 'Erro: ' + e);
+      enableInput();
+    }
+  }
+
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+  btn.addEventListener('click', send);
+
+  // Live events
+  window.addEventListener('backend:transcript', (e) => {
+    clearProcessing();
+    addMsg('msg-system', '', '[' + e.detail.speaker + '] ' + e.detail.text);
+  });
+  window.addEventListener('backend:copilot_response', (e) => {
+    clearProcessing();
+    if (e.detail.response) addMsg('msg-bot', 'Copiloto:', e.detail.response);
+    enableInput();
+  });
+  window.addEventListener('backend:chat_thinking', () => {
+    addMsg('msg-system', '', '⏳ Copiloto pensando...');
+    input.disabled = true; btn.disabled = true;
+  });
+  window.addEventListener('backend:submit_started', () => {
+    addMsg('msg-system', '', '⏳ Transcrevendo e analisando...');
+    input.disabled = true; btn.disabled = true;
+  });
+  window.addEventListener('backend:recording_state', (e) => {
+    if (e.detail.recording) {
+      addMsg('msg-system', '', '🔴 Gravando...');
+      input.disabled = true; btn.disabled = true;
+    } else {
+      addMsg('msg-system', '', '⏹ Gravação finalizada.');
+      enableInput();
+    }
+  });
+
+  // Init
+  if (window.pywebview) {
+    restoreHistory();
+  } else {
+    window.addEventListener('pywebviewready', restoreHistory);
+  }
+</script>
+</body>
+</html>

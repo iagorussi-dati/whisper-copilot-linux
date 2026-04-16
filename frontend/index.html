@@ -56,6 +56,7 @@ const state = {
   isAnalyzing: false,
   isProcessing: false,
   isRecording: false,
+  showChat: false, // unused, kept for compat
   timerStart: null, timerDisplay: '00:00:00',
   micLevel: 0, monitorLevel: 0,
   // Summary
@@ -147,29 +148,27 @@ function renderSetup() {
       ${state.awsInfo ? `<span class="text-xs text-slate-400">${state.awsInfo}</span>` : ''}
     </div>
 
-    <!-- Participants -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">Participantes (opcional)</h2>
-    <p class="text-xs text-slate-500 mb-2">A IA identifica quem é quem com base nas falas.</p>
-    ${c.participants.map((p, i) => `
-      <div class="flex gap-2 mb-2 items-center">
-        <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
-          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
-        <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Descrição"
-          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
-        <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1">×</button>
-      </div>
-    `).join('')}
-    <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-slate-300 mb-4">+ Adicionar participante</button>
-
-    <!-- Suggestions target -->
-    <div class="mb-4">
-      <label class="text-xs text-slate-400">Sugestões direcionadas para:</label>
-      <select data-bind="suggestions_target"
-        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 mt-1">
-        <option value="" ${!c.suggestions_target ? 'selected' : ''}>Todos</option>
-        ${c.participants.filter(p => p.name).map(p => `<option value="${p.name}" ${c.suggestions_target === p.name ? 'selected' : ''}>${p.name}</option>`).join('')}
-      </select>
-      <p class="text-xs text-slate-500 mt-1">A IA vai gerar sugestões pensando nessa pessoa.</p>
+    <!-- Contexto da conversa -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Contexto</h2>
+    <p class="text-xs text-slate-500 mb-3">Quem participa da conversa? A IA usa isso para identificar falas e direcionar respostas.</p>
+    <div class="space-y-2 mb-3">
+      ${c.participants.map((p, i) => `
+        <div class="flex gap-2 items-center bg-slate-800/50 rounded-lg p-2 ${c.suggestions_target === p.name && p.name ? 'ring-1 ring-emerald-500/50' : ''}">
+          <button data-action="setTarget" data-idx="${i}" title="Direcionar copiloto para esta pessoa"
+            class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${c.suggestions_target === p.name && p.name ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-500 hover:bg-slate-600'}">
+            ${c.suggestions_target === p.name && p.name ? '🎯' : '👤'}
+          </button>
+          <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
+            class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+          <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Papel (ex: cliente, dev, gestor)"
+            class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+          <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1 transition-colors">×</button>
+        </div>
+      `).join('')}
+    </div>
+    <div class="flex gap-2 items-center mb-4">
+      <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">+ Adicionar pessoa</button>
+      ${c.suggestions_target ? `<span class="text-xs text-emerald-400 ml-auto">🎯 Copiloto focado em: ${c.suggestions_target}</span>` : '<span class="text-xs text-slate-500 ml-auto">Copiloto sem foco específico</span>'}
     </div>
 
     <!-- System Prompt -->
@@ -272,7 +271,7 @@ function renderDeviceSelector(type, label, devices, selected, testState) {
           <div class="flex items-center gap-2 text-xs text-slate-400 mb-1">
             <span>Volume:</span>
             <div class="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
-              <div class="h-full ${type === 'mic' ? 'bg-emerald-500' : 'bg-blue-500'} transition-all duration-150" style="width: ${Math.min(level * 500, 100)}%"></div>
+              <div id="vu-${type}" class="h-full ${type === 'mic' ? 'bg-emerald-500' : 'bg-blue-500'} transition-all duration-150" style="width: ${Math.min(level * 500, 100)}%"></div>
             </div>
           </div>
           <p class="text-xs text-slate-500">Fale no microfone ou toque um som no autofalante...</p>
@@ -333,11 +332,11 @@ function renderMeeting() {
       </div>
     </div>
 
-    <!-- Suggestions -->
+    <!-- Copilot -->
     <div class="bg-slate-800/30 rounded-lg p-4" style="height: 35vh;">
-      <h2 class="text-sm font-semibold text-slate-400 mb-2">SUGESTÕES DO COPILOTO</h2>
+      <h2 class="text-sm font-semibold text-slate-400 mb-2">COPILOTO</h2>
       <div id="suggestions-area" class="overflow-y-auto space-y-2" style="height: calc(100% - 2rem);">
-        ${state.suggestions.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando sugestões...</p>' : ''}
+        ${state.suggestions.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando...</p>' : ''}
         ${state.suggestions.map(s => `
           <div class="text-sm fade-in mb-2">
             <span class="text-amber-400">→</span> <span class="text-slate-300">${s}</span>
@@ -405,7 +404,13 @@ function bindEvents() {
     if (action === 'updateParticipant') {
       el.addEventListener('input', () => {
         const i = parseInt(el.dataset.idx);
-        state.config.participants[i][el.dataset.field] = el.value;
+        const field = el.dataset.field;
+        const oldName = state.config.participants[i].name;
+        state.config.participants[i][field] = el.value;
+        // Update target if name changed
+        if (field === 'name' && state.config.suggestions_target === oldName) {
+          state.config.suggestions_target = el.value;
+        }
       });
       return;
     }
@@ -438,49 +443,10 @@ function bindEvents() {
         case 'testDevice': {
           const type = el.dataset.type;
           const devId = type === 'mic' ? state.config.mic_device_id : state.config.monitor_device_id;
+          if (!devId || devId === 'none') break;
           if (type === 'mic') state.micTest = 'testing'; else state.monitorTest = 'testing';
-          
-          // Track audio levels during test
-          let testLevels = [];
-          const testLevelHandler = (e) => {
-            if (e.detail.deviceId === devId) {
-              testLevels.push(e.detail.level);
-              // Update visual feedback during test
-              if (type === 'mic') state.micLevel = e.detail.level;
-              else state.monitorLevel = e.detail.level;
-              // Update VU meter in real-time
-              const selector = type === 'mic' ? '[data-type="mic"] + button' : '[data-type="monitor"] + button';
-              const btn = document.querySelector(selector);
-              if (btn) {
-                const pct = Math.min(e.detail.level * 500, 100);
-                btn.style.background = `linear-gradient(to right, ${type === 'mic' ? '#10b981' : '#3b82f6'} ${pct}%, #334155 ${pct}%)`;
-              }
-            }
-          };
-          window.addEventListener('backend:test_level', testLevelHandler);
-          
           render();
-          try {
-            const level = await callApi('test_device', devId, type === 'mic' ? 'input' : 'monitor');
-            window.removeEventListener('backend:test_level', testLevelHandler);
-            
-            // Check if we got consistent audio - different thresholds for mic vs monitor
-            const significantLevels = testLevels.filter(l => l > (type === 'mic' ? 0.003 : 0.01));
-            const hasAudio = significantLevels.length >= (type === 'mic' ? 8 : 5);
-            
-            if (type === 'mic') {
-              state.micTest = hasAudio ? 'ok' : 'fail';
-              state.micLevel = 0;
-            } else {
-              state.monitorTest = hasAudio ? 'ok' : 'fail';
-              state.monitorLevel = 0;
-            }
-          } catch (e) { 
-            window.removeEventListener('backend:test_level', testLevelHandler);
-            if (type === 'mic') { state.micTest = 'fail'; state.micLevel = 0; }
-            else { state.monitorTest = 'fail'; state.monitorLevel = 0; }
-          }
-          render();
+          callApi('test_device', devId, type === 'mic' ? 'input' : 'monitor');
           break;
         }
         case 'validateAws':
@@ -494,11 +460,29 @@ function bindEvents() {
         case 'addParticipant':
           state.config.participants.push({ name: '', role: '' });
           render();
+          // Focus the new name input
+          setTimeout(() => {
+            const inputs = document.querySelectorAll('[data-action="updateParticipant"][data-field="name"]');
+            if (inputs.length) inputs[inputs.length - 1].focus();
+          }, 50);
           break;
-        case 'removeParticipant':
+        case 'removeParticipant': {
+          const removed = state.config.participants[parseInt(el.dataset.idx)];
           state.config.participants.splice(parseInt(el.dataset.idx), 1);
+          if (removed && state.config.suggestions_target === removed.name) {
+            state.config.suggestions_target = '';
+          }
           render();
           break;
+        }
+        case 'setTarget': {
+          const p = state.config.participants[parseInt(el.dataset.idx)];
+          if (p && p.name) {
+            state.config.suggestions_target = state.config.suggestions_target === p.name ? '' : p.name;
+          }
+          render();
+          break;
+        }
         case 'selectTemplate': {
           const tpl = el.value;
           if (tpl === 'custom') {
@@ -633,52 +617,35 @@ window.addEventListener('backend:transcript', (e) => {
   }
 });
 
-window.addEventListener('backend:suggestions', (e) => {
-  const data = e.detail;
-  if (data.suggestions) {
-    state.suggestions.push(...data.suggestions);
-    if (data.roles) Object.assign(state.roles, data.roles);
-    
-    // Reset processing state
-    state.isProcessing = false;
-    render();
-    
-    if (state.page === 'meeting') {
-      const area = document.getElementById('suggestions-area');
-      if (area) {
-        const placeholder = area.querySelector('.italic');
-        if (placeholder) placeholder.remove();
-        
-        // Fade old suggestions
-        area.querySelectorAll('.suggestion-item').forEach(el => {
-          el.classList.add('opacity-30');
-          el.classList.remove('opacity-100');
-        });
-        
-        // Add new suggestions with highlight
-        for (const s of data.suggestions) {
-          const div = document.createElement('div');
-          div.className = 'suggestion-item text-sm fade-in mb-2 opacity-100 transition-opacity duration-500';
-          div.innerHTML = `<span class="text-amber-400">→</span> <span class="text-slate-100 font-medium">${s}</span>`;
-          area.appendChild(div);
-        }
-        area.scrollTop = area.scrollHeight;
-      }
-    }
-  }
-});
-
-window.addEventListener('backend:processing_done', (e) => {
+window.addEventListener('backend:copilot_response', (e) => {
+  const { response, had_instruction } = e.detail;
   state.isProcessing = false;
+  if (response) state.suggestions.push(response);
   render();
 
-  if (!e.detail.had_suggestions && state.page === 'meeting') {
+  if (state.page === 'meeting') {
     const area = document.getElementById('suggestions-area');
     if (area) {
-      const div = document.createElement('div');
-      div.className = 'text-sm text-slate-500 italic fade-in mb-2';
-      div.textContent = '— IA não gerou sugestões neste trecho —';
-      area.appendChild(div);
+      const placeholder = area.querySelector('.italic');
+      if (placeholder) placeholder.remove();
+
+      // Fade old entries
+      area.querySelectorAll('.copilot-entry').forEach(el => {
+        el.classList.add('opacity-30');
+        el.classList.remove('opacity-100');
+      });
+
+      if (response) {
+        const div = document.createElement('div');
+        div.className = 'copilot-entry text-sm fade-in mb-2 opacity-100 transition-opacity duration-500';
+        div.innerHTML = `<span class="text-amber-400 font-medium">${had_instruction ? '💬' : '→'}</span> <span class="text-slate-100">${response}</span>`;
+        area.appendChild(div);
+      } else {
+        const div = document.createElement('div');
+        div.className = 'text-sm text-slate-500 italic fade-in mb-2';
+        div.textContent = '— Sem resposta neste trecho —';
+        area.appendChild(div);
+      }
       area.scrollTop = area.scrollHeight;
     }
   }
@@ -692,7 +659,16 @@ window.addEventListener('backend:recording_done', (e) => {
 
 window.addEventListener('backend:recording_state', (e) => {
   state.isRecording = e.detail.recording;
-  if (!e.detail.recording) state.isProcessing = true;
+  render();
+});
+
+window.addEventListener('backend:recording_stopped', (e) => {
+  state.isRecording = false;
+  render();
+});
+
+window.addEventListener('backend:submit_started', () => {
+  state.isProcessing = true;
   render();
 });
 
@@ -724,15 +700,20 @@ window.addEventListener('backend:audio_level', (e) => {
 
 window.addEventListener('backend:test_level', (e) => {
   const { deviceId, level } = e.detail;
-  // Update level for the device being tested
   const isMic = !deviceId.includes('monitor') && !deviceId.includes('loopback');
   if (isMic) state.micLevel = level;
   else state.monitorLevel = level;
-  
-  // Update test VU meter in real-time
-  if (state.page === 'setup' && (state.micTest === 'testing' || state.monitorTest === 'testing')) {
-    render();
-  }
+  const bar = document.getElementById(isMic ? 'vu-mic' : 'vu-monitor');
+  if (bar) bar.style.width = Math.min(level * 500, 100) + '%';
+});
+
+window.addEventListener('backend:test_done', (e) => {
+  const { deviceId, peak } = e.detail;
+  const isMic = !deviceId.includes('monitor') && !deviceId.includes('loopback');
+  const hasAudio = peak > (isMic ? 0.003 : 0.001);
+  if (isMic) { state.micTest = hasAudio ? 'ok' : 'fail'; state.micLevel = 0; }
+  else { state.monitorTest = hasAudio ? 'ok' : 'fail'; state.monitorLevel = 0; }
+  render();
 });
 
 window.addEventListener('backend:error', (e) => {
@@ -765,18 +746,15 @@ window.addEventListener('keydown', (e) => {
 
 // ── Init ──
 window.addEventListener('pywebviewready', async () => {
-  // Load saved config
   try {
     const saved = await callApi('load_config');
     if (saved) Object.assign(state.config, saved);
-  } catch {}
+  } catch(e) { console.error('load_config error:', e); }
 
-  // Load devices
   try {
     state.devices = await callApi('list_audio_devices') || [];
-  } catch {}
+  } catch(e) { console.error('list_audio_devices error:', e); }
 
-  // Auto-select recommended device if none selected
   const inputDevs = state.devices.filter(d => d.deviceType === 'input');
   const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
   
@@ -793,8 +771,21 @@ window.addEventListener('pywebviewready', async () => {
   render();
 });
 
-// Fallback if pywebviewready doesn't fire
-setTimeout(() => { if (!state.devices.length) render(); }, 1000);
+// Fallback if pywebviewready doesn't fire or init fails
+setTimeout(async () => {
+  if (!document.querySelector('#app').innerHTML.trim()) {
+    console.log('Fallback render triggered');
+    try {
+      const a = api();
+      if (a) {
+        const saved = await a.load_config();
+        if (saved) Object.assign(state.config, saved);
+        state.devices = await a.list_audio_devices() || [];
+      }
+    } catch(e) { console.error('Fallback init error:', e); }
+    render();
+  }
+}, 2000);
 </script>
 
 </body>

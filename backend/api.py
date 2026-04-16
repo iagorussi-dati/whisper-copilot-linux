@@ -29,6 +29,7 @@ class Api:
 
     def __init__(self):
         self._window = None  # set by main.py after window creation
+        self._chat_window = None
         self._mic_capture: AudioCapture | None = None
         self._monitor_capture: AudioCapture | None = None
         self._transcript: list[dict] = []
@@ -45,6 +46,9 @@ class Api:
         self._lock = threading.Lock()
         self._monitor_threads: dict[str, threading.Event] = {}
         self._recording = False
+        self._pending_wav = None
+        self._pending_instruction = ""
+        self._chat_history: list[dict] = []
         self._hotkey_stop = threading.Event()
         self._start_hotkey_watcher()
 
@@ -116,20 +120,67 @@ class Api:
             self.start_recording()
 
     def _emit(self, event: str, data):
-        """Send event to frontend via evaluate_js."""
-        if self._window:
-            payload = json.dumps(data, ensure_ascii=True)
-            self._window.evaluate_js(f"window.__emit('{event}', {payload})")
+        """Send event to frontend via evaluate_js (non-blocking)."""
+        # Save chat-relevant events to history
+        if event in ('transcript', 'copilot_response', 'recording_state', 'recording_stopped'):
+            self._chat_history.append({"event": event, "data": data})
+        payload = json.dumps(data, ensure_ascii=True)
+        js = f"window.__emit('{event}', {payload})"
+        for w in [self._window, self._chat_window]:
+            if w:
+                try:
+                    w.evaluate_js(js)
+                except Exception as e:
+                    log.warning(f"[Emit] {event} failed: {e}")
+
+    def get_chat_history(self) -> list[dict]:
+        """Return chat history for popup restore."""
+        return list(self._chat_history)
+
+    def _open_chat_popup(self):
+        """Open a floating chat window (reuse if already open)."""
+        import webview
+        # Check if window still exists
+        if self._chat_window:
+            try:
+                # Test if window is still alive by checking its property
+                _ = self._chat_window.title
+                return  # still open
+            except Exception:
+                self._chat_window = None
+        chat_html = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "chat-popup.html")
+        self._chat_window = webview.create_window(
+            "Whisper Chat",
+            url=chat_html,
+            js_api=self,
+            width=500,
+            height=400,
+            on_top=True,
+            background_color="#0f172a",
+        )
+        # Clear reference when user closes the window
+        def on_closed():
+            self._chat_window = None
+        self._chat_window.events.closed += on_closed
 
     # ── Device management ──
 
     def list_audio_devices(self) -> list[dict]:
         return list_audio_devices()
 
-    def test_device(self, device_id: str, device_type: str) -> float:
-        def on_level(level):
-            self._emit("test_level", {"deviceId": device_id, "level": level})
-        return test_device(device_id, device_type, duration=3, on_level=on_level)
+    def test_device(self, device_id: str, device_type: str):
+        log.info(f"[Test] Starting test: {device_id} ({device_type})")
+        def run():
+            try:
+                def on_level(level):
+                    self._emit("test_level", {"deviceId": device_id, "level": level})
+                peak = test_device(device_id, device_type, duration=3, on_level=on_level)
+                log.info(f"[Test] Done: peak={peak:.6f}")
+                self._emit("test_done", {"deviceId": device_id, "type": device_type, "peak": peak})
+            except Exception as e:
+                log.error(f"[Test] Error: {e}")
+                self._emit("test_done", {"deviceId": device_id, "type": device_type, "peak": 0.0})
+        threading.Thread(target=run, daemon=True).start()
 
     def start_monitor(self, device_id: str, device_type: str):
         self.stop_monitor(device_id)
@@ -225,9 +276,11 @@ class Api:
 
         self._my_label = cfg.my_name or "EU"
         self._suggestions_target = cfg.suggestions_target or self._my_label
+        self._raw_system_prompt = cfg.custom_system_prompt or ""
         self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
         self._transcript = []
         self._suggestions = []
+        self._chat_history = []
         self._start_time = time.time()
 
         chunk_dur = cfg.chunk_seconds
@@ -272,8 +325,8 @@ class Api:
             self._monitor_capture.start()
 
     def stop_recording(self):
-        """Manual mode: stop capturing and transcribe."""
-        log.info("[Manual] Stop recording, flushing...")
+        """Manual mode: stop capturing, hold audio for submit."""
+        log.info("[Manual] Stop recording")
         mic_pcm = None
         mon_pcm = None
         if self._mic_capture:
@@ -285,7 +338,8 @@ class Api:
 
         if mic_pcm is None and mon_pcm is None:
             log.info("[Manual] No audio captured")
-            self._emit("recording_done", {"had_audio": False})
+            self._pending_wav = None
+            self._emit("recording_stopped", {"had_audio": False})
             return
 
         if mic_pcm is not None and mon_pcm is not None:
@@ -299,9 +353,51 @@ class Api:
             mixed = mic_pcm if mic_pcm is not None else mon_pcm
 
         from .audio.wav import pcm_to_wav
-        wav_bytes = pcm_to_wav(mixed, 16000)
-        log.info(f"[Manual] Audio: {len(mixed)} samples ({len(mixed)/16000:.1f}s)")
-        threading.Thread(target=self._process_monitor_chunk, args=(wav_bytes,), daemon=True).start()
+        self._pending_wav = pcm_to_wav(mixed, 16000)
+        log.info(f"[Manual] Audio ready: {len(mixed)} samples ({len(mixed)/16000:.1f}s)")
+        self._emit("recording_stopped", {"had_audio": True})
+        self._open_chat_popup()  # reopen if user closed it
+
+    def submit_recording(self, user_instruction: str = ""):
+        """Submit pending audio for transcription, or chat-only if no audio."""
+        wav = self._pending_wav
+        self._pending_wav = None
+
+        if user_instruction:
+            self._chat_history.append({"event": "user_instruction", "data": {"text": user_instruction}})
+
+        # No audio: chat-only mode
+        if not wav:
+            if not user_instruction:
+                self._emit("recording_done", {"had_audio": False})
+                return
+            log.info(f"[Chat] Pure chat: '{user_instruction[:80]}'")
+            self._emit("chat_thinking", {})
+            def chat_only():
+                context = self._build_full_context()
+                system = self._raw_system_prompt or "Você é um copiloto de reuniões."
+                system += "\nResponda em texto puro, sem markdown, sem headers, sem JSON."
+                user_msg = f"Contexto completo da conversa:\n{context}\n\nInstrução do usuário:\n{user_instruction}"
+                log.info(f"[Chat] System prompt ({len(system)} chars): {system[:150]}")
+                log.info(f"[Chat] User msg ({len(user_msg)} chars): {user_msg[:200]}")
+                try:
+                    result = self._bedrock.call_raw(system, user_msg, max_tokens=4096)
+                    log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")
+                    self._emit("copilot_response", {"response": result, "had_instruction": True})
+                except Exception as e:
+                    log.error(f"[Chat] Error: {e}")
+                    self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": True})
+            threading.Thread(target=chat_only, daemon=True).start()
+            return
+
+        log.info(f"[Manual] Submit with instruction: '{user_instruction[:80]}'")
+        self._emit("submit_started", {})
+        self._pending_instruction = user_instruction
+
+        def run():
+            self._process_monitor_chunk(wav)
+
+        threading.Thread(target=run, daemon=True).start()
 
     def _on_mic_chunk(self, wav_bytes: bytes, source: str):
         """Process mic chunk: transcribe and emit as [EU]."""
@@ -351,17 +447,18 @@ class Api:
             log.error(f"[ERRO] Monitor chunk: {e}", exc_info=True)
 
     def _process_monitor_text(self, transcript_text: str, segments: list | None = None):
-        """Process transcribed text: Bedrock attributes speakers + generates suggestions."""
+        """Process transcribed text: Bedrock attributes speakers + generates response."""
         import time
         start_time = time.time()
 
         earlier_ctx = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
+        user_instruction = getattr(self, '_pending_instruction', '') or ''
+        self._pending_instruction = ''
 
         try:
             participants_str = self._participants_context or "Participantes não informados. Deduza pelos conteúdos."
             earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
 
-            # Single Bedrock call: attribute speakers + generate suggestions
             speaker_instruction = (
                 "\n\nCOMO IDENTIFICAR QUEM FALA:\n"
                 "- Analise o PAPEL de cada participante para atribuir as falas\n"
@@ -373,25 +470,51 @@ class Api:
                 "- Frases de condução ('a ideia é entender', 'montar uma proposta') = organizador\n\n"
                 "IMPORTANTE: Inclua TODAS as falas, não pule nenhuma.\n"
                 "Agrupe APENAS falas consecutivas do mesmo speaker.\n"
-                'Formato JSON obrigatório: {"transcript": [{"speaker": "Nome", "text": "fala"}], "suggestions": ["sugestão"]}\n'
-                "Se não tiver sugestões relevantes, retorne suggestions como array vazio."
             )
+
+            # Build format instruction based on whether user gave instruction
+            if user_instruction:
+                format_instruction = (
+                    'Formato JSON obrigatório: {"transcript": [{"speaker": "Nome", "text": "fala"}], "response": "sua resposta aqui"}\n'
+                )
+                user_instruction_block = (
+                    f"\n\n=== INSTRUÇÃO DO USUÁRIO (OBRIGATÓRIO RESPONDER) ===\n"
+                    f"{user_instruction}\n"
+                    f"=== FIM DA INSTRUÇÃO ===\n"
+                    f'Você DEVE responder à instrução acima no campo "response" do JSON. '
+                    f"A resposta deve ser completa e útil. NÃO retorne response vazio."
+                )
+            else:
+                format_instruction = (
+                    'Formato JSON obrigatório: {"transcript": [{"speaker": "Nome", "text": "fala"}], "response": "sua resposta aqui"}\n'
+                    'O campo "response": responda perguntas feitas na conversa, dê sugestões ou observações úteis.\n'
+                    'Se alguém fez uma pergunta, RESPONDA a pergunta.\n'
+                    'Só retorne response vazio "" se realmente não tiver nada útil a dizer.'
+                )
+                user_instruction_block = ""
 
             system = self._custom_system_prompt or ""
             system += (
-                "\nVocê atribui falas aos participantes de reuniões e gera sugestões. "
+                "\nVocê é um copiloto de reuniões. Atribui falas aos participantes e responde ao usuário. "
                 "Responda SOMENTE JSON puro sem markdown, sem explicações."
             )
 
             user_msg = (
                 f"{participants_str}{earlier_block}\n"
-                f"[INSTRUÇÃO] Sugestões direcionadas para: {self._suggestions_target}\n"
-                f"{speaker_instruction}\n\n"
+                f"[INSTRUÇÃO] Direcionado para: {self._suggestions_target}\n"
+                f"{speaker_instruction}\n{format_instruction}\n"
                 f"Transcrição do trecho atual:\n{transcript_text}"
+                f"{user_instruction_block}"
             )
 
-            log.info(f"[STEP 2] System prompt: {len(system)} chars")
-            log.info(f"[STEP 2] User msg: {len(user_msg)} chars, target={self._suggestions_target}")
+            log.info(f"[STEP 2] === BEDROCK REQUEST ===")
+            log.info(f"[STEP 2] System prompt ({len(system)} chars): {system[:200]}")
+            log.info(f"[STEP 2] User instruction: '{user_instruction}'")
+            log.info(f"[STEP 2] Instruction position: AFTER transcription")
+            log.info(f"[STEP 2] User msg ({len(user_msg)} chars):")
+            for line in user_msg.split('\n')[:30]:
+                if line.strip():
+                    log.info(f"[STEP 2]   | {line[:150]}")
             log.info(f"[STEP 2] Enviando pro Bedrock...")
 
             t2 = time.time()
@@ -400,9 +523,9 @@ class Api:
             log.info(f"[STEP 2] Bedrock respondeu em {time.time() - t2:.2f}s")
             log.info(f"[STEP 2] Resposta ({len(result_text)} chars): {repr(result_text[:300])}")
 
-            # Parse JSON response — find JSON object in response (may have markdown/text around it)
+            # Parse JSON
             transcript_entries = []
-            suggestions = []
+            response_text = ""
             depth = 0
             start = None
             for i, c in enumerate(result_text):
@@ -415,14 +538,17 @@ class Api:
                         try:
                             parsed = json.loads(result_text[start:i+1])
                             transcript_entries = parsed.get("transcript", [])
-                            suggestions = parsed.get("suggestions", [])
+                            response_text = parsed.get("response", "")
+                            # Backwards compat: also check "suggestions"
+                            if not response_text and "suggestions" in parsed:
+                                sug = parsed["suggestions"]
+                                if isinstance(sug, list) and sug:
+                                    response_text = "\n".join(f"→ {s}" for s in sug)
                             break
                         except json.JSONDecodeError:
                             start = None
-            if not transcript_entries:
-                log.warning(f"[STEP 2] JSON parse failed, emitting raw")
 
-            # Emit transcript with speakers
+            # Emit transcript
             if transcript_entries:
                 for item in transcript_entries:
                     sp = item.get("speaker", "OUTROS")
@@ -431,26 +557,35 @@ class Api:
                         self._emit_transcript(sp, txt)
                 log.info(f"[STEP 3] {len(transcript_entries)} entradas com speakers")
             else:
-                # Fallback: emit without speaker attribution
                 for line in transcript_text.split("\n"):
                     line = line.strip()
                     if line:
                         self._emit_transcript("CONVERSA", line)
 
-            # Emit suggestions
-            if suggestions:
-                log.info(f"[STEP 4] {len(suggestions)} sugestões")
-                self._suggestions.extend(suggestions)
-                self._emit("suggestions", {"suggestions": suggestions})
+            # Emit response (unified)
+            # Ensure response_text is a string
+            if isinstance(response_text, dict):
+                # Bedrock returned object instead of string — extract text
+                if "suggestions" in response_text:
+                    sug = response_text["suggestions"]
+                    response_text = "\n".join(sug) if isinstance(sug, list) else str(sug)
+                else:
+                    response_text = json.dumps(response_text, ensure_ascii=False)
+            response_text = str(response_text)
+            log.info(f"[STEP 4] Raw response_text: {repr(response_text[:200])}")
+            clean_response = response_text.strip().strip('{}').strip()
+            if clean_response:
+                log.info(f"[STEP 4] Response: {len(response_text)} chars")
+                self._suggestions.append(response_text)
+                self._emit("copilot_response", {"response": response_text, "had_instruction": bool(user_instruction)})
             else:
-                log.info("[STEP 4] Nenhuma sugestão neste trecho")
-                self._emit("processing_done", {"had_suggestions": False})
+                log.info("[STEP 4] Sem resposta")
+                self._emit("copilot_response", {"response": "", "had_instruction": bool(user_instruction)})
 
             log.info(f"[DONE] Chunk processado em {time.time() - start_time:.2f}s total")
 
         except Exception as e:
             log.error(f"[ERRO] Process text: {e}", exc_info=True)
-            # Fallback: emit raw transcript
             for line in transcript_text.split("\n"):
                 line = line.strip()
                 if line:
@@ -479,16 +614,7 @@ class Api:
     def _build_system_prompt(self, custom_prompt: str) -> str:
         if not custom_prompt:
             return ""
-        # Se o prompt já define formato de resposta, usar direto
-        if '"suggestions"' in custom_prompt:
-            return custom_prompt
-        return (
-            f"{custom_prompt}\n\n"
-            f"FORMATO DE RESPOSTA (obrigatório):\n"
-            f"Se não tiver nada relevante, responda exatamente: {{}}\n"
-            f'Quando responder, use este JSON:\n'
-            f'{{"suggestions": ["sugestão 1", "sugestão 2"]}}\n'
-        )
+        return custom_prompt
 
     def _build_context(self) -> str:
         start = max(0, len(self._transcript) - MAX_CONTEXT_LINES)
@@ -496,8 +622,28 @@ class Api:
             f"[{e['speaker']}] {e['text']}" for e in self._transcript[start:]
         )
 
+    def _build_full_context(self) -> str:
+        """Build context including transcripts, user instructions and copilot responses."""
+        lines = []
+        for entry in self._chat_history[-50:]:
+            ev = entry["event"]
+            d = entry["data"]
+            if ev == "transcript":
+                lines.append(f"[{d['speaker']}] {d['text']}")
+            elif ev == "user_instruction":
+                lines.append(f"[Usuário perguntou] {d['text']}")
+            elif ev == "copilot_response" and d.get("response"):
+                lines.append(f"[Copiloto respondeu] {d['response'][:300]}")
+        return "\n".join(lines)
+
     def stop_meeting(self) -> dict:
         self.unregister_global_hotkey()
+        if self._chat_window:
+            try:
+                self._chat_window.destroy()
+            except Exception:
+                pass
+            self._chat_window = None
         if self._mic_capture:
             self._mic_capture.stop()
             self._mic_capture = None
