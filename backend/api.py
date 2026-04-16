@@ -107,17 +107,22 @@ class Api:
         self._hotkey_key = ""
 
     def toggle_recording(self):
-        """Toggle recording state (called from JS or global hotkey)."""
+        """Toggle recording state (manual) or flush+chat (auto)."""
         if not self._start_time:
             return
-        if self._recording:
-            self._recording = False
-            self._emit("recording_state", {"recording": False})
-            self.stop_recording()
+        if self._manual_mode:
+            if self._recording:
+                self._recording = False
+                self._emit("recording_state", {"recording": False})
+                self.stop_recording()
+            else:
+                self._recording = True
+                self._emit("recording_state", {"recording": True})
+                self.start_recording()
         else:
-            self._recording = True
-            self._emit("recording_state", {"recording": True})
-            self.start_recording()
+            # Auto mode: flush remaining audio, transcribe it, then open chat
+            log.info("[AUTO] User triggered flush+chat")
+            self._flush_auto_and_chat()
 
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js (non-blocking)."""
@@ -281,6 +286,7 @@ class Api:
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
+        self._manual_mode = (cfg.chunk_seconds == 0)
         self._start_time = time.time()
 
         chunk_dur = cfg.chunk_seconds
@@ -324,6 +330,38 @@ class Api:
         if self._monitor_capture:
             self._monitor_capture.start()
 
+    def _flush_auto_and_chat(self):
+        """Auto mode: flush remaining audio, transcribe, then open chat."""
+        self._emit("auto_flushing", {})
+
+        def run():
+            # Flush remaining PCM from captures
+            import numpy as np
+            mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
+            mon_pcm = self._monitor_capture.flush_pcm() if self._monitor_capture else None
+
+            if mic_pcm is not None or mon_pcm is not None:
+                if mic_pcm is not None and mon_pcm is not None:
+                    max_len = max(len(mic_pcm), len(mon_pcm))
+                    mic_f = np.zeros(max_len, dtype=np.float32)
+                    mon_f = np.zeros(max_len, dtype=np.float32)
+                    mic_f[:len(mic_pcm)] = mic_pcm.astype(np.float32)
+                    mon_f[:len(mon_pcm)] = mon_pcm.astype(np.float32)
+                    mixed = np.clip(mic_f + mon_f, -32768, 32767).astype(np.int16)
+                else:
+                    mixed = mic_pcm if mic_pcm is not None else mon_pcm
+
+                from .audio.wav import pcm_to_wav
+                wav = pcm_to_wav(mixed, 16000)
+                log.info(f"[AUTO] Flushing remaining {len(mixed)/16000:.1f}s")
+                self._process_auto_chunk(wav)
+
+            log.info(f"[AUTO] Total transcript: {len(self._transcript)} entries")
+            self._emit("auto_ready", {"entries": len(self._transcript)})
+            self._open_chat_popup()
+
+        threading.Thread(target=run, daemon=True).start()
+
     def stop_recording(self):
         """Manual mode: stop capturing, hold audio for submit."""
         log.info("[Manual] Stop recording")
@@ -366,18 +404,20 @@ class Api:
         if user_instruction:
             self._chat_history.append({"event": "user_instruction", "data": {"text": user_instruction}})
 
-        # No audio: chat-only mode
+        # No audio: chat-only mode (also handles auto mode Enter)
         if not wav:
-            if not user_instruction:
+            if not user_instruction and not self._transcript:
                 self._emit("recording_done", {"had_audio": False})
                 return
-            log.info(f"[Chat] Pure chat: '{user_instruction[:80]}'")
+            # Use system prompt if no instruction
+            effective_instruction = user_instruction or "Baseado na conversa, dê sua resposta seguindo o system prompt."
+            log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
             self._emit("chat_thinking", {})
             def chat_only():
                 context = self._build_full_context()
                 system = self._raw_system_prompt or "Você é um copiloto de reuniões."
                 system += "\nResponda em texto puro, sem markdown, sem headers, sem JSON."
-                user_msg = f"Contexto completo da conversa:\n{context}\n\nInstrução do usuário:\n{user_instruction}"
+                user_msg = f"Contexto completo da conversa:\n{context}\n\nInstrução do usuário:\n{effective_instruction}"
                 log.info(f"[Chat] System prompt ({len(system)} chars): {system[:150]}")
                 log.info(f"[Chat] User msg ({len(user_msg)} chars): {user_msg[:200]}")
                 try:
@@ -400,8 +440,8 @@ class Api:
         threading.Thread(target=run, daemon=True).start()
 
     def _on_mic_chunk(self, wav_bytes: bytes, source: str):
-        """Process mic chunk: transcribe and emit as [EU]."""
-        threading.Thread(target=self._process_mic_chunk, args=(wav_bytes,), daemon=True).start()
+        """Process mic chunk."""
+        threading.Thread(target=self._process_auto_chunk, args=(wav_bytes,), daemon=True).start()
 
     def _process_mic_chunk(self, wav_bytes: bytes):
         try:
@@ -409,15 +449,82 @@ class Api:
             if not text:
                 return
             self._emit_transcript(self._my_label, text)
-            self._request_suggestions()
         except GroqError as e:
             self._emit("error", {"code": "groq_error", "message": str(e)})
         except Exception as e:
             log.error(f"Mic chunk error: {e}")
 
     def _on_monitor_chunk(self, wav_bytes: bytes, source: str):
-        """Process monitor chunk: verbose transcribe + diarization."""
-        threading.Thread(target=self._process_monitor_chunk, args=(wav_bytes,), daemon=True).start()
+        """Process monitor chunk."""
+        threading.Thread(target=self._process_auto_chunk, args=(wav_bytes,), daemon=True).start()
+
+    def _process_auto_chunk(self, wav_bytes: bytes):
+        """Auto mode: Groq transcribes + Bedrock identifies speakers only (no response)."""
+        import time as _time
+        t0 = _time.time()
+        try:
+            t1 = _time.time()
+            log.info("[AUTO] Enviando áudio pro Groq...")
+            segments = self._groq.transcribe_verbose(wav_bytes)
+            if not segments:
+                return
+            transcript_text = "\n".join(s.text.strip() for s in segments if s.text.strip())
+            if not transcript_text:
+                return
+            groq_time = _time.time() - t1
+            log.info(f"[AUTO] Groq OK: {len(transcript_text)} chars em {groq_time:.2f}s")
+
+            # Bedrock: identify speakers only
+            earlier_ctx = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
+            participants_str = self._participants_context or "Participantes não informados. Deduza pelos conteúdos."
+            earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
+
+            system = ("Você identifica quem fala em reuniões. "
+                      "Responda SOMENTE JSON puro: {\"transcript\": [{\"speaker\": \"Nome\", \"text\": \"fala\"}]}")
+            user_msg = (
+                f"{participants_str}{earlier_block}\n"
+                "Inclua TODAS as falas. Agrupe falas consecutivas do mesmo speaker.\n"
+                f"Transcrição:\n{transcript_text}"
+            )
+
+            t2 = _time.time()
+            log.info(f"[AUTO] Enviando pro Bedrock ({len(user_msg)} chars)...")
+            result_text = self._bedrock.call_raw(system, user_msg, max_tokens=2048)
+            bedrock_time = _time.time() - t2
+            log.info(f"[AUTO] Bedrock OK em {bedrock_time:.2f}s")
+
+            # Parse transcript entries
+            depth = 0
+            start = None
+            for i, c in enumerate(result_text):
+                if c == '{':
+                    if depth == 0: start = i
+                    depth += 1
+                elif c == '}':
+                    depth -= 1
+                    if depth == 0 and start is not None:
+                        try:
+                            parsed = json.loads(result_text[start:i+1])
+                            entries = parsed.get("transcript", [])
+                            for item in entries:
+                                sp = item.get("speaker", "OUTROS")
+                                txt = item.get("text", "").strip()
+                                if txt:
+                                    self._emit_transcript(sp, txt)
+                            log.info(f"[AUTO] {len(entries)} entradas | Groq={groq_time:.2f}s Bedrock={bedrock_time:.2f}s Total={_time.time()-t0:.2f}s")
+                            return
+                        except json.JSONDecodeError:
+                            start = None
+
+            # Fallback
+            for line in transcript_text.split("\n"):
+                line = line.strip()
+                if line:
+                    self._emit_transcript("CONVERSA", line)
+            log.info(f"[AUTO] Fallback | Groq={groq_time:.2f}s Bedrock={bedrock_time:.2f}s Total={_time.time()-t0:.2f}s")
+
+        except Exception as e:
+            log.error(f"[AUTO] Error: {e}", exc_info=True)
 
     def _process_monitor_chunk(self, wav_bytes: bytes):
         import time
