@@ -45,6 +45,7 @@ const state = {
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
+    suggestion_mode: 'short',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -171,14 +172,36 @@ function renderSetup() {
       ${c.suggestions_target ? `<span class="text-xs text-emerald-400 ml-auto">🎯 Copiloto focado em: ${c.suggestions_target}</span>` : '<span class="text-xs text-slate-500 ml-auto">Copiloto sem foco específico</span>'}
     </div>
 
+    <!-- Modo de operação -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Modo</h2>
+    <div class="flex gap-2 mb-3">
+      ${[{id:'short',label:'📋 Sugestões Curtas',desc:'3 sugestões rápidas'},{id:'full',label:'📋 Sugestões Completas',desc:'10 sugestões detalhadas'},{id:'',label:'💬 Copiloto',desc:'Chat interativo'}].map(m => `
+        <button data-action="setMode" data-val="${m.id}" class="flex-1 py-2 px-2 text-xs rounded border transition-colors ${c.suggestion_mode === m.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+          ${m.label}<br><span class="text-slate-500">${m.desc}</span>
+        </button>
+      `).join('')}
+    </div>
+    ${c.suggestion_mode ? `
+      <div class="bg-slate-800/50 rounded p-3 mb-3">
+        <p class="text-xs text-slate-500 mb-1">Formato das sugestões (automático):</p>
+        <p class="text-xs text-slate-400 font-mono">🔴 "Erro crítico — ação urgente"</p>
+        <p class="text-xs text-slate-400 font-mono">⚠️ "Atenção — ponto importante"</p>
+        <p class="text-xs text-slate-400 font-mono">💡 "Oportunidade — sugestão"</p>
+        <p class="text-xs text-slate-400 font-mono">✅ "Pronto — próximo passo"</p>
+      </div>
+    ` : `
+      <p class="text-xs text-slate-500 mb-3">No modo copiloto, você interage via chat flutuante. As respostas seguem o system prompt.</p>
+    `}
+
     <!-- System Prompt -->
     <h2 class="text-lg font-semibold mt-4 mb-2">System Prompt (opcional)</h2>
-    <p class="text-xs text-slate-500 mb-2">Define o comportamento das sugestões. Selecione um template ou carregue um arquivo.</p>
+    <p class="text-xs text-slate-500 mb-2">Define o contexto e comportamento. Selecione um template ou carregue um arquivo.</p>
     <div class="flex gap-2 mb-2">
       <select data-action="selectTemplate"
         class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
         <option value="">Selecione um template...</option>
         <option value="discovery">📋 Discovery Comercial (Dati)</option>
+        <option value="tecnico">🔧 Consultor Técnico AWS</option>
         <option value="piadas">🎭 Piadas e Humor</option>
         <option value="vendas">💰 Copiloto de Vendas</option>
         <option value="custom">📄 Carregar arquivo...</option>
@@ -285,12 +308,17 @@ function renderDeviceSelector(type, label, devices, selected, testState) {
 
 // ── MEETING PAGE ──
 function renderMeeting() {
+  const isManual = state.config.chunk_seconds == 0;
+  const isSuggestionMode = !!state.config.suggestion_mode;
+  const modeLabel = isSuggestionMode ? (state.config.suggestion_mode === 'short' ? 'Sugestões Curtas' : 'Sugestões Completas') : 'Copiloto';
+  
   return `
     <!-- Header -->
     <div class="flex items-center justify-between mb-4 bg-slate-800/50 rounded-lg p-3">
       <div class="flex items-center gap-3">
-        <span class="w-3 h-3 rounded-full ${state.isRecording ? 'bg-red-500 pulse' : 'bg-slate-600'}"></span>
+        <span class="w-3 h-3 rounded-full ${state.isRecording ? 'bg-red-500 pulse' : isSuggestionMode && !isManual ? 'bg-emerald-500 pulse' : 'bg-slate-600'}"></span>
         <span class="text-sm font-mono">${state.timerDisplay}</span>
+        <span class="text-xs text-slate-500">${modeLabel}</span>
       </div>
       <div class="flex gap-4 text-xs text-slate-400">
         ${state.config.mic_device_id && state.config.mic_device_id !== 'none' ? `<span>Mic: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-emerald-500 rounded" style="width:${Math.min(state.micLevel * 500, 100)}%"></span></span></span>` : ''}
@@ -298,16 +326,18 @@ function renderMeeting() {
       </div>
       <button data-action="stopMeeting" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors">Encerrar</button>
     </div>
-    ${state.config.chunk_seconds == 0 ? `
+
+    <!-- Controls -->
+    ${isManual ? `
     <div class="flex justify-center mb-3">
       ${state.isProcessing ? `
         <button disabled class="px-6 py-2 rounded text-sm font-medium bg-violet-800 text-violet-400 cursor-wait animate-pulse">
-          ⏳ Transcrevendo...
+          ⏳ Processando...
         </button>
       ` : state.isRecording ? `
         <button id="triggerBtn" data-action="stopRecording"
           class="px-6 py-2 rounded text-sm font-medium bg-red-600 hover:bg-red-500 text-white animate-pulse">
-          ⏹ Parar e Transcrever (Espaço/T)
+          ⏹ Parar (Espaço/T)
         </button>
       ` : `
         <button id="triggerBtn" data-action="startRecording"
@@ -316,10 +346,22 @@ function renderMeeting() {
         </button>
       `}
     </div>
-    ` : ''}
+    ` : `
+    <div class="flex justify-center mb-3">
+      ${state.isProcessing ? `
+        <button disabled class="px-6 py-2 rounded text-sm font-medium bg-violet-800 text-violet-400 cursor-wait animate-pulse">
+          ⏳ Processando...
+        </button>
+      ` : `
+        <button data-action="forceProcess" class="px-6 py-2 rounded text-sm font-medium bg-slate-700 hover:bg-slate-600 text-slate-300 transition-colors">
+          ${isSuggestionMode ? '📋 Gerar Sugestões Agora (Espaço)' : '💬 Abrir Copiloto (Espaço)'}
+        </button>
+      `}
+    </div>
+    `}
 
     <!-- Transcript -->
-    <div class="bg-slate-800/30 rounded-lg p-4 mb-4" style="height: 45vh;">
+    <div class="bg-slate-800/30 rounded-lg p-4 mb-4" style="height: ${isSuggestionMode ? '40vh' : '50vh'};">
       <h2 class="text-sm font-semibold text-slate-400 mb-2">TRANSCRIÇÃO</h2>
       <div id="transcript-area" class="overflow-y-auto space-y-1" style="height: calc(100% - 2rem);">
         ${state.transcript.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando transcrição...</p>' : ''}
@@ -332,18 +374,20 @@ function renderMeeting() {
       </div>
     </div>
 
-    <!-- Copilot -->
+    <!-- Copilot panel (suggestion mode only — copilot mode uses popup) -->
+    ${isSuggestionMode ? `
     <div class="bg-slate-800/30 rounded-lg p-4" style="height: 35vh;">
-      <h2 class="text-sm font-semibold text-slate-400 mb-2">COPILOTO</h2>
+      <h2 class="text-sm font-semibold text-slate-400 mb-2">SUGESTÕES</h2>
       <div id="suggestions-area" class="overflow-y-auto space-y-2" style="height: calc(100% - 2rem);">
-        ${state.suggestions.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando...</p>' : ''}
+        ${state.suggestions.length === 0 ? '<p class="text-slate-500 text-sm italic">Aguardando sugestões...</p>' : ''}
         ${state.suggestions.map(s => `
           <div class="text-sm fade-in mb-2">
-            <span class="text-amber-400">→</span> <span class="text-slate-300">${s}</span>
+            <span class="text-slate-100">${s}</span>
           </div>
         `).join('')}
       </div>
     </div>
+    ` : ''}
   `;
 }
 
@@ -520,8 +564,13 @@ function bindEvents() {
           state.config.chunk_seconds = el.dataset.val === 'manual' ? 0 : 60;
           render();
           break;
+        case 'setMode':
+          state.config.suggestion_mode = el.dataset.val;
+          render();
+          break;
         case 'startRecording':
         case 'stopRecording':
+        case 'forceProcess':
           await callApi('toggle_recording');
           break;
         case 'triggerTranscription':
@@ -733,13 +782,19 @@ window.addEventListener('keydown', (e) => {
     e.preventDefault();
     document.querySelector('[data-action="stopMeeting"]')?.click();
   }
-  // Space/T = toggle recording in manual mode
-  if ((e.key === ' ' || e.key === 't' || e.key === 'T') && state.page === 'meeting' && state.config.chunk_seconds == 0 && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
+  // Space/T = toggle recording (manual) or force process (auto)
+  if ((e.key === ' ' || e.key === 't' || e.key === 'T') && state.page === 'meeting' && !state.isProcessing && e.target.tagName !== 'INPUT' && e.target.tagName !== 'TEXTAREA') {
     e.preventDefault();
-    if (state.isRecording) {
-      document.querySelector('[data-action="stopRecording"]')?.click();
+    if (state.config.chunk_seconds == 0) {
+      // Manual mode: toggle recording
+      if (state.isRecording) {
+        document.querySelector('[data-action="stopRecording"]')?.click();
+      } else {
+        document.querySelector('[data-action="startRecording"]')?.click();
+      }
     } else {
-      document.querySelector('[data-action="startRecording"]')?.click();
+      // Auto mode: force process
+      document.querySelector('[data-action="forceProcess"]')?.click();
     }
   }
 });

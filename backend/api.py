@@ -240,6 +240,7 @@ class Api:
         base = pathlib.Path(__file__).parent.parent
         paths = {
             "discovery": base / "Prompt_Modelo.md",
+            "tecnico": base / "prompts" / "consultor-tecnico.md",
             "piadas": base / "prompts" / "piadas.md",
             "vendas": base / "prompts" / "vendas.md",
         }
@@ -364,7 +365,13 @@ class Api:
 
             log.info(f"[AUTO] Total transcript: {len(self._transcript)} entries")
             self._emit("auto_ready", {"entries": len(self._transcript)})
-            self._open_chat_popup()
+
+            if self._suggestion_mode:
+                # Suggestion mode: generate suggestions directly
+                self._generate_auto_suggestions()
+            else:
+                # Copilot mode: open chat popup
+                self._open_chat_popup()
 
         threading.Thread(target=run, daemon=True).start()
 
@@ -415,10 +422,12 @@ class Api:
     @staticmethod
     def _clean_md(text: str) -> str:
         import re
-        text = re.sub(r'#{1,6}\s*', '', text)
-        text = re.sub(r'\*{1,2}([^*]+)\*{1,2}', r'\1', text)
-        text = re.sub(r'^-\s+', '', text, flags=re.MULTILINE)
-        text = re.sub(r'\n{3,}', '\n\n', text)
+        text = re.sub(r'#{1,6}\s*', '', text)                    # ### headers
+        text = re.sub(r'\*{1,2}([^*]+)\*{1,2}', r'\1', text)    # **bold** *italic*
+        text = re.sub(r'^-\s+', '', text, flags=re.MULTILINE)    # - list items
+        text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE) # 1. numbered
+        text = re.sub(r'`([^`]+)`', r'\1', text)                 # `code`
+        text = re.sub(r'\n{3,}', '\n\n', text)                   # excess newlines
         return text.strip()
 
     def submit_recording(self, user_instruction: str = ""):
@@ -435,34 +444,32 @@ class Api:
                 self._emit("recording_done", {"had_audio": False})
                 return
             self._emit("chat_thinking", {})
-            effective_instruction = user_instruction or "Dê sugestões baseado na conversa."
+            effective_instruction = user_instruction or "Analise a conversa e dê sua opinião em poucas frases."
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
             def chat_only():
-                context = self._build_full_context()
-                system = self._raw_system_prompt or "Você é um copiloto de reuniões."
-                # Inject app format for suggestion mode
-                if self._suggestion_mode:
-                    max_tok = 256 if self._suggestion_mode == "short" else 1024
-                    n = 3 if self._suggestion_mode == "short" else 10
-                    fmt = self.APP_FORMAT_SUGGESTION
-                    user_msg = f"Contexto da conversa:\n{context}\n\nDê {n} sugestões para {self._suggestions_target}.\n{fmt}"
-                    if user_instruction:
-                        user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {user_instruction}\n{fmt}"
-                else:
-                    max_tok = 4096
-                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\nResponda em texto puro, sem markdown."
-
-                log.info(f"[Chat] mode={self._suggestion_mode} max_tok={max_tok}")
-                log.info(f"[Chat] System ({len(system)} chars): {system[:100]}")
-                log.info(f"[Chat] User msg ({len(user_msg)} chars)")
                 try:
+                    context = self._build_full_context()
+                    system = self._raw_system_prompt or "Você é um copiloto de reuniões."
+                    log.info(f"[Chat] Thread started. context={len(context)} chars, mode={self._suggestion_mode}")
+                    if self._suggestion_mode:
+                        max_tok = 256 if self._suggestion_mode == "short" else 1024
+                        n = 3 if self._suggestion_mode == "short" else 10
+                        fmt = self.APP_FORMAT_SUGGESTION
+                        user_msg = f"Contexto da conversa:\n{context}\n\nDê {n} sugestões para {self._suggestions_target}.\n{fmt}"
+                        if user_instruction:
+                            user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {user_instruction}\n{fmt}"
+                    else:
+                        max_tok = 512
+                        copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação. Seja breve."
+                        user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}{copilot_fmt}"
+                    log.info(f"[Chat] mode={self._suggestion_mode} max_tok={max_tok}")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
                     log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")
                     self._emit("copilot_response", {"response": result, "had_instruction": bool(user_instruction)})
                 except Exception as e:
-                    log.error(f"[Chat] Error: {e}")
+                    log.error(f"[Chat] Error: {e}", exc_info=True)
                     self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": bool(user_instruction)})
             threading.Thread(target=chat_only, daemon=True).start()
             return
@@ -549,6 +556,10 @@ class Api:
                                 if txt:
                                     self._emit_transcript(sp, txt)
                             log.info(f"[AUTO] {len(entries)} entradas | Groq={groq_time:.2f}s Bedrock={bedrock_time:.2f}s Total={_time.time()-t0:.2f}s")
+                            
+                            # In suggestion mode, also generate suggestions
+                            if self._suggestion_mode and entries:
+                                self._generate_auto_suggestions()
                             return
                         except json.JSONDecodeError:
                             start = None
@@ -562,6 +573,26 @@ class Api:
 
         except Exception as e:
             log.error(f"[AUTO] Error: {e}", exc_info=True)
+
+    def _generate_auto_suggestions(self):
+        """Generate suggestions automatically after each auto chunk (suggestion mode only)."""
+        import time as _time
+        context = self._build_context()
+        if not context or not self._bedrock:
+            return
+        system = self._raw_system_prompt or "Você é um copiloto de reuniões."
+        n = 3 if self._suggestion_mode == "short" else 10
+        max_tok = 256 if self._suggestion_mode == "short" else 1024
+        user_msg = f"Contexto da conversa:\n{context}\n\nDê {n} sugestões para {self._suggestions_target}.\n{self.APP_FORMAT_SUGGESTION}"
+
+        t = _time.time()
+        try:
+            result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
+            result = self._clean_md(result)
+            log.info(f"[AUTO-SUG] {len(result)} chars em {_time.time()-t:.2f}s")
+            self._emit("copilot_response", {"response": result, "had_instruction": False})
+        except Exception as e:
+            log.error(f"[AUTO-SUG] Error: {e}")
 
     def _process_monitor_chunk(self, wav_bytes: bytes):
         import time
