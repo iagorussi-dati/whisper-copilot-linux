@@ -48,6 +48,7 @@ class Api:
         self._recording = False
         self._pending_wav = None
         self._pending_instruction = ""
+        self._suggestion_mode = ""  # "", "short", "full"
         self._chat_history: list[dict] = []
         self._hotkey_stop = threading.Event()
         self._start_hotkey_watcher()
@@ -141,6 +142,10 @@ class Api:
     def get_chat_history(self) -> list[dict]:
         """Return chat history for popup restore."""
         return list(self._chat_history)
+
+    def get_suggestion_format(self) -> str:
+        """Return the suggestion format instruction (read-only preview)."""
+        return self.APP_FORMAT_SUGGESTION
 
     def _open_chat_popup(self):
         """Open a floating chat window (reuse if already open)."""
@@ -283,6 +288,7 @@ class Api:
         self._suggestions_target = cfg.suggestions_target or self._my_label
         self._raw_system_prompt = cfg.custom_system_prompt or ""
         self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
+        self._suggestion_mode = cfg.suggestion_mode or ""
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
@@ -396,6 +402,25 @@ class Api:
         self._emit("recording_stopped", {"had_audio": True})
         self._open_chat_popup()  # reopen if user closed it
 
+    APP_FORMAT_SUGGESTION = (
+        "\nFORMATO DE RESPOSTA (obrigatório, sem exceção):\n"
+        "Cada sugestão = 1 linha com emoji e frase entre aspas.\n"
+        "NÃO use markdown, NÃO use títulos, NÃO use listas com -, NÃO use negrito.\n"
+        "Emojis: 🔴 erro crítico, ⚠️ atenção, 💡 oportunidade, ✅ pronto pra próximo passo\n"
+        "Exemplo:\n"
+        '🔴 "Cliente, qual a dor real que motiva essa migração?"\n'
+        '💡 "Cliente, qual o volume de requests por segundo hoje?"'
+    )
+
+    @staticmethod
+    def _clean_md(text: str) -> str:
+        import re
+        text = re.sub(r'#{1,6}\s*', '', text)
+        text = re.sub(r'\*{1,2}([^*]+)\*{1,2}', r'\1', text)
+        text = re.sub(r'^-\s+', '', text, flags=re.MULTILINE)
+        text = re.sub(r'\n{3,}', '\n\n', text)
+        return text.strip()
+
     def submit_recording(self, user_instruction: str = ""):
         """Submit pending audio for transcription, or chat-only if no audio."""
         wav = self._pending_wav
@@ -404,29 +429,41 @@ class Api:
         if user_instruction:
             self._chat_history.append({"event": "user_instruction", "data": {"text": user_instruction}})
 
-        # No audio: chat-only mode (also handles auto mode Enter)
+        # No audio: chat-only mode
         if not wav:
             if not user_instruction and not self._transcript:
                 self._emit("recording_done", {"had_audio": False})
                 return
-            # Use system prompt if no instruction
-            effective_instruction = user_instruction or "Baseado na conversa, dê sua resposta seguindo o system prompt."
-            log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
             self._emit("chat_thinking", {})
+            effective_instruction = user_instruction or "Dê sugestões baseado na conversa."
+            log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
+
             def chat_only():
                 context = self._build_full_context()
                 system = self._raw_system_prompt or "Você é um copiloto de reuniões."
-                system += "\nResponda em texto puro, sem markdown, sem headers, sem JSON."
-                user_msg = f"Contexto completo da conversa:\n{context}\n\nInstrução do usuário:\n{effective_instruction}"
-                log.info(f"[Chat] System prompt ({len(system)} chars): {system[:150]}")
-                log.info(f"[Chat] User msg ({len(user_msg)} chars): {user_msg[:200]}")
+                # Inject app format for suggestion mode
+                if self._suggestion_mode:
+                    max_tok = 256 if self._suggestion_mode == "short" else 1024
+                    n = 3 if self._suggestion_mode == "short" else 10
+                    fmt = self.APP_FORMAT_SUGGESTION
+                    user_msg = f"Contexto da conversa:\n{context}\n\nDê {n} sugestões para {self._suggestions_target}.\n{fmt}"
+                    if user_instruction:
+                        user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {user_instruction}\n{fmt}"
+                else:
+                    max_tok = 4096
+                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\nResponda em texto puro, sem markdown."
+
+                log.info(f"[Chat] mode={self._suggestion_mode} max_tok={max_tok}")
+                log.info(f"[Chat] System ({len(system)} chars): {system[:100]}")
+                log.info(f"[Chat] User msg ({len(user_msg)} chars)")
                 try:
-                    result = self._bedrock.call_raw(system, user_msg, max_tokens=4096)
+                    result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
+                    result = self._clean_md(result)
                     log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")
-                    self._emit("copilot_response", {"response": result, "had_instruction": True})
+                    self._emit("copilot_response", {"response": result, "had_instruction": bool(user_instruction)})
                 except Exception as e:
                     log.error(f"[Chat] Error: {e}")
-                    self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": True})
+                    self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": bool(user_instruction)})
             threading.Thread(target=chat_only, daemon=True).start()
             return
 
