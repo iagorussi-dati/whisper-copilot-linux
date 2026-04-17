@@ -481,15 +481,25 @@ class Api:
         import shutil
         if not shutil.which("hyprctl"):
             return
-        try:
+
+        def do_position():
             import subprocess, json as _json
-            time.sleep(0.5)  # wait for window to be registered
-            r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
-            clients = _json.loads(r.stdout)
-            chat = next((c for c in clients if c.get("title") == "Whisper Chat"), None)
+            # Retry finding the window
+            chat = None
+            for attempt in range(10):
+                time.sleep(0.5)
+                r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
+                clients = _json.loads(r.stdout)
+                our = [c for c in clients if "main.py" in c.get("class", "")]
+                if len(our) >= 2:
+                    chat = min(our, key=lambda c: c["size"][0] * c["size"][1])
+                    break
+                log.debug(f"[SIDEBAR] Attempt {attempt+1}: {len(our)} windows found")
+
             if not chat:
-                log.debug("[SIDEBAR] Chat window not found in hyprctl")
+                log.warning("[SIDEBAR] Chat window not found after retries")
                 return
+
             addr = chat["address"]
             r2 = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
             mon = _json.loads(r2.stdout)[0]
@@ -501,9 +511,9 @@ class Api:
             subprocess.run(["hyprctl", "dispatch", f"resizewindowpixel exact {sw} {mh},address:{addr}"], capture_output=True, timeout=2)
             subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {mw - sw} 0,address:{addr}"], capture_output=True, timeout=2)
             subprocess.run(["hyprctl", "dispatch", f"pin address:{addr}"], capture_output=True, timeout=2)
-            log.info(f"[SIDEBAR] Positioned: {sw}x{mh} at x={mw - sw}")
-        except Exception as e:
-            log.debug(f"[SIDEBAR] Failed: {e}")
+            log.info(f"[SIDEBAR] Positioned: {sw}x{mh} at x={mw - sw} addr={addr}")
+
+        threading.Thread(target=do_position, daemon=True).start()
 
     def _focus_popup(self):
         """Focus the popup window via hyprctl (Wayland/Hyprland)."""
