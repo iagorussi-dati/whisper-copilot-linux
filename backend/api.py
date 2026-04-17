@@ -376,6 +376,13 @@ class Api:
                     self._chat_window.restore()
                 except Exception:
                     pass
+                # Hyprland/Wayland: force focus via hyprctl
+                try:
+                    import subprocess
+                    subprocess.run(["hyprctl", "dispatch", "focuswindow", "title:Whisper"],
+                                   capture_output=True, timeout=2)
+                except Exception:
+                    pass
             if self._auto_response:
                 log.info("[REC] Auto-response: generating response...")
                 self.submit_recording('')
