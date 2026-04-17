@@ -46,6 +46,7 @@ const state = {
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
     response_mode: 'short', auto_response: true, extra_context: '',
+    participant_mode: 'named', many_context: '',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -105,7 +106,7 @@ function renderSetup() {
   const inputDevs = state.devices.filter(d => d.deviceType === 'input');
   const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
   const hasDevice = (c.mic_device_id && c.mic_device_id !== 'none') || (c.monitor_device_id && c.monitor_device_id !== 'none');
-  const canStart = hasDevice && state.awsValid === 'ok';
+  const canStart = hasDevice && state.awsValid === 'ok' && c.custom_system_prompt;
 
   return `
     <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
@@ -124,28 +125,41 @@ function renderSetup() {
       ${state.awsInfo ? `<span class="text-xs text-slate-400">${state.awsInfo}</span>` : ''}
     </div>
 
-    <!-- Contexto da conversa -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">Contexto</h2>
-    <p class="text-xs text-slate-500 mb-3">Quem participa da conversa? A IA usa isso para identificar falas e direcionar respostas.</p>
-    <div class="space-y-2 mb-3">
-      ${c.participants.map((p, i) => `
-        <div class="flex gap-2 items-center bg-slate-800/50 rounded-lg p-2 ${c.suggestions_target === p.name && p.name ? 'ring-1 ring-emerald-500/50' : ''}">
-          <button data-action="setTarget" data-idx="${i}" title="Direcionar copiloto para esta pessoa"
-            class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${c.suggestions_target === p.name && p.name ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-500 hover:bg-slate-600'}">
-            ${c.suggestions_target === p.name && p.name ? '🎯' : '👤'}
-          </button>
-          <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
-            class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
-          <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Papel (ex: cliente, dev, gestor)"
-            class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
-          <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1 transition-colors">×</button>
-        </div>
-      `).join('')}
+    <!-- Identificação de participantes -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Participantes</h2>
+    <div class="flex gap-2 mb-3">
+      <button data-action="setParticipantMode" data-val="named" class="flex-1 py-2 text-xs rounded border transition-colors ${c.participant_mode !== 'many' ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        👥 Pessoas específicas
+      </button>
+      <button data-action="setParticipantMode" data-val="many" class="flex-1 py-2 text-xs rounded border transition-colors ${c.participant_mode === 'many' ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        🌐 Muitas pessoas
+      </button>
     </div>
-    <div class="flex gap-2 items-center mb-4">
+
+    ${c.participant_mode !== 'many' ? `
+      <p class="text-xs text-slate-500 mb-2">Adicione quem vai falar. A IA identifica melhor com nome + papel.</p>
+      <div class="space-y-2 mb-3">
+        ${c.participants.map((p, i) => `
+          <div class="flex gap-2 items-center bg-slate-800/50 rounded-lg p-2 ${c.suggestions_target === p.name && p.name ? 'ring-1 ring-emerald-500/50' : ''}">
+            <button data-action="setTarget" data-idx="${i}" title="Direcionar copiloto"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${c.suggestions_target === p.name && p.name ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-500 hover:bg-slate-600'}">
+              ${c.suggestions_target === p.name && p.name ? '🎯' : '👤'}
+            </button>
+            <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
+              class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+            <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Papel (ex: dev, gestor)"
+              class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+            <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1 transition-colors">×</button>
+          </div>
+        `).join('')}
+      </div>
       <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">+ Adicionar pessoa</button>
-      ${c.suggestions_target ? `<span class="text-xs text-emerald-400 ml-auto">🎯 Copiloto focado em: ${c.suggestions_target}</span>` : '<span class="text-xs text-slate-500 ml-auto">Copiloto sem foco específico</span>'}
-    </div>
+    ` : `
+      <p class="text-xs text-slate-500 mb-2">A IA identifica automaticamente pelos nomes mencionados na conversa.</p>
+      <textarea data-bind="many_context" rows="2" placeholder="Contexto (opcional): Ex: Daily standup de equipe de desenvolvimento..."
+        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.many_context || ''}</textarea>
+    `}
+    ${c.suggestions_target ? `<p class="text-xs text-emerald-400 mt-2">🎯 Copiloto focado em: ${c.suggestions_target}</p>` : ''}
 
     <!-- System Prompt -->
     <h2 class="text-lg font-semibold mt-4 mb-2">System Prompt (opcional)</h2>
@@ -237,6 +251,7 @@ function renderSetup() {
 
     <!-- Start -->
     ${!hasDevice ? '<p class="text-xs text-amber-400 mb-2">⚠️ Selecione pelo menos um dispositivo (microfone ou autofalante)</p>' : ''}
+    ${!c.custom_system_prompt ? '<p class="text-xs text-amber-400 mb-2">⚠️ Selecione um template de System Prompt</p>' : ''}
     <button data-action="startMeeting" ${!canStart ? 'disabled' : ''}
       class="w-full py-3 rounded font-semibold text-lg transition-colors ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}">
       Iniciar
@@ -531,6 +546,10 @@ function bindEvents() {
           break;
         case 'setAutoResponse':
           state.config.auto_response = el.dataset.val === 'true';
+          render();
+          break;
+        case 'setParticipantMode':
+          state.config.participant_mode = el.dataset.val;
           render();
           break;
         case 'triggerTranscription':

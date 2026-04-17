@@ -36,6 +36,8 @@ class AppConfig:
     global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
     response_mode: str = "short"  # "short", "full", "research"
     auto_response: bool = True  # True = responde sozinho, False = espera instrução
+    many_context: str = ""  # contexto para modo 'muitas pessoas'
+    participant_mode: str = "named"  # "named" ou "many"
     extra_context: str = ""  # contexto adicional do usuário
 
     def to_dict(self) -> dict:

@@ -276,17 +276,23 @@ class Api:
             threading.Thread(target=prewarm, daemon=True).start()
 
         # Build participants context
-        ctx_parts = []
-        for p in cfg.participants:
-            name = p.name if isinstance(p, Participant) else p.get("name", "")
-            role = p.role if isinstance(p, Participant) else p.get("role", "")
-            if not name:
-                continue
-            desc = f"{name} - {role}" if role else name
-            ctx_parts.append(f"- {desc}")
-        self._participants_context = (
-            f"Participantes da reunião:\n" + "\n".join(ctx_parts) if ctx_parts else ""
-        )
+        if cfg.participant_mode == "many":
+            ctx = cfg.many_context or ""
+            self._participants_context = (
+                f"Contexto: {ctx}\n" if ctx else ""
+            ) + "Várias pessoas falando. Identifique pelos nomes mencionados na conversa."
+        else:
+            ctx_parts = []
+            for p in cfg.participants:
+                name = p.name if isinstance(p, Participant) else p.get("name", "")
+                role = p.role if isinstance(p, Participant) else p.get("role", "")
+                if not name:
+                    continue
+                desc = f"{name} - {role}" if role else name
+                ctx_parts.append(f"- {desc}")
+            self._participants_context = (
+                f"Participantes da reunião:\n" + "\n".join(ctx_parts) if ctx_parts else ""
+            )
 
         self._my_label = cfg.my_name or "EU"
         self._suggestions_target = cfg.suggestions_target or self._my_label
