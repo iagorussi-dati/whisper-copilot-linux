@@ -380,25 +380,24 @@ class Api:
                 time.sleep(0.1)
             log.info(f"[REC] Popup ready={getattr(self, '_chat_window_ready', '?')} (waited {time.time()-start_wait:.1f}s)")
             log.info(f"[REC] auto_response={self._auto_response}")
-            # Focus the chat popup window
+            # Focus the chat popup window (delay to let Hyprland finish hotkey processing)
+            time.sleep(0.5)
             if self._chat_window:
-                try:
-                    self._chat_window.show()
-                    self._chat_window.restore()
-                except Exception:
-                    pass
-                # Hyprland/Wayland: force focus via hyprctl
                 try:
                     import subprocess, json as _json
                     r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
                     clients = _json.loads(r.stdout)
-                    # Find the smaller window (popup) among our windows
                     our_windows = [c for c in clients if "main.py" in c.get("class", "")]
                     if len(our_windows) > 1:
                         popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
                         subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
                                        capture_output=True, timeout=2)
-                        log.info(f"[REC] Focused popup window: {popup['address']}")
+                        log.info(f"[REC] Focused popup: {popup['address']}")
+                    # Retry after another delay
+                    time.sleep(0.3)
+                    if our_windows and len(our_windows) > 1:
+                        subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
+                                       capture_output=True, timeout=2)
                 except Exception as e:
                     log.debug(f"[REC] Focus failed: {e}")
             if self._auto_response:
