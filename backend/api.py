@@ -283,6 +283,7 @@ class Api:
         self._suggestions_target = cfg.suggestions_target or self._my_label
         self._raw_system_prompt = cfg.custom_system_prompt or ""
         self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
+        self._response_mode = cfg.response_mode or "short"
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
@@ -392,14 +393,22 @@ class Api:
             effective_instruction = user_instruction or "Analise a conversa e dê sua opinião em poucas frases."
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
+            RESPONSE_MODES = {
+                "short": {"max_tok": 256, "hint": "Dê 3 respostas curtas e diretas."},
+                "full": {"max_tok": 1024, "hint": "Dê até 10 respostas detalhadas."},
+                "research": {"max_tok": 4096, "hint": "Faça uma análise profunda e completa."},
+            }
+
             def chat_only():
                 try:
                     context = self._build_full_context()
                     system = self._raw_system_prompt or "Você é um copiloto de reuniões."
-                    max_tok = 512
-                    copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação. Seja breve."
-                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}{copilot_fmt}"
-                    log.info(f"[Chat] context={len(context)} chars, max_tok={max_tok}")
+                    mode = RESPONSE_MODES.get(self._response_mode, RESPONSE_MODES["short"])
+                    max_tok = mode["max_tok"]
+                    hint = mode["hint"] if not user_instruction else ""
+                    copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação."
+                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}"
+                    log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
                     log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")

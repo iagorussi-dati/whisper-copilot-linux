@@ -45,6 +45,7 @@ const state = {
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
+    response_mode: 'short',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -108,32 +109,7 @@ function renderSetup() {
 
   return `
     <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
-    <p class="text-xs text-slate-500 mb-4">Usa as API keys do .env automaticamente.</p>
-
-    <!-- Transcription provider -->
-    <h2 class="text-lg font-semibold mb-2">Transcrição</h2>
-    <div class="flex gap-2 mb-2">
-      <button class="flex-1 py-2 text-xs rounded border border-emerald-500 bg-emerald-500/10 text-emerald-400">Groq Whisper</button>
-    </div>
-    <p class="text-xs text-amber-400/70 mb-4">⚠️ Groq: limite de 20 req/min. Chunk mínimo: 30s</p>
-
-    <!-- Diarization -->
-    <h2 class="text-lg font-semibold mb-2">Diarização (quem falou)</h2>
-    <div class="flex gap-2 mb-2">
-      ${[{id:'local',label:'Ativado'},{id:'none',label:'Desativado'}].map(d => `
-        <button data-action="setDiar" data-val="${d.id}" class="flex-1 py-2 text-xs rounded border transition-colors ${c.diarization_provider === d.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">${d.label}</button>
-      `).join('')}
-    </div>
-    ${c.diarization_provider === 'local' ? `
-      <div class="mb-4">
-        <div class="flex justify-between text-xs text-slate-400">
-          <span>Sensibilidade:</span><span>${c.diarization_threshold.toFixed(2)}</span>
-        </div>
-        <input type="range" min="0.1" max="0.9" step="0.05" value="${c.diarization_threshold}" data-bind="diarization_threshold"
-          class="w-full mt-1 accent-slate-400" />
-        <p class="text-xs text-slate-500 mt-1">↓ agrupa mais vozes, ↑ separa mais vozes</p>
-      </div>
-    ` : ''}
+    <p class="text-xs text-slate-500 mb-4">Copiloto de reuniões em tempo real.</p>
 
     <!-- Audio devices -->
     <h2 class="text-lg font-semibold mb-2">Dispositivos de Áudio</h2>
@@ -193,6 +169,22 @@ function renderSetup() {
 
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
+
+    <!-- Response mode -->
+    <label class="text-xs text-slate-400">Tipo de resposta do copiloto</label>
+    <div class="flex gap-2 mt-1 mb-4">
+      ${[
+        {id:'short', label:'⚡ Curta', desc:'~2s', detail:'3 sugestões rápidas'},
+        {id:'full', label:'📋 Completa', desc:'~4s', detail:'10 sugestões detalhadas'},
+        {id:'research', label:'🔍 Pesquisa', desc:'~10s', detail:'Análise profunda'}
+      ].map(m => `
+        <button data-action="setResponseMode" data-val="${m.id}" class="flex-1 py-2 px-2 rounded border transition-colors ${c.response_mode === m.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+          <div class="text-xs font-medium">${m.label}</div>
+          <div class="text-xs text-slate-500">${m.desc} — ${m.detail}</div>
+        </button>
+      `).join('')}
+    </div>
+
     <div class="grid grid-cols-2 gap-4 mb-4">
       <div>
         <label class="text-xs text-slate-400">Idioma</label>
@@ -200,10 +192,10 @@ function renderSetup() {
           class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
       </div>
       <div>
-        <label class="text-xs text-slate-400">Transcrição a cada (segundos)</label>
-        <input type="range" min="30" max="300" step="10" value="${c.chunk_seconds}" data-bind="chunk_seconds"
+        <label class="text-xs text-slate-400">Transcrição a cada</label>
+        <input type="range" min="60" max="300" step="10" value="${c.chunk_seconds}" data-bind="chunk_seconds"
           class="w-full mt-1 accent-slate-400" />
-        <span class="text-xs text-slate-500">${c.chunk_seconds}s</span>
+        <span class="text-xs text-slate-500">${c.chunk_seconds}s (mín. 60s)</span>
       </div>
     </div>
 
@@ -502,6 +494,10 @@ function bindEvents() {
           break;
         case 'toggleRec':
           await callApi('toggle_recording');
+          break;
+        case 'setResponseMode':
+          state.config.response_mode = el.dataset.val;
+          render();
           break;
         case 'triggerTranscription':
           if (!state.isProcessing) {
