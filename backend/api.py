@@ -163,8 +163,14 @@ class Api:
             background_color="#0f172a",
         )
         # Clear reference when user closes the window
+        self._chat_window_ready = False
+        def on_loaded():
+            self._chat_window_ready = True
+            log.info("[POPUP] Window loaded and ready")
         def on_closed():
             self._chat_window = None
+            self._chat_window_ready = False
+        self._chat_window.events.loaded += on_loaded
         self._chat_window.events.closed += on_closed
 
     # ── Device management ──
@@ -368,6 +374,11 @@ class Api:
 
         def flush_and_respond():
             self._process_auto_chunk(wav)
+            # Wait for popup to be ready before sending events/focusing
+            start_wait = time.time()
+            while not getattr(self, '_chat_window_ready', True) and time.time() - start_wait < 5:
+                time.sleep(0.1)
+            log.info(f"[REC] Popup ready={getattr(self, '_chat_window_ready', '?')} (waited {time.time()-start_wait:.1f}s)")
             log.info(f"[REC] auto_response={self._auto_response}")
             # Focus the chat popup window
             if self._chat_window:

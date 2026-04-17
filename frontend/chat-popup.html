@@ -170,8 +170,21 @@
   });
 
   // Init
-  if (window.pywebview) restoreHistory();
-  else window.addEventListener('pywebviewready', restoreHistory);
+  let popupReady = false;
+  function markReady() {
+    popupReady = true;
+    console.log('[POPUP] Ready at ' + Date.now());
+    restoreHistory();
+  }
+  if (window.pywebview) markReady();
+  else window.addEventListener('pywebviewready', markReady);
+
+  // Log all incoming events
+  ['transcript', 'copilot_response', 'recording_state', 'recording_stopped', 'chat_thinking'].forEach(evt => {
+    window.addEventListener('backend:' + evt, (e) => {
+      console.log('[POPUP] Event: ' + evt + ' ready=' + popupReady + ' inputDisabled=' + input.disabled);
+    });
+  });
 
   // Force focus on click anywhere in the window
   document.body.addEventListener('click', () => {
