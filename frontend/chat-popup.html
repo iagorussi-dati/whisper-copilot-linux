@@ -167,6 +167,12 @@
     disableInput();
   });
 
+  window.addEventListener('backend:session_reset', () => {
+    msgs.innerHTML = '<div class="msg msg-system">Nova sessão. Copiloto pronto.</div>';
+    hasTranscript = false;
+    disableInput();
+  });
+
   window.addEventListener('backend:focus_input', () => {
     console.log('[POPUP] focus_input received');
     setStatus('status-ready', '✅ Transcrição pronta — digite instrução ou aperte Enter');

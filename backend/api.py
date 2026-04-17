@@ -311,6 +311,7 @@ class Api:
         self._suggestions = []
         self._chat_history = []
         self._start_time = time.time()
+        self._emit("session_reset", {})
 
         log.info(f"[START] === MEETING STARTED ===")
         log.info(f"[START] response_mode={self._response_mode}")
@@ -498,7 +499,7 @@ class Api:
                     max_tok = mode["max_tok"]
                     hint = mode["hint"] if not user_instruction else ""
                     copilot_fmt = "\nVá direto ao ponto. Sem títulos, sem saudações, sem introduções. Texto corrido."
-                    no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto. Foque no que é novo."
+                    no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto." if "[Copiloto respondeu]" in context else ""
                     user_msg = f"{participants}\n\nContexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
