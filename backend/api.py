@@ -48,7 +48,6 @@ class Api:
         self._recording = False
         self._pending_wav = None
         self._pending_instruction = ""
-        self._suggestion_mode = ""  # "", "short", "full"
         self._chat_history: list[dict] = []
         self._hotkey_stop = threading.Event()
         self._start_hotkey_watcher()
@@ -108,22 +107,17 @@ class Api:
         self._hotkey_key = ""
 
     def toggle_recording(self):
-        """Toggle recording state (manual) or flush+chat (auto)."""
+        """Toggle recording: start/stop capture."""
         if not self._start_time:
             return
-        if self._manual_mode:
-            if self._recording:
-                self._recording = False
-                self._emit("recording_state", {"recording": False})
-                self.stop_recording()
-            else:
-                self._recording = True
-                self._emit("recording_state", {"recording": True})
-                self.start_recording()
+        if self._recording:
+            self._recording = False
+            self._emit("recording_state", {"recording": False})
+            self.stop_recording()
         else:
-            # Auto mode: flush remaining audio, transcribe it, then open chat
-            log.info("[AUTO] User triggered flush+chat")
-            self._flush_auto_and_chat()
+            self._recording = True
+            self._emit("recording_state", {"recording": True})
+            self.start_recording()
 
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js (non-blocking)."""
@@ -289,18 +283,12 @@ class Api:
         self._suggestions_target = cfg.suggestions_target or self._my_label
         self._raw_system_prompt = cfg.custom_system_prompt or ""
         self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
-        self._suggestion_mode = cfg.suggestion_mode or ""
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
-        self._manual_mode = (cfg.chunk_seconds == 0)
         self._start_time = time.time()
 
-        chunk_dur = cfg.chunk_seconds
-
-        # Start mic capture
-        manual_mode = cfg.chunk_seconds == 0  # 0 = manual mode
-        chunk_dur = cfg.chunk_seconds if not manual_mode else 9999
+        chunk_dur = max(cfg.chunk_seconds, 60)  # min 60s chunks for auto-transcribe
 
         if cfg.mic_device_id and cfg.mic_device_id != "none":
             self._mic_capture = AudioCapture(
@@ -308,89 +296,47 @@ class Api:
                 on_chunk=self._on_mic_chunk,
                 on_level=lambda src, lvl: self._emit("audio_level", {"source": src, "level": lvl}),
                 on_status=lambda src, st: self._emit("status", {"source": src, "status": st}),
-                manual_mode=manual_mode,
+                manual_mode=False,
             )
-            if not manual_mode:
-                self._mic_capture.start()
 
-        # Start monitor capture
         if cfg.monitor_device_id and cfg.monitor_device_id != "none":
             self._monitor_capture = AudioCapture(
                 cfg.monitor_device_id, "monitor", chunk_dur,
                 on_chunk=self._on_monitor_chunk,
                 on_level=lambda src, lvl: self._emit("audio_level", {"source": src, "level": lvl}),
                 on_status=lambda src, st: self._emit("status", {"source": src, "status": st}),
-                manual_mode=manual_mode,
+                manual_mode=False,
             )
-            if not manual_mode:
-                self._monitor_capture.start()
 
-        # Register global hotkey
         if cfg.global_hotkey:
             self.register_global_hotkey(cfg.global_hotkey)
 
+        # Open chat popup immediately
+        self._open_chat_popup()
+
     def start_recording(self):
-        """Manual mode: start capturing audio."""
-        log.info("[Manual] Start recording")
+        """Start capturing audio."""
+        log.info("[REC] Start recording")
         if self._mic_capture:
             self._mic_capture.start()
         if self._monitor_capture:
             self._monitor_capture.start()
 
-    def _flush_auto_and_chat(self):
-        """Auto mode: flush remaining audio, transcribe, then open chat."""
-        self._emit("auto_flushing", {})
-
-        def run():
-            # Flush remaining PCM from captures
-            import numpy as np
-            mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
-            mon_pcm = self._monitor_capture.flush_pcm() if self._monitor_capture else None
-
-            if mic_pcm is not None or mon_pcm is not None:
-                if mic_pcm is not None and mon_pcm is not None:
-                    max_len = max(len(mic_pcm), len(mon_pcm))
-                    mic_f = np.zeros(max_len, dtype=np.float32)
-                    mon_f = np.zeros(max_len, dtype=np.float32)
-                    mic_f[:len(mic_pcm)] = mic_pcm.astype(np.float32)
-                    mon_f[:len(mon_pcm)] = mon_pcm.astype(np.float32)
-                    mixed = np.clip(mic_f + mon_f, -32768, 32767).astype(np.int16)
-                else:
-                    mixed = mic_pcm if mic_pcm is not None else mon_pcm
-
-                from .audio.wav import pcm_to_wav
-                wav = pcm_to_wav(mixed, 16000)
-                log.info(f"[AUTO] Flushing remaining {len(mixed)/16000:.1f}s")
-                self._process_auto_chunk(wav)
-
-            log.info(f"[AUTO] Total transcript: {len(self._transcript)} entries")
-            self._emit("auto_ready", {"entries": len(self._transcript)})
-
-            if self._suggestion_mode:
-                # Suggestion mode: generate suggestions directly
-                self._generate_auto_suggestions()
-            else:
-                # Copilot mode: open chat popup
-                self._open_chat_popup()
-
-        threading.Thread(target=run, daemon=True).start()
-
     def stop_recording(self):
-        """Manual mode: stop capturing, hold audio for submit."""
-        log.info("[Manual] Stop recording")
-        mic_pcm = None
-        mon_pcm = None
+        """Stop capturing, flush remaining audio, transcribe it."""
+        log.info("[REC] Stop recording")
+        # Flush BEFORE stopping (stop clears the thread)
+        mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
+        mon_pcm = self._monitor_capture.flush_pcm() if self._monitor_capture else None
+
         if self._mic_capture:
-            mic_pcm = self._mic_capture.flush_pcm()
             self._mic_capture.stop()
         if self._monitor_capture:
-            mon_pcm = self._monitor_capture.flush_pcm()
             self._monitor_capture.stop()
 
+        self._emit("recording_stopped", {"had_audio": mic_pcm is not None or mon_pcm is not None})
+
         if mic_pcm is None and mon_pcm is None:
-            log.info("[Manual] No audio captured")
-            self._pending_wav = None
-            self._emit("recording_stopped", {"had_audio": False})
             return
 
         if mic_pcm is not None and mon_pcm is not None:
@@ -404,10 +350,9 @@ class Api:
             mixed = mic_pcm if mic_pcm is not None else mon_pcm
 
         from .audio.wav import pcm_to_wav
-        self._pending_wav = pcm_to_wav(mixed, 16000)
-        log.info(f"[Manual] Audio ready: {len(mixed)} samples ({len(mixed)/16000:.1f}s)")
-        self._emit("recording_stopped", {"had_audio": True})
-        self._open_chat_popup()  # reopen if user closed it
+        wav = pcm_to_wav(mixed, 16000)
+        log.info(f"[REC] Flushing remaining {len(mixed)/16000:.1f}s")
+        threading.Thread(target=self._process_auto_chunk, args=(wav,), daemon=True).start()
 
     APP_FORMAT_SUGGESTION = (
         "\nFORMATO DE RESPOSTA (obrigatório, sem exceção):\n"
@@ -451,19 +396,10 @@ class Api:
                 try:
                     context = self._build_full_context()
                     system = self._raw_system_prompt or "Você é um copiloto de reuniões."
-                    log.info(f"[Chat] Thread started. context={len(context)} chars, mode={self._suggestion_mode}")
-                    if self._suggestion_mode:
-                        max_tok = 256 if self._suggestion_mode == "short" else 1024
-                        n = 3 if self._suggestion_mode == "short" else 10
-                        fmt = self.APP_FORMAT_SUGGESTION
-                        user_msg = f"Contexto da conversa:\n{context}\n\nDê {n} sugestões para {self._suggestions_target}.\n{fmt}"
-                        if user_instruction:
-                            user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {user_instruction}\n{fmt}"
-                    else:
-                        max_tok = 512
-                        copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação. Seja breve."
-                        user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}{copilot_fmt}"
-                    log.info(f"[Chat] mode={self._suggestion_mode} max_tok={max_tok}")
+                    max_tok = 512
+                    copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação. Seja breve."
+                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}{copilot_fmt}"
+                    log.info(f"[Chat] context={len(context)} chars, max_tok={max_tok}")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
                     log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")
@@ -474,14 +410,11 @@ class Api:
             threading.Thread(target=chat_only, daemon=True).start()
             return
 
-        log.info(f"[Manual] Submit with instruction: '{user_instruction[:80]}'")
+        # Has pending WAV from manual stop — should not happen in new flow
+        log.info(f"[Submit] Unexpected wav, processing...")
         self._emit("submit_started", {})
         self._pending_instruction = user_instruction
-
-        def run():
-            self._process_monitor_chunk(wav)
-
-        threading.Thread(target=run, daemon=True).start()
+        threading.Thread(target=self._process_monitor_chunk, args=(wav,), daemon=True).start()
 
     def _on_mic_chunk(self, wav_bytes: bytes, source: str):
         """Process mic chunk."""
@@ -556,10 +489,6 @@ class Api:
                                 if txt:
                                     self._emit_transcript(sp, txt)
                             log.info(f"[AUTO] {len(entries)} entradas | Groq={groq_time:.2f}s Bedrock={bedrock_time:.2f}s Total={_time.time()-t0:.2f}s")
-                            
-                            # In suggestion mode, also generate suggestions
-                            if self._suggestion_mode and entries:
-                                self._generate_auto_suggestions()
                             return
                         except json.JSONDecodeError:
                             start = None
@@ -573,26 +502,6 @@ class Api:
 
         except Exception as e:
             log.error(f"[AUTO] Error: {e}", exc_info=True)
-
-    def _generate_auto_suggestions(self):
-        """Generate suggestions automatically after each auto chunk (suggestion mode only)."""
-        import time as _time
-        context = self._build_context()
-        if not context or not self._bedrock:
-            return
-        system = self._raw_system_prompt or "Você é um copiloto de reuniões."
-        n = 3 if self._suggestion_mode == "short" else 10
-        max_tok = 256 if self._suggestion_mode == "short" else 1024
-        user_msg = f"Contexto da conversa:\n{context}\n\nDê {n} sugestões para {self._suggestions_target}.\n{self.APP_FORMAT_SUGGESTION}"
-
-        t = _time.time()
-        try:
-            result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
-            result = self._clean_md(result)
-            log.info(f"[AUTO-SUG] {len(result)} chars em {_time.time()-t:.2f}s")
-            self._emit("copilot_response", {"response": result, "had_instruction": False})
-        except Exception as e:
-            log.error(f"[AUTO-SUG] Error: {e}")
 
     def _process_monitor_chunk(self, wav_bytes: bytes):
         import time

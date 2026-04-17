@@ -123,26 +123,26 @@ class AudioCapture:
                 if self.on_status:
                     self.on_status(self.source_type, "silent")
 
-        # In manual mode, just accumulate — flush() sends it
-        if self.manual_mode:
+        # Always accumulate in shared buffer for flush_pcm
+        with self._buf_lock:
+            if not self._pcm_buf:
+                self._buf_start_ts = time.time()
+            self._pcm_buf.extend(pcm_buf)
+        pcm_buf.clear()
+
+        # In non-manual mode, send chunk when enough samples
+        if not self.manual_mode:
             with self._buf_lock:
-                if not self._pcm_buf:
-                    self._buf_start_ts = time.time()
-                self._pcm_buf.extend(pcm_buf)
-            pcm_buf.clear()
-            return
+                if len(self._pcm_buf) >= self.chunk_samples:
+                    chunk = np.array(self._pcm_buf[:self.chunk_samples], dtype=np.int16)
+                    del self._pcm_buf[:self.chunk_samples]
 
-        if len(pcm_buf) >= self.chunk_samples:
-            chunk = np.array(pcm_buf[:self.chunk_samples], dtype=np.int16)
-            del pcm_buf[:self.chunk_samples]
+                    chunk_rms = float(np.sqrt(np.mean((chunk.astype(np.float32) / 32768.0) ** 2)))
+                    if chunk_rms < SILENCE_THRESHOLD:
+                        return
 
-            # Skip silent chunks
-            chunk_rms = float(np.sqrt(np.mean((chunk.astype(np.float32) / 32768.0) ** 2)))
-            if chunk_rms < SILENCE_THRESHOLD:
-                return
-
-            wav_bytes = pcm_to_wav(chunk, SAMPLE_RATE)
-            self.on_chunk(wav_bytes, self.source_type)
+                    wav_bytes = pcm_to_wav(chunk, SAMPLE_RATE)
+                    self.on_chunk(wav_bytes, self.source_type)
 
     def _capture_parec(self):
         """Capture from PulseAudio/PipeWire device using parec or pw-cat."""
