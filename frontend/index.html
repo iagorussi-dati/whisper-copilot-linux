@@ -226,7 +226,7 @@ function renderSetup() {
       ${[
         {id:'short', label:'⚡ Curta', desc:'~1s', detail:'Até 2 frases'},
         {id:'full', label:'💬 Normal', desc:'~2s', detail:'Até 4 frases'},
-        {id:'research', label:'🔍 Detalhada', desc:'~5s', detail:'Até 3 parágrafos'}
+        {id:'research', label:'🔍 Detalhada', desc:'~5s', detail:'Pesquisa web + análise'}
       ].map(m => `
         <button data-action="setResponseMode" data-val="${m.id}" class="flex-1 py-2 px-2 rounded border transition-colors ${c.response_mode === m.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
           <div class="text-xs font-medium">${m.label}</div>

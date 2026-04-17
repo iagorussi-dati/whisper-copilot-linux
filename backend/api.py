@@ -590,9 +590,9 @@ class Api:
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 150, "hint": "Seja breve.", "fmt": "\nSem markdown, sem títulos."},
-                "full": {"max_tok": 300, "hint": "", "fmt": "\nSem markdown, sem títulos."},
-                "research": {"max_tok": 600, "hint": "", "fmt": "\nSem markdown. Parágrafos curtos."},
+                "short": {"max_tok": 150, "hint": "Seja breve.", "fmt": "\nSem markdown, sem títulos.", "search": False},
+                "full": {"max_tok": 300, "hint": "", "fmt": "\nSem markdown, sem títulos.", "search": False},
+                "research": {"max_tok": 600, "hint": "", "fmt": "\nSem markdown. Parágrafos curtos.", "search": True},
             }
 
             def chat_only():
@@ -605,7 +605,24 @@ class Api:
                     hint = mode["hint"] if not user_instruction else ""
                     copilot_fmt = mode["fmt"]
                     no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto." if "[Copiloto respondeu]" in context else ""
-                    user_msg = f"{participants}\n\nContexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
+
+                    # Web search for research mode
+                    search_context = ""
+                    if mode["search"]:
+                        from .search import web_search
+                        last_transcript = " ".join(e['text'] for e in self._transcript[-5:])
+                        # Use instruction as query, or build from transcript
+                        if user_instruction:
+                            search_query = f'{user_instruction} "{last_transcript[:80]}"'
+                        else:
+                            search_query = f'"{last_transcript[:80]}"'
+                        if search_query:
+                            log.info(f"[Chat] Web search: '{search_query[:60]}'")
+                            search_results = web_search(search_query, max_results=5)
+                            search_context = f"\n\nResultados da pesquisa web:\n{search_results}"
+                            log.info(f"[Chat] Search results: {len(search_results)} chars")
+
+                    user_msg = f"{participants}\n\nContexto da conversa:\n{context}{search_context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
