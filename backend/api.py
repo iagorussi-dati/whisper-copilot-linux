@@ -17,6 +17,7 @@ from .transcription import GroqClient, GroqError
 from .diarization import VoiceBank, extract_embedding
 from .llm import BedrockClient
 from .config import AppConfig, Participant, load_config, save_config
+from .platform import get_platform, register_global_hotkey, unregister_global_hotkey, focus_popup_window
 
 load_dotenv()
 log = logging.getLogger("whisper-copilot")
@@ -78,32 +79,19 @@ class Api:
         threading.Thread(target=watch, daemon=True).start()
 
     def register_global_hotkey(self, key: str):
-        """Register SUPER+key as global hotkey via hyprctl."""
+        """Register global hotkey via platform-specific method."""
         self.unregister_global_hotkey()
         if not key:
             return
         self._hotkey_key = key
-        import subprocess
         toggle_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "whisper-toggle.sh")
-        cmd = f"SUPER,{key},exec,{toggle_script}"
-        try:
-            subprocess.run(["hyprctl", "keyword", "bind", cmd],
-                           capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Registered SUPER+{key}")
-        except Exception as e:
-            log.error(f"[Hotkey] Failed to register: {e}")
+        register_global_hotkey(key, toggle_script)
 
     def unregister_global_hotkey(self):
-        """Remove global hotkey bind."""
+        """Remove global hotkey."""
         if not self._hotkey_key:
             return
-        import subprocess
-        try:
-            subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
-                           capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Unregistered SUPER+{self._hotkey_key}")
-        except Exception:
-            pass
+        unregister_global_hotkey(self._hotkey_key)
         self._hotkey_key = ""
 
     def toggle_recording(self):
@@ -398,21 +386,8 @@ class Api:
 
 
     def _focus_popup(self):
-        """Focus the popup window via hyprctl (Wayland/Hyprland)."""
-        if not self._chat_window:
-            return
-        try:
-            import subprocess, json as _json
-            r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
-            clients = _json.loads(r.stdout)
-            our_windows = [c for c in clients if "main.py" in c.get("class", "")]
-            if len(our_windows) > 1:
-                popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
-                subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
-                               capture_output=True, timeout=2)
-                log.info(f"[FOCUS] Focused popup: {popup['address']}")
-        except Exception as e:
-            log.debug(f"[FOCUS] Failed: {e}")
+        """Focus the popup window via platform-specific method."""
+        focus_popup_window()
 
     def _emit_to_popup(self, event, data):
         """Send event only to popup window."""
