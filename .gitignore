@@ -7,3 +7,8 @@ build/
 .venv/
 venv/
 pretrained_models/
+
+.kiro/
+.qdrant-initialized
+.vscode/
+test_onset.py
