@@ -35,6 +35,7 @@ class AppConfig:
     custom_system_prompt: str = ""  # system prompt customizado para sugestões
     global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
     response_mode: str = "short"  # "short", "full", "research"
+    auto_response: bool = True  # True = responde sozinho, False = espera instrução
 
     def to_dict(self) -> dict:
         d = asdict(self)

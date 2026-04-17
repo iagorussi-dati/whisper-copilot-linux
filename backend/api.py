@@ -284,6 +284,7 @@ class Api:
         self._raw_system_prompt = cfg.custom_system_prompt or ""
         self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
         self._response_mode = cfg.response_mode or "short"
+        self._auto_response = cfg.auto_response
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
@@ -291,6 +292,7 @@ class Api:
 
         log.info(f"[START] === MEETING STARTED ===")
         log.info(f"[START] response_mode={self._response_mode}")
+        log.info(f"[START] auto_response={self._auto_response}")
         log.info(f"[START] target={self._suggestions_target}")
         log.info(f"[START] system_prompt={len(self._raw_system_prompt)} chars: {self._raw_system_prompt[:80]}")
         log.info(f"[START] participants={self._participants_context[:100]}")
@@ -363,7 +365,14 @@ class Api:
         from .audio.wav import pcm_to_wav
         wav = pcm_to_wav(mixed, 16000)
         log.info(f"[REC] Flushing remaining {len(mixed)/16000:.1f}s")
-        threading.Thread(target=self._process_auto_chunk, args=(wav,), daemon=True).start()
+
+        def flush_and_respond():
+            self._process_auto_chunk(wav)
+            if self._auto_response:
+                log.info("[REC] Auto-response: generating response...")
+                self.submit_recording('')
+
+        threading.Thread(target=flush_and_respond, daemon=True).start()
 
     APP_FORMAT_SUGGESTION = (
         "\nFORMATO DE RESPOSTA (obrigatório, sem exceção):\n"
@@ -417,7 +426,8 @@ class Api:
                     max_tok = mode["max_tok"]
                     hint = mode["hint"] if not user_instruction else ""
                     copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação."
-                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}"
+                    no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto. Foque no que é novo."
+                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
@@ -757,17 +767,26 @@ class Api:
         transcript = list(self._transcript)
         suggestions = list(self._suggestions)
 
-        # Generate summary
-        full_text = "\n".join(f"[{e['speaker']}] {e['text']}" for e in transcript)
-        summary = ""
-        if self._bedrock:
-            try:
-                summary = self._bedrock.generate_summary(full_text, suggestions)
-            except Exception as e:
-                summary = f"Erro ao gerar resumo: {e}"
-
         self._voice_bank = VoiceBank(0.30)
         self._start_time = None
+
+        return {"transcript": transcript, "suggestions": suggestions, "summary": ""}
+
+    def generate_final_report(self, user_instruction: str = "") -> str:
+        """Generate a final MD report based on user instruction."""
+        context = self._build_full_context()
+        system = self._raw_system_prompt or "Você é um copiloto de reuniões."
+        instruction = user_instruction or "Gere um resumo completo da reunião."
+        user_msg = f"Contexto completo da reunião:\n{context}\n\nInstrução: {instruction}\nGere um relatório em formato Markdown bem estruturado."
+
+        log.info(f"[Report] Generating with instruction: {instruction[:80]}")
+        try:
+            result = self._bedrock.call_raw(system, user_msg, max_tokens=4096)
+            log.info(f"[Report] Done: {len(result)} chars")
+            return result
+        except Exception as e:
+            log.error(f"[Report] Error: {e}")
+            return f"Erro ao gerar relatório: {e}"
 
         return {"transcript": transcript, "suggestions": suggestions, "summary": summary}
 

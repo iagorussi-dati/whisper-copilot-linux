@@ -45,7 +45,7 @@ const state = {
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
-    response_mode: 'short',
+    response_mode: 'short', auto_response: true,
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -170,8 +170,21 @@ function renderSetup() {
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
 
+    <!-- Auto vs instruction -->
+    <label class="text-xs text-slate-400">Modo do copiloto</label>
+    <div class="flex gap-2 mt-1 mb-4">
+      <button data-action="setAutoResponse" data-val="true" class="flex-1 py-2 px-2 rounded border transition-colors ${c.auto_response ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        <div class="text-xs font-medium">🤖 Automático</div>
+        <div class="text-xs text-slate-500">Responde sozinho ao parar</div>
+      </button>
+      <button data-action="setAutoResponse" data-val="false" class="flex-1 py-2 px-2 rounded border transition-colors ${!c.auto_response ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        <div class="text-xs font-medium">💬 Com instrução</div>
+        <div class="text-xs text-slate-500">Espera você digitar</div>
+      </button>
+    </div>
+
     <!-- Response mode -->
-    <label class="text-xs text-slate-400">Tipo de resposta do copiloto</label>
+    <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
       ${[
         {id:'short', label:'⚡ Curta', desc:'~2s', detail:'3 sugestões rápidas'},
@@ -326,20 +339,29 @@ function renderMeeting() {
 // ── SUMMARY PAGE ──
 function renderSummary() {
   return `
-    <h1 class="text-2xl font-bold mb-4">Resumo da Reunião</h1>
-    ${state.summaryLoading ? `
-      <div class="flex items-center gap-2 text-slate-400 mb-4">
-        <span class="pulse">⏳</span> Gerando resumo...
-      </div>
-    ` : `
-      <div class="bg-slate-800/30 rounded-lg p-6 mb-4 markdown-body" id="summary-content">
-        ${marked.parse(state.summary || 'Nenhum resumo disponível.')}
-      </div>
-    `}
-    <div class="flex gap-3">
-      <button data-action="copySummary" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">📋 Copiar</button>
-      <button data-action="newMeeting" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-medium transition-colors">Nova Reunião</button>
+    <h1 class="text-2xl font-bold mb-4">Finalizar Reunião</h1>
+    <p class="text-sm text-slate-400 mb-4">Transcrição: ${state.transcript.length} entradas. O que deseja fazer com a reunião?</p>
+    
+    <div class="mb-4">
+      <textarea id="reportInstruction" rows="3" placeholder="Ex: Gere um resumo executivo, liste os action items, faça uma ata..."
+        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y"></textarea>
     </div>
+    
+    <button data-action="generateReport" class="w-full py-2 bg-violet-600 hover:bg-violet-500 rounded text-sm font-medium transition-colors mb-4">
+      ${state.summaryLoading ? '⏳ Gerando...' : '📄 Gerar Relatório'}
+    </button>
+
+    ${state.summary ? `
+      <div class="bg-slate-800/30 rounded-lg p-6 mb-4 markdown-body" id="summary-content">
+        ${marked.parse(state.summary)}
+      </div>
+      <div class="flex gap-3 mb-4">
+        <button data-action="copySummary" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">📋 Copiar</button>
+        <button data-action="saveSummary" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">💾 Salvar .md</button>
+      </div>
+    ` : ''}
+
+    <button data-action="newMeeting" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-medium transition-colors">Nova Reunião</button>
   `;
 }
 
@@ -499,6 +521,10 @@ function bindEvents() {
           state.config.response_mode = el.dataset.val;
           render();
           break;
+        case 'setAutoResponse':
+          state.config.auto_response = el.dataset.val === 'true';
+          render();
+          break;
         case 'triggerTranscription':
           if (!state.isProcessing) {
             state.isProcessing = true;
@@ -518,15 +544,37 @@ function bindEvents() {
           break;
         case 'stopMeeting':
           stopTimer();
-          const result = await callApi('stop_meeting');
-          state.summary = result?.summary || '';
+          await callApi('stop_meeting');
+          state.summary = '';
           state.summaryLoading = false;
           state.page = 'summary';
           render();
           break;
+        case 'generateReport': {
+          const instruction = document.getElementById('reportInstruction')?.value || '';
+          state.summaryLoading = true;
+          render();
+          try {
+            const report = await callApi('generate_final_report', instruction);
+            state.summary = report || '';
+          } catch(e) { state.summary = 'Erro: ' + e; }
+          state.summaryLoading = false;
+          render();
+          break;
+        }
         case 'copySummary':
           navigator.clipboard.writeText(state.summary);
           break;
+        case 'saveSummary': {
+          const blob = new Blob([state.summary], {type: 'text/markdown'});
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = 'reuniao-' + new Date().toISOString().slice(0,10) + '.md';
+          a.click();
+          URL.revokeObjectURL(url);
+          break;
+        }
         case 'newMeeting':
           state.page = 'setup';
           state.transcript = [];
