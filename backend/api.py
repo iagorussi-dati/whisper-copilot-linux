@@ -440,7 +440,14 @@ class Api:
         text = re.sub(r'^-\s+', '', text, flags=re.MULTILINE)    # - list items
         text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE) # 1. numbered
         text = re.sub(r'`([^`]+)`', r'\1', text)                 # `code`
-        text = re.sub(r'\n{3,}', '\n\n', text)                   # excess newlines
+        # Remove title-like first line (no punctuation, followed by blank line)
+        lines = text.strip().split('\n')
+        if len(lines) >= 2 and lines[1].strip() == '':
+            first = lines[0].strip()
+            if first and first[-1] not in '.,;:!?' and len(first) < 80:
+                lines = lines[2:]
+        text = '\n'.join(lines)
+        text = re.sub(r'\n{3,}', '\n\n', text)
         return text.strip()
 
     def submit_recording(self, user_instruction: str = ""):
@@ -469,13 +476,14 @@ class Api:
             def chat_only():
                 try:
                     context = self._build_full_context()
+                    participants = self._participants_context
                     system = self._raw_system_prompt or "Você é um copiloto de reuniões."
                     mode = RESPONSE_MODES.get(self._response_mode, RESPONSE_MODES["short"])
                     max_tok = mode["max_tok"]
                     hint = mode["hint"] if not user_instruction else ""
-                    copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação."
+                    copilot_fmt = "\nVá direto ao ponto. Sem títulos, sem saudações, sem introduções. Texto corrido."
                     no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto. Foque no que é novo."
-                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
+                    user_msg = f"{participants}\n\nContexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
