@@ -142,27 +142,47 @@ class Api:
         return self.APP_FORMAT_SUGGESTION
 
     def _open_chat_popup(self):
-        """Open a floating chat window (reuse if already open)."""
+        """Open chat as sidebar on the right."""
         import webview
-        # Check if window still exists
         if self._chat_window:
             try:
-                # Test if window is still alive by checking its property
                 _ = self._chat_window.title
-                return  # still open
+                return
             except Exception:
                 self._chat_window = None
+
+        # Hyprland: set sidebar rules before creating window
+        p = get_platform()
+        if p["hyprland"]:
+            import subprocess
+            try:
+                import json as _json
+                r = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
+                mon = _json.loads(r.stdout)[0]
+                w = int(mon["width"] / mon["scale"])
+                h = int(mon["height"] / mon["scale"])
+                sw = 420
+                for rule in [
+                    f"float,class:main.py,title:Whisper Chat",
+                    f"size {sw} {h},class:main.py,title:Whisper Chat",
+                    f"move {w - sw} 0,class:main.py,title:Whisper Chat",
+                    f"pin,class:main.py,title:Whisper Chat",
+                ]:
+                    subprocess.run(["hyprctl", "keyword", "windowrulev2", rule], capture_output=True, timeout=2)
+                log.info(f"[POPUP] Sidebar rules: {sw}x{h} at x={w - sw}")
+            except Exception as e:
+                log.debug(f"[POPUP] Sidebar rules failed: {e}")
+
         chat_html = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "chat-popup.html")
         self._chat_window = webview.create_window(
             "Whisper Chat",
             url=chat_html,
             js_api=self,
-            width=500,
-            height=400,
+            width=420,
+            height=1080,
             on_top=True,
             background_color="#0f172a",
         )
-        # Clear reference when user closes the window
         self._chat_window_ready = False
         def on_loaded():
             self._chat_window_ready = True

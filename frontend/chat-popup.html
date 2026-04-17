@@ -50,6 +50,8 @@
   const btn = document.getElementById('send-btn');
   let isRecording = false;
   let hasTranscript = false;
+  let transcriptionDone = false;
+  let pendingSend = null;
 
   function addMsg(cls, html) {
     const div = document.createElement('div');
@@ -111,6 +113,7 @@
       case 'recording_state':
         isRecording = data.recording;
         if (data.recording) {
+          transcriptionDone = false;
           setStatus('status-recording', '🔴 <span class="pulse">Gravando...</span>');
           disableInput();
         } else {
@@ -118,8 +121,9 @@
         }
         break;
       case 'recording_stopped':
-        // Don't enable input yet — wait for transcription to finish
-        // The focus_input event will enable it after transcription + hyprctl focus
+        // Enable input immediately so user can type while transcription happens
+        setStatus('status-ready', '⏳ Transcrevendo... digite sua instrução');
+        enableInput('Instrução (Enter envia após transcrição)');
         break;
       case 'transcript':
         hasTranscript = true;
@@ -142,6 +146,20 @@
   async function send() {
     const msg = input.value.trim();
     input.value = '';
+
+    if (!transcriptionDone) {
+      // Queue it — will send after transcription finishes
+      pendingSend = msg;
+      if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
+      setStatus('status-thinking', '⏳ <span class="pulse">Aguardando transcrição...</span>');
+      disableInput();
+      return;
+    }
+
+    doSend(msg);
+  }
+
+  async function doSend(msg) {
     disableInput();
     if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
     setStatus('status-thinking', '⏳ <span class="pulse">Copiloto pensando...</span>');
@@ -174,9 +192,14 @@
   });
 
   window.addEventListener('backend:focus_input', () => {
-    console.log('[POPUP] focus_input received');
-    setStatus('status-ready', '✅ Transcrição pronta — digite instrução ou aperte Enter');
-    enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
+    transcriptionDone = true;
+    setStatus('status-ready', '✅ Transcrição pronta');
+    // If user already typed and pressed Enter, send now
+    if (pendingSend !== null) {
+      const msg = pendingSend;
+      pendingSend = null;
+      doSend(msg);
+    }
   });
 
   // Init
