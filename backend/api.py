@@ -502,16 +502,19 @@ class Api:
 
             addr = chat["address"]
             r2 = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
-            mon = _json.loads(r2.stdout)[0]
+            monitors = _json.loads(r2.stdout)
+            mon = next((m for m in monitors if m.get("focused")), monitors[0])
+            mx, my = mon.get("x", 0), mon.get("y", 0)
             mw = int(mon["width"] / mon["scale"])
             mh = int(mon["height"] / mon["scale"])
             sw = 420
+            x = mx + mw - sw
             subprocess.run(["hyprctl", "dispatch", f"setfloating address:{addr}"], capture_output=True, timeout=2)
             time.sleep(0.1)
             subprocess.run(["hyprctl", "dispatch", f"resizewindowpixel exact {sw} {mh},address:{addr}"], capture_output=True, timeout=2)
-            subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {mw - sw} 0,address:{addr}"], capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {x} {my},address:{addr}"], capture_output=True, timeout=2)
             subprocess.run(["hyprctl", "dispatch", f"pin address:{addr}"], capture_output=True, timeout=2)
-            log.info(f"[SIDEBAR] Positioned: {sw}x{mh} at x={mw - sw} addr={addr}")
+            log.info(f"[SIDEBAR] {sw}x{mh} at ({x},{my}) monitor={mon['name']} addr={addr}")
 
         threading.Thread(target=do_position, daemon=True).start()
 
