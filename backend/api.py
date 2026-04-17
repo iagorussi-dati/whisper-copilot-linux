@@ -542,6 +542,8 @@ class Api:
             earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
 
             system = ("Você identifica quem fala em reuniões. "
+                      "Se alguém é chamado pelo nome na conversa, use esse nome como speaker. "
+                      "Se não souber o nome, use Pessoa 1, Pessoa 2, etc mantendo consistência. "
                       "Responda SOMENTE JSON puro: {\"transcript\": [{\"speaker\": \"Nome\", \"text\": \"fala\"}]}")
             user_msg = (
                 f"{participants_str}{earlier_block}\n"
