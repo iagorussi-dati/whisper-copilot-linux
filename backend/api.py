@@ -239,6 +239,9 @@ class Api:
         import pathlib
         base = pathlib.Path(__file__).parent.parent
         paths = {
+            "sugestoes": base / "prompts" / "sugestoes.md",
+            "assistente": base / "prompts" / "assistente-objetivo.md",
+            "pesquisa": base / "prompts" / "pesquisa.md",
             "discovery": base / "Prompt_Modelo.md",
             "tecnico": base / "prompts" / "consultor-tecnico.md",
             "piadas": base / "prompts" / "piadas.md",
@@ -288,7 +291,9 @@ class Api:
         self._my_label = cfg.my_name or "EU"
         self._suggestions_target = cfg.suggestions_target or self._my_label
         self._raw_system_prompt = cfg.custom_system_prompt or ""
-        self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
+        if cfg.extra_context:
+            self._raw_system_prompt += f"\n\nContexto adicional do usuário:\n{cfg.extra_context}"
+        self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
         self._response_mode = cfg.response_mode or "short"
         self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
         self._transcript = []

@@ -45,7 +45,7 @@ const state = {
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
-    response_mode: 'short', auto_response: true,
+    response_mode: 'short', auto_response: true, extra_context: '',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -154,6 +154,9 @@ function renderSetup() {
       <select data-action="selectTemplate"
         class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
         <option value="">Selecione um template...</option>
+        <option value="sugestoes">📋 Sugestões (ações concretas)</option>
+        <option value="assistente">⚡ Assistente Objetivo (respostas diretas)</option>
+        <option value="pesquisa">🔍 Pesquisa (análise profunda)</option>
         <option value="discovery">📋 Discovery Comercial (Dati)</option>
         <option value="tecnico">🔧 Consultor Técnico AWS</option>
         <option value="piadas">🎭 Piadas e Humor</option>
@@ -163,9 +166,14 @@ function renderSetup() {
     </div>
     <input type="file" data-action="loadPromptFile" accept=".md,.txt,.markdown"
       class="text-xs text-slate-400 mb-2" style="display:none" id="promptFileInput" />
-    <textarea data-bind="custom_system_prompt" rows="6" placeholder="Ex: Você é um copiloto de vendas. Sugira técnicas de fechamento quando o cliente demonstrar interesse..."
+    <textarea data-bind="custom_system_prompt" rows="4" placeholder="Selecione um template acima ou escreva seu próprio..."
       class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.custom_system_prompt}</textarea>
-    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ System prompt carregado (${c.custom_system_prompt.length} chars)</p>` : ''}
+    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ Prompt carregado (${c.custom_system_prompt.length} chars)</p>` : ''}
+    
+    <label class="text-xs text-slate-400 mt-3 block">Contexto adicional (opcional)</label>
+    <textarea data-bind="extra_context" rows="2" placeholder="Ex: Sou o tech lead da equipe. Quero foco em decisões técnicas..."
+      class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
+    <p class="text-xs text-slate-500 mt-1">Informações extras que o copiloto deve considerar.</p>
 
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
