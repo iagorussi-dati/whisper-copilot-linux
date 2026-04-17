@@ -68,9 +68,14 @@ class Api:
                 try:
                     p = pathlib.Path(self.HOTKEY_FILE)
                     if p.exists():
+                        cmd = p.read_text().strip()
                         p.unlink(missing_ok=True)
-                        log.info("[Hotkey] Global toggle received")
-                        self.toggle_recording()
+                        if cmd == "snapshot":
+                            log.info("[Hotkey] Snapshot received")
+                            self.snapshot()
+                        else:
+                            log.info("[Hotkey] Global toggle received")
+                            self.toggle_recording()
                 except Exception as e:
                     log.error(f"[Hotkey] Error: {e}")
                 self._hotkey_stop.wait(0.2)
@@ -78,32 +83,36 @@ class Api:
         threading.Thread(target=watch, daemon=True).start()
 
     def register_global_hotkey(self, key: str):
-        """Register SUPER+key as global hotkey via hyprctl."""
+        """Register SUPER+key for toggle and SUPER+S for snapshot."""
         self.unregister_global_hotkey()
         if not key:
             return
         self._hotkey_key = key
         import subprocess
-        toggle_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "whisper-toggle.sh")
-        cmd = f"SUPER,{key},exec,{toggle_script}"
+        base = os.path.dirname(os.path.abspath(__file__))
+        toggle_script = os.path.join(base, "..", "whisper-toggle.sh")
+        snapshot_script = os.path.join(base, "..", "whisper-snapshot.sh")
         try:
-            subprocess.run(["hyprctl", "keyword", "bind", cmd],
+            subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{key},exec,{toggle_script}"],
                            capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Registered SUPER+{key}")
+            subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,S,exec,{snapshot_script}"],
+                           capture_output=True, timeout=3)
+            log.info(f"[Hotkey] Registered SUPER+{key} (toggle) + SUPER+S (snapshot)")
         except Exception as e:
-            log.error(f"[Hotkey] Failed to register: {e}")
+            log.error(f"[Hotkey] Failed: {e}")
 
     def unregister_global_hotkey(self):
-        """Remove global hotkey bind."""
-        if not self._hotkey_key:
-            return
+        """Remove global hotkey binds."""
         import subprocess
-        try:
-            subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
-                           capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Unregistered SUPER+{self._hotkey_key}")
-        except Exception:
-            pass
+        if self._hotkey_key:
+            try:
+                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
+                               capture_output=True, timeout=3)
+                subprocess.run(["hyprctl", "keyword", "unbind", "SUPER,S"],
+                               capture_output=True, timeout=3)
+                log.info(f"[Hotkey] Unregistered SUPER+{self._hotkey_key} + SUPER+S")
+            except Exception:
+                pass
         self._hotkey_key = ""
 
     def toggle_recording(self):
@@ -118,6 +127,46 @@ class Api:
             self._recording = True
             self._emit("recording_state", {"recording": True})
             self.start_recording()
+
+    def snapshot(self):
+        """Transcribe what's recorded so far WITHOUT stopping. Recording continues."""
+        if not self._start_time or not self._recording:
+            return
+        log.info("[SNAPSHOT] Flushing current audio (recording continues)...")
+        self._emit("snapshot_started", {})
+
+        mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
+        mon_pcm = self._monitor_capture.flush_pcm() if self._monitor_capture else None
+
+        if mic_pcm is None and mon_pcm is None:
+            log.info("[SNAPSHOT] No audio to flush")
+            return
+
+        if mic_pcm is not None and mon_pcm is not None:
+            max_len = max(len(mic_pcm), len(mon_pcm))
+            mic_f = np.zeros(max_len, dtype=np.float32)
+            mon_f = np.zeros(max_len, dtype=np.float32)
+            mic_f[:len(mic_pcm)] = mic_pcm.astype(np.float32)
+            mon_f[:len(mon_pcm)] = mon_pcm.astype(np.float32)
+            mixed = np.clip(mic_f + mon_f, -32768, 32767).astype(np.int16)
+        else:
+            mixed = mic_pcm if mic_pcm is not None else mon_pcm
+
+        from .audio.wav import pcm_to_wav
+        wav = pcm_to_wav(mixed, 16000)
+        log.info(f"[SNAPSHOT] {len(mixed)/16000:.1f}s of audio")
+
+        def process():
+            self._process_auto_chunk(wav)
+            log.info(f"[SNAPSHOT] Done. Transcript: {len(self._transcript)} entries. Recording continues.")
+            if self._auto_response:
+                self.submit_recording('')
+            else:
+                self._focus_popup()
+                time.sleep(0.3)
+                self._emit_to_popup("focus_input", {})
+
+        threading.Thread(target=process, daemon=True).start()
 
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js (non-blocking)."""
@@ -152,8 +201,8 @@ class Api:
                 self._chat_window = None
 
         # Hyprland: set sidebar rules before creating window
-        p = get_platform()
-        if p["hyprland"]:
+        import shutil
+        if shutil.which("hyprctl"):
             import subprocess
             try:
                 import json as _json
