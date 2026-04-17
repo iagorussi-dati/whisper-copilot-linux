@@ -34,6 +34,7 @@ class AppConfig:
     suggestions_target: str = ""  # nome do participante que recebe as sugestões
     custom_system_prompt: str = ""  # system prompt customizado para sugestões
     global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
+    snapshot_hotkey: str = "D"  # tecla para SUPER+tecla snapshot
     response_mode: str = "short"  # "short", "full", "research"
     auto_response: bool = True  # True = responde sozinho, False = espera instrução
     many_context: str = ""  # contexto para modo 'muitas pessoas'

@@ -185,6 +185,12 @@
     disableInput();
   });
 
+  window.addEventListener('backend:snapshot_started', () => {
+    setStatus('status-ready', '📸 Snapshot — transcrevendo...');
+    transcriptionDone = false;
+    enableInput('Instrução (Enter envia após transcrição)');
+  });
+
   window.addEventListener('backend:session_reset', () => {
     msgs.innerHTML = '<div class="msg msg-system">Nova sessão. Copiloto pronto.</div>';
     hasTranscript = false;

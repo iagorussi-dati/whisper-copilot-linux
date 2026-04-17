@@ -83,7 +83,7 @@ class Api:
         threading.Thread(target=watch, daemon=True).start()
 
     def register_global_hotkey(self, key: str):
-        """Register SUPER+key for toggle and SUPER+S for snapshot."""
+        """Register SUPER+key for toggle and SUPER+snapshot_key for snapshot."""
         self.unregister_global_hotkey()
         if not key:
             return
@@ -95,9 +95,11 @@ class Api:
         try:
             subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{key},exec,{toggle_script}"],
                            capture_output=True, timeout=3)
-            subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,S,exec,{snapshot_script}"],
-                           capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Registered SUPER+{key} (toggle) + SUPER+S (snapshot)")
+            log.info(f"[Hotkey] Registered SUPER+{key} (toggle)")
+            if self._snapshot_key:
+                subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{self._snapshot_key},exec,{snapshot_script}"],
+                               capture_output=True, timeout=3)
+                log.info(f"[Hotkey] Registered SUPER+{self._snapshot_key} (snapshot)")
         except Exception as e:
             log.error(f"[Hotkey] Failed: {e}")
 
@@ -108,11 +110,15 @@ class Api:
             try:
                 subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
                                capture_output=True, timeout=3)
-                subprocess.run(["hyprctl", "keyword", "unbind", "SUPER,S"],
-                               capture_output=True, timeout=3)
-                log.info(f"[Hotkey] Unregistered SUPER+{self._hotkey_key} + SUPER+S")
             except Exception:
                 pass
+        if getattr(self, '_snapshot_key', ''):
+            try:
+                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._snapshot_key}"],
+                               capture_output=True, timeout=3)
+            except Exception:
+                pass
+        log.info(f"[Hotkey] Unregistered all")
         self._hotkey_key = ""
 
     def toggle_recording(self):
@@ -414,6 +420,7 @@ class Api:
                 manual_mode=False,
             )
 
+        self._snapshot_key = cfg.snapshot_hotkey or ""
         if cfg.global_hotkey:
             self.register_global_hotkey(cfg.global_hotkey)
 
