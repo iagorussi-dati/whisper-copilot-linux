@@ -169,33 +169,38 @@ function renderSetup() {
     `}
     ${c.suggestions_target ? `<p class="text-xs text-emerald-400 mt-2">🎯 Copiloto focado em: ${c.suggestions_target}</p>` : ''}
 
-    <!-- System Prompt -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">System Prompt (opcional)</h2>
-    <p class="text-xs text-slate-500 mb-2">Define o contexto e comportamento do copiloto. Selecione um template ou carregue um arquivo.</p>
+    <!-- Template do Copiloto -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Template</h2>
+    <p class="text-xs text-slate-500 mb-2">Define como o copiloto se comporta. Obrigatório.</p>
     <div class="flex gap-2 mb-2">
       <select data-action="selectTemplate"
         class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
         <option value="">Selecione um template...</option>
-        <option value="sugestoes">📋 Sugestões (ações concretas)</option>
-        <option value="assistente">⚡ Assistente Objetivo (respostas diretas)</option>
-        <option value="pesquisa">🔍 Pesquisa (análise profunda)</option>
-        <option value="discovery">📋 Discovery Comercial (Dati)</option>
-        <option value="tecnico">🔧 Consultor Técnico AWS</option>
-        <option value="piadas">🎭 Piadas e Humor</option>
-        <option value="vendas">💰 Copiloto de Vendas</option>
+        <optgroup label="Uso geral">
+          <option value="sugestoes">📋 Sugestões (ações com emojis)</option>
+          <option value="assistente">⚡ Assistente Objetivo (máx 3 frases)</option>
+          <option value="pesquisa">🔍 Pesquisa (análise profunda)</option>
+        </optgroup>
+        <optgroup label="Específicos">
+          <option value="discovery">📋 Discovery Comercial (Dati)</option>
+          <option value="tecnico">🔧 Consultor Técnico AWS</option>
+          <option value="vendas">💰 Copiloto de Vendas</option>
+          <option value="piadas">🎭 Piadas e Humor</option>
+        </optgroup>
         <option value="custom">📄 Carregar arquivo...</option>
       </select>
     </div>
     <input type="file" data-action="loadPromptFile" accept=".md,.txt,.markdown"
       class="text-xs text-slate-400 mb-2" style="display:none" id="promptFileInput" />
-    <textarea data-bind="custom_system_prompt" rows="4" placeholder="Selecione um template acima ou escreva seu próprio..."
-      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.custom_system_prompt}</textarea>
-    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ Prompt carregado (${c.custom_system_prompt.length} chars)</p>` : ''}
-    
-    <label class="text-xs text-slate-400 mt-3 block">Contexto adicional (opcional)</label>
-    <textarea data-bind="extra_context" rows="2" placeholder="Ex: Sou o tech lead da equipe. Quero foco em decisões técnicas..."
-      class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
-    <p class="text-xs text-slate-500 mt-1">Informações extras que o copiloto deve considerar.</p>
+    <textarea data-bind="custom_system_prompt" rows="3" placeholder="Selecione um template acima ou escreva seu próprio..."
+      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y text-xs">${c.custom_system_prompt}</textarea>
+    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ Template carregado</p>` : '<p class="text-xs text-amber-400 mt-1">⚠️ Selecione um template</p>'}
+
+    <!-- Instruções adicionais -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Instruções adicionais</h2>
+    <p class="text-xs text-slate-500 mb-2">Contexto extra que o copiloto deve considerar. Opcional.</p>
+    <textarea data-bind="extra_context" rows="2" placeholder="Ex: Estamos discutindo migração pra AWS. Foco em custos e prazos. O cliente é conservador..."
+      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
 
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
