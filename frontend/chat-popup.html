@@ -80,7 +80,11 @@
     input.disabled = false;
     btn.disabled = false;
     if (placeholder) input.placeholder = placeholder;
+    // Force focus with retries (pywebview GTK sometimes delays focus)
+    window.focus();
     input.focus();
+    setTimeout(() => { window.focus(); input.focus(); }, 100);
+    setTimeout(() => { window.focus(); input.focus(); }, 500);
   }
 
   function disableInput() {

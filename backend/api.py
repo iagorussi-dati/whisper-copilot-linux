@@ -369,6 +369,13 @@ class Api:
         def flush_and_respond():
             self._process_auto_chunk(wav)
             log.info(f"[REC] auto_response={self._auto_response}")
+            # Focus the chat popup window
+            if self._chat_window:
+                try:
+                    self._chat_window.show()
+                    self._chat_window.restore()
+                except Exception:
+                    pass
             if self._auto_response:
                 log.info("[REC] Auto-response: generating response...")
                 self.submit_recording('')
