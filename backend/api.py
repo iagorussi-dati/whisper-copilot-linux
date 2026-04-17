@@ -451,6 +451,20 @@ class Api:
     )
 
     @staticmethod
+    def _trim_to_sentence(text: str) -> str:
+        """Trim text at the last complete sentence."""
+        text = text.strip()
+        if not text:
+            return text
+        if text[-1] in '.!?")\':':
+            return text
+        # Find last sentence-ending punctuation
+        for i in range(len(text) - 1, -1, -1):
+            if text[i] in '.!?':
+                return text[:i + 1]
+        return text  # no punctuation found, return as-is
+
+    @staticmethod
     def _clean_md(text: str) -> str:
         import re
         text = re.sub(r'#{1,6}\s*', '', text)                    # ### headers
@@ -486,9 +500,9 @@ class Api:
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 100, "hint": "Dê no máximo 3 respostas em 1 frase cada.", "fmt": "\nVá direto ao ponto. Sem títulos, sem saudações. Texto corrido."},
-                "full": {"max_tok": 512, "hint": "Dê até 10 respostas detalhadas.", "fmt": "\nResponda de forma natural, como se estivesse conversando. Sem markdown."},
-                "research": {"max_tok": 2048, "hint": "Faça uma análise profunda e completa.", "fmt": "\nResponda de forma completa e detalhada. Sem markdown."},
+                "short": {"max_tok": 100, "hint": "Responda em no máximo 2 frases.", "fmt": "\nVá direto ao ponto. Sem títulos, sem saudações."},
+                "full": {"max_tok": 200, "hint": "Responda em no máximo 4 frases.", "fmt": "\nResponda de forma natural. Sem markdown. Parágrafos curtos."},
+                "research": {"max_tok": 600, "hint": "Responda em no máximo 3 parágrafos.", "fmt": "\nResponda de forma detalhada e organizada. Sem markdown. Parágrafos curtos."},
             }
 
             def chat_only():
@@ -505,6 +519,8 @@ class Api:
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
+                    # Trim at last complete sentence to avoid mid-sentence cutoff
+                    result = self._trim_to_sentence(result)
                     log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")
                     self._emit("copilot_response", {"response": result, "had_instruction": bool(user_instruction)})
                 except Exception as e:

@@ -223,9 +223,9 @@ function renderSetup() {
     <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
       ${[
-        {id:'short', label:'⚡ Curta', desc:'~2s', detail:'Até 3 respostas rápidas'},
-        {id:'full', label:'📋 Completa', desc:'~5s', detail:'Até 10 respostas'},
-        {id:'research', label:'🔍 Pesquisa', desc:'~10s', detail:'Análise profunda'}
+        {id:'short', label:'⚡ Curta', desc:'~1s', detail:'Até 2 frases'},
+        {id:'full', label:'💬 Normal', desc:'~2s', detail:'Até 4 frases'},
+        {id:'research', label:'🔍 Detalhada', desc:'~5s', detail:'Até 3 parágrafos'}
       ].map(m => `
         <button data-action="setResponseMode" data-val="${m.id}" class="flex-1 py-2 px-2 rounded border transition-colors ${c.response_mode === m.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
           <div class="text-xs font-medium">${m.label}</div>
