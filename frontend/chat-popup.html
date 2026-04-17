@@ -2,7 +2,7 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
-<title>Whisper Chat</title>
+<title>Whisper Copilot</title>
 <style>
   * { margin: 0; padding: 0; box-sizing: border-box; }
   body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; }
@@ -12,25 +12,35 @@
   .msg-bot .label { color: #fbbf24; font-weight: 600; }
   .msg-bot .text { background: #1e293b; border-radius: 8px; padding: 8px 12px; margin-top: 4px; }
   .msg-system { color: #64748b; font-style: italic; font-size: 13px; }
-  .msg-divider { border-top: 1px solid #1e293b; margin: 12px 0; padding-top: 8px; }
+  .msg-transcript { color: #94a3b8; font-size: 13px; }
+  .msg-transcript .speaker { color: #60a5fa; font-weight: 600; }
+  .msg-action { color: #a78bfa; font-size: 13px; font-weight: 500; }
+  .msg-status { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; }
+  .status-recording { background: #7f1d1d30; color: #fca5a5; }
+  .status-ready { background: #14532d30; color: #86efac; }
+  .status-thinking { background: #1e1b4b30; color: #c4b5fd; }
   #input-bar { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #1e293b; background: #0f172a; }
   #chat-input { flex: 1; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; color: #e2e8f0; font-size: 14px; outline: none; }
   #chat-input:focus { border-color: #8b5cf6; }
   #chat-input::placeholder { color: #64748b; }
+  #chat-input:disabled { opacity: 0.5; }
   #send-btn { background: #7c3aed; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
   #send-btn:hover { background: #6d28d9; }
-  #send-btn:disabled { background: #334155; cursor: wait; }
+  #send-btn:disabled { background: #334155; cursor: not-allowed; }
+  .pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
 </style>
 </head>
 <body>
-<div id="messages"></div>
+<div id="messages">
+  <div class="msg msg-system">Copiloto pronto. Aperte Espaço para gravar.</div>
+</div>
 <div id="input-bar">
-  <input id="chat-input" type="text" placeholder="Instrução para o copiloto (Enter vazio = só transcrever)" autofocus />
+  <input id="chat-input" type="text" placeholder="Instrução para o copiloto (Enter = enviar)" autofocus />
   <button id="send-btn">Enviar</button>
 </div>
 <script>
   function getApi() { return window.pywebview ? window.pywebview.api : null; }
-
   window.__emit = function(event, data) {
     window.dispatchEvent(new CustomEvent('backend:' + event, { detail: data }));
   };
@@ -38,72 +48,88 @@
   const msgs = document.getElementById('messages');
   const input = document.getElementById('chat-input');
   const btn = document.getElementById('send-btn');
+  let isRecording = false;
+  let hasTranscript = false;
 
-  function addMsg(cls, label, text) {
+  function addMsg(cls, html) {
     const div = document.createElement('div');
     div.className = 'msg ' + cls;
-    if (label) {
-      div.innerHTML = '<span class="label">' + label + '</span>' + (cls === 'msg-bot' ? '<div class="text">' + text + '</div>' : ' ' + text);
-    } else {
-      div.textContent = text;
-    }
+    div.innerHTML = html;
     msgs.appendChild(div);
     msgs.scrollTop = msgs.scrollHeight;
   }
 
-  function clearProcessing() {
-    const last = msgs.querySelector('.msg-system:last-child');
-    if (last && last.textContent.includes('Processando')) last.remove();
+  function setStatus(cls, text) {
+    // Remove previous status
+    msgs.querySelectorAll('.msg-status').forEach(el => el.remove());
+    if (text) {
+      const div = document.createElement('div');
+      div.className = 'msg-status ' + cls;
+      div.innerHTML = text;
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
   }
 
-  function enableInput() {
+  function clearProcessing() {
+    const last = msgs.querySelector('.status-thinking');
+    if (last) last.remove();
+  }
+
+  function enableInput(placeholder) {
     input.disabled = false;
     btn.disabled = false;
+    if (placeholder) input.placeholder = placeholder;
     input.focus();
   }
 
-  // Restore history on load
+  function disableInput() {
+    input.disabled = true;
+    btn.disabled = true;
+  }
+
+  // Restore history
   async function restoreHistory() {
     const a = getApi();
     if (!a) return;
     try {
       const history = await a.get_chat_history();
-      if (!history || !history.length) {
-        addMsg('msg-system', '', 'Aguardando gravação...');
-        return;
-      }
-      for (const entry of history) {
-        processEvent(entry.event, entry.data);
-      }
-    } catch(e) {
-      console.error('restore error:', e);
-    }
+      if (!history || !history.length) return;
+      for (const entry of history) processEvent(entry.event, entry.data);
+    } catch(e) { console.error('restore:', e); }
   }
 
   function processEvent(event, data) {
     switch(event) {
       case 'recording_state':
+        isRecording = data.recording;
         if (data.recording) {
-          addMsg('msg-system', '', '🔴 Gravando...');
-          input.disabled = true; btn.disabled = true;
+          setStatus('status-recording', '🔴 <span class="pulse">Gravando...</span>');
+          disableInput();
         } else {
-          addMsg('msg-system', '', '⏹ Gravação finalizada.');
-          enableInput();
+          setStatus('', '');
+        }
+        break;
+      case 'recording_stopped':
+        if (hasTranscript) {
+          setStatus('status-ready', '✅ Transcrição pronta — digite instrução ou aperte Enter');
+          enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
         }
         break;
       case 'transcript':
-        addMsg('msg-system', '', '[' + data.speaker + '] ' + data.text);
+        hasTranscript = true;
+        addMsg('msg-transcript', '<span class="speaker">[' + data.speaker + ']</span> ' + data.text);
         break;
       case 'copilot_response':
         clearProcessing();
-        if (data.response) addMsg('msg-bot', 'Copiloto:', data.response);
-        enableInput();
+        if (data.response) {
+          addMsg('msg-bot', '<span class="label">Copiloto:</span><div class="text">' + data.response + '</div>');
+        }
+        setStatus('status-ready', '✅ Pronto — grave mais ou digite outra instrução');
+        enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
         break;
       case 'user_instruction':
-        addMsg('msg-user', 'Você:', data.text);
-        break;
-      case 'recording_stopped':
-        enableInput();
+        addMsg('msg-user', '<span class="label">Você:</span> ' + data.text);
         break;
     }
   }
@@ -111,15 +137,14 @@
   async function send() {
     const msg = input.value.trim();
     input.value = '';
-    input.disabled = true;
-    btn.disabled = true;
-    if (msg) addMsg('msg-user', 'Você:', msg);
-    addMsg('msg-system', '', '⏳ Processando...');
+    disableInput();
+    if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
+    setStatus('status-thinking', '⏳ <span class="pulse">Copiloto pensando...</span>');
     try {
       const a = getApi();
       if (a) await a.submit_recording(msg);
     } catch(e) {
-      addMsg('msg-system', '', 'Erro: ' + e);
+      addMsg('msg-system', 'Erro: ' + e);
       enableInput();
     }
   }
@@ -128,39 +153,18 @@
   btn.addEventListener('click', send);
 
   // Live events
-  window.addEventListener('backend:transcript', (e) => {
-    clearProcessing();
-    addMsg('msg-system', '', '[' + e.detail.speaker + '] ' + e.detail.text);
-  });
-  window.addEventListener('backend:copilot_response', (e) => {
-    clearProcessing();
-    if (e.detail.response) addMsg('msg-bot', 'Copiloto:', e.detail.response);
-    enableInput();
-  });
+  window.addEventListener('backend:transcript', (e) => processEvent('transcript', e.detail));
+  window.addEventListener('backend:copilot_response', (e) => processEvent('copilot_response', e.detail));
+  window.addEventListener('backend:recording_state', (e) => processEvent('recording_state', e.detail));
+  window.addEventListener('backend:recording_stopped', (e) => processEvent('recording_stopped', e.detail));
   window.addEventListener('backend:chat_thinking', () => {
-    addMsg('msg-system', '', '⏳ Copiloto pensando...');
-    input.disabled = true; btn.disabled = true;
-  });
-  window.addEventListener('backend:submit_started', () => {
-    addMsg('msg-system', '', '⏳ Transcrevendo e analisando...');
-    input.disabled = true; btn.disabled = true;
-  });
-  window.addEventListener('backend:recording_state', (e) => {
-    if (e.detail.recording) {
-      addMsg('msg-system', '', '🔴 Gravando...');
-      input.disabled = true; btn.disabled = true;
-    } else {
-      addMsg('msg-system', '', '⏹ Gravação finalizada.');
-      enableInput();
-    }
+    setStatus('status-thinking', '⏳ <span class="pulse">Copiloto pensando...</span>');
+    disableInput();
   });
 
   // Init
-  if (window.pywebview) {
-    restoreHistory();
-  } else {
-    window.addEventListener('pywebviewready', restoreHistory);
-  }
+  if (window.pywebview) restoreHistory();
+  else window.addEventListener('pywebviewready', restoreHistory);
 </script>
 </body>
 </html>

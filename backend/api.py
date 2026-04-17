@@ -289,6 +289,16 @@ class Api:
         self._chat_history = []
         self._start_time = time.time()
 
+        log.info(f"[START] === MEETING STARTED ===")
+        log.info(f"[START] response_mode={self._response_mode}")
+        log.info(f"[START] target={self._suggestions_target}")
+        log.info(f"[START] system_prompt={len(self._raw_system_prompt)} chars: {self._raw_system_prompt[:80]}")
+        log.info(f"[START] participants={self._participants_context[:100]}")
+        log.info(f"[START] mic={cfg.mic_device_id[:50] if cfg.mic_device_id else 'none'}")
+        log.info(f"[START] monitor={cfg.monitor_device_id[:50] if cfg.monitor_device_id else 'none'}")
+        log.info(f"[START] chunk_seconds={cfg.chunk_seconds}")
+        log.info(f"[START] hotkey={cfg.global_hotkey}")
+
         chunk_dur = max(cfg.chunk_seconds, 60)  # min 60s chunks for auto-transcribe
 
         if cfg.mic_device_id and cfg.mic_device_id != "none":
