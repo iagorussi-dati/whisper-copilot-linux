@@ -118,10 +118,8 @@
         }
         break;
       case 'recording_stopped':
-        if (hasTranscript) {
-          setStatus('status-ready', '✅ Transcrição pronta — digite instrução ou aperte Enter');
-          enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
-        }
+        // Don't enable input yet — wait for transcription to finish
+        // The focus_input event will enable it after transcription + hyprctl focus
         break;
       case 'transcript':
         hasTranscript = true;
@@ -171,6 +169,7 @@
 
   window.addEventListener('backend:focus_input', () => {
     console.log('[POPUP] focus_input received');
+    setStatus('status-ready', '✅ Transcrição pronta — digite instrução ou aperte Enter');
     enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
   });
 
