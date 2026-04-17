@@ -58,11 +58,11 @@ class BedrockClient:
         request.headers["Authorization"] = f"Bearer {self._api_key}"
 
     def _call(self, system: str, user_msg: str, max_tokens: int = 1024,
-              temperature: float = 0.3) -> str:
+              temperature: float = 0.1) -> str:
         params = {
             "modelId": self.model_id,
             "messages": [{"role": "user", "content": [{"text": user_msg}]}],
-            "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature},
+            "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature, "topP": 0.5},
         }
         if system:
             params["system"] = [
@@ -85,7 +85,7 @@ class BedrockClient:
         return text
 
     def call_raw(self, system: str, user_msg: str, max_tokens: int = 1024,
-                 temperature: float = 0.3) -> str:
+                 temperature: float = 0.1) -> str:
         return self._call(system, user_msg, max_tokens, temperature)
 
     def validate(self) -> str:
