@@ -143,6 +143,7 @@ class Api:
 
         mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
         mon_pcm = self._monitor_capture.flush_pcm() if self._monitor_capture else None
+        log.info(f"[SNAPSHOT] mic={'None' if mic_pcm is None else f'{len(mic_pcm)} samples'} mon={'None' if mon_pcm is None else f'{len(mon_pcm)} samples'}")
 
         if mic_pcm is None and mon_pcm is None:
             log.info("[SNAPSHOT] No audio to flush")
