@@ -281,6 +281,11 @@ class Api:
             self._participants_context = (
                 f"Contexto: {ctx}\n" if ctx else ""
             ) + "Várias pessoas falando. Identifique pelos nomes mencionados na conversa."
+        elif cfg.participant_mode == "none":
+            identity = cfg.user_identity or ""
+            self._participants_context = (
+                f"Sobre o usuário: {identity}\n" if identity else ""
+            ) + "Identifique os participantes pelos nomes mencionados na conversa. Ajude o usuário diretamente."
         else:
             ctx_parts = []
             for p in cfg.participants:
