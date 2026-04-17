@@ -485,9 +485,9 @@ class Api:
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 100, "hint": "Dê no máximo 3 respostas em 1 frase cada."},
-                "full": {"max_tok": 512, "hint": "Dê até 10 respostas detalhadas."},
-                "research": {"max_tok": 2048, "hint": "Faça uma análise profunda e completa."},
+                "short": {"max_tok": 100, "hint": "Dê no máximo 3 respostas em 1 frase cada.", "fmt": "\nVá direto ao ponto. Sem títulos, sem saudações. Texto corrido."},
+                "full": {"max_tok": 512, "hint": "Dê até 10 respostas detalhadas.", "fmt": "\nResponda de forma natural, como se estivesse conversando. Sem markdown."},
+                "research": {"max_tok": 2048, "hint": "Faça uma análise profunda e completa.", "fmt": "\nResponda de forma completa e detalhada. Sem markdown."},
             }
 
             def chat_only():
@@ -498,7 +498,7 @@ class Api:
                     mode = RESPONSE_MODES.get(self._response_mode, RESPONSE_MODES["short"])
                     max_tok = mode["max_tok"]
                     hint = mode["hint"] if not user_instruction else ""
-                    copilot_fmt = "\nVá direto ao ponto. Sem títulos, sem saudações, sem introduções. Texto corrido."
+                    copilot_fmt = mode["fmt"]
                     no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto." if "[Copiloto respondeu]" in context else ""
                     user_msg = f"{participants}\n\nContexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
