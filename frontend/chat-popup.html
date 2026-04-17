@@ -169,6 +169,11 @@
     disableInput();
   });
 
+  window.addEventListener('backend:focus_input', () => {
+    console.log('[POPUP] focus_input received');
+    enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
+  });
+
   // Init
   let popupReady = false;
   function markReady() {

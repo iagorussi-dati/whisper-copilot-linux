@@ -374,40 +374,54 @@ class Api:
 
         def flush_and_respond():
             self._process_auto_chunk(wav)
-            # Wait for popup to be ready before sending events/focusing
+            # Wait for popup to be ready
             start_wait = time.time()
             while not getattr(self, '_chat_window_ready', True) and time.time() - start_wait < 5:
                 time.sleep(0.1)
             log.info(f"[REC] Popup ready={getattr(self, '_chat_window_ready', '?')} (waited {time.time()-start_wait:.1f}s)")
             log.info(f"[REC] auto_response={self._auto_response}")
-            # Focus the chat popup window (delay to let Hyprland finish hotkey processing)
+
+            # Focus popup via hyprctl (Wayland)
             time.sleep(0.5)
-            if self._chat_window:
-                try:
-                    import subprocess, json as _json
-                    r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
-                    clients = _json.loads(r.stdout)
-                    our_windows = [c for c in clients if "main.py" in c.get("class", "")]
-                    if len(our_windows) > 1:
-                        popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
-                        subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
-                                       capture_output=True, timeout=2)
-                        log.info(f"[REC] Focused popup: {popup['address']}")
-                    # Retry after another delay
-                    time.sleep(0.3)
-                    if our_windows and len(our_windows) > 1:
-                        subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
-                                       capture_output=True, timeout=2)
-                except Exception as e:
-                    log.debug(f"[REC] Focus failed: {e}")
+            self._focus_popup()
+
             if self._auto_response:
                 log.info("[REC] Auto-response: generating response...")
                 self.submit_recording('')
             else:
                 log.info("[REC] Waiting for user instruction (auto_response=False)")
+                # Focus input inside popup AFTER window has focus
+                time.sleep(0.3)
+                self._emit_to_popup("focus_input", {})
 
         threading.Thread(target=flush_and_respond, daemon=True).start()
 
+
+    def _focus_popup(self):
+        """Focus the popup window via hyprctl (Wayland/Hyprland)."""
+        if not self._chat_window:
+            return
+        try:
+            import subprocess, json as _json
+            r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
+            clients = _json.loads(r.stdout)
+            our_windows = [c for c in clients if "main.py" in c.get("class", "")]
+            if len(our_windows) > 1:
+                popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
+                subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
+                               capture_output=True, timeout=2)
+                log.info(f"[FOCUS] Focused popup: {popup['address']}")
+        except Exception as e:
+            log.debug(f"[FOCUS] Failed: {e}")
+
+    def _emit_to_popup(self, event, data):
+        """Send event only to popup window."""
+        if self._chat_window:
+            try:
+                payload = json.dumps(data, ensure_ascii=True)
+                self._chat_window.evaluate_js(f"window.__emit('{event}', {payload})")
+            except Exception:
+                pass
     APP_FORMAT_SUGGESTION = (
         "\nFORMATO DE RESPOSTA (obrigatório, sem exceção):\n"
         "Cada sugestão = 1 linha com emoji e frase entre aspas.\n"
