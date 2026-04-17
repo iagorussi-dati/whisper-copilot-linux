@@ -239,6 +239,7 @@ class Api:
         import pathlib
         base = pathlib.Path(__file__).parent.parent
         paths = {
+            "conversa": base / "prompts" / "conversa-natural.md",
             "sugestoes": base / "prompts" / "sugestoes.md",
             "assistente": base / "prompts" / "assistente-objetivo.md",
             "pesquisa": base / "prompts" / "pesquisa.md",
