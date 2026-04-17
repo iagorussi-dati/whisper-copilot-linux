@@ -172,6 +172,20 @@
   // Init
   if (window.pywebview) restoreHistory();
   else window.addEventListener('pywebviewready', restoreHistory);
+
+  // Force focus on click anywhere in the window
+  document.body.addEventListener('click', () => {
+    if (!input.disabled) {
+      input.focus();
+    }
+  });
+
+  // Also try focus on any key press
+  document.addEventListener('keydown', (e) => {
+    if (!input.disabled && document.activeElement !== input) {
+      input.focus();
+    }
+  });
 </script>
 </body>
 </html>

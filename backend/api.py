@@ -378,11 +378,18 @@ class Api:
                     pass
                 # Hyprland/Wayland: force focus via hyprctl
                 try:
-                    import subprocess
-                    subprocess.run(["hyprctl", "dispatch", "focuswindow", "title:Whisper"],
-                                   capture_output=True, timeout=2)
-                except Exception:
-                    pass
+                    import subprocess, json as _json
+                    r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
+                    clients = _json.loads(r.stdout)
+                    # Find the smaller window (popup) among our windows
+                    our_windows = [c for c in clients if "main.py" in c.get("class", "")]
+                    if len(our_windows) > 1:
+                        popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
+                        subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
+                                       capture_output=True, timeout=2)
+                        log.info(f"[REC] Focused popup window: {popup['address']}")
+                except Exception as e:
+                    log.debug(f"[REC] Focus failed: {e}")
             if self._auto_response:
                 log.info("[REC] Auto-response: generating response...")
                 self.submit_recording('')
