@@ -206,27 +206,8 @@ class Api:
             except Exception:
                 self._chat_window = None
 
-        # Hyprland: set sidebar rules before creating window
-        import shutil
-        if shutil.which("hyprctl"):
-            import subprocess
-            try:
-                import json as _json
-                r = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
-                mon = _json.loads(r.stdout)[0]
-                w = int(mon["width"] / mon["scale"])
-                h = int(mon["height"] / mon["scale"])
-                sw = 420
-                for rule in [
-                    f"float,class:main.py,title:Whisper Chat",
-                    f"size {sw} {h},class:main.py,title:Whisper Chat",
-                    f"move {w - sw} 0,class:main.py,title:Whisper Chat",
-                    f"pin,class:main.py,title:Whisper Chat",
-                ]:
-                    subprocess.run(["hyprctl", "keyword", "windowrulev2", rule], capture_output=True, timeout=2)
-                log.info(f"[POPUP] Sidebar rules: {sw}x{h} at x={w - sw}")
-            except Exception as e:
-                log.debug(f"[POPUP] Sidebar rules failed: {e}")
+        # Will position as sidebar after window loads
+        self._needs_sidebar_position = True
 
         chat_html = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "chat-popup.html")
         self._chat_window = webview.create_window(
@@ -242,6 +223,8 @@ class Api:
         def on_loaded():
             self._chat_window_ready = True
             log.info("[POPUP] Window loaded and ready")
+            if getattr(self, '_needs_sidebar_position', False):
+                self._position_sidebar()
         def on_closed():
             self._chat_window = None
             self._chat_window_ready = False
@@ -490,6 +473,36 @@ class Api:
 
         threading.Thread(target=flush_and_respond, daemon=True).start()
 
+
+
+    def _position_sidebar(self):
+        """Position the chat popup as a sidebar on the right edge."""
+        import shutil
+        if not shutil.which("hyprctl"):
+            return
+        try:
+            import subprocess, json as _json
+            time.sleep(0.5)  # wait for window to be registered
+            r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
+            clients = _json.loads(r.stdout)
+            chat = next((c for c in clients if c.get("title") == "Whisper Chat"), None)
+            if not chat:
+                log.debug("[SIDEBAR] Chat window not found in hyprctl")
+                return
+            addr = chat["address"]
+            r2 = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
+            mon = _json.loads(r2.stdout)[0]
+            mw = int(mon["width"] / mon["scale"])
+            mh = int(mon["height"] / mon["scale"])
+            sw = 420
+            subprocess.run(["hyprctl", "dispatch", f"setfloating address:{addr}"], capture_output=True, timeout=2)
+            time.sleep(0.1)
+            subprocess.run(["hyprctl", "dispatch", f"resizewindowpixel exact {sw} {mh},address:{addr}"], capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {mw - sw} 0,address:{addr}"], capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"pin address:{addr}"], capture_output=True, timeout=2)
+            log.info(f"[SIDEBAR] Positioned: {sw}x{mh} at x={mw - sw}")
+        except Exception as e:
+            log.debug(f"[SIDEBAR] Failed: {e}")
 
     def _focus_popup(self):
         """Focus the popup window via hyprctl (Wayland/Hyprland)."""

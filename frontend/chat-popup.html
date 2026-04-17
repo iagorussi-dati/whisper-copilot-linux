@@ -52,6 +52,17 @@
   let hasTranscript = false;
   let transcriptionDone = false;
   let pendingSend = null;
+  let recStartTime = null;
+  let recTimerInterval = null;
+
+  function updateRecTimer() {
+    const el = document.getElementById('rec-timer');
+    if (!el || !recStartTime) return;
+    const s = Math.floor((Date.now() - recStartTime) / 1000);
+    const m = String(Math.floor(s / 60)).padStart(2, '0');
+    const sec = String(s % 60).padStart(2, '0');
+    el.textContent = `${m}:${sec}`;
+  }
 
   function addMsg(cls, html) {
     const div = document.createElement('div');
@@ -114,9 +125,12 @@
         isRecording = data.recording;
         if (data.recording) {
           transcriptionDone = false;
-          setStatus('status-recording', '🔴 <span class="pulse">Gravando...</span>');
+          recStartTime = Date.now();
+          recTimerInterval = setInterval(updateRecTimer, 1000);
+          setStatus('status-recording', '🔴 <span class="pulse">Gravando</span> <span id="rec-timer">00:00</span>');
           disableInput();
         } else {
+          if (recTimerInterval) { clearInterval(recTimerInterval); recTimerInterval = null; }
           setStatus('', '');
         }
         break;
