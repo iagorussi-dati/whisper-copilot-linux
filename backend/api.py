@@ -284,7 +284,7 @@ class Api:
         self._raw_system_prompt = cfg.custom_system_prompt or ""
         self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
         self._response_mode = cfg.response_mode or "short"
-        self._auto_response = cfg.auto_response
+        self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
@@ -368,9 +368,12 @@ class Api:
 
         def flush_and_respond():
             self._process_auto_chunk(wav)
+            log.info(f"[REC] auto_response={self._auto_response}")
             if self._auto_response:
                 log.info("[REC] Auto-response: generating response...")
                 self.submit_recording('')
+            else:
+                log.info("[REC] Waiting for user instruction (auto_response=False)")
 
         threading.Thread(target=flush_and_respond, daemon=True).start()
 
