@@ -576,9 +576,9 @@ class Api:
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 100, "hint": "Responda em no máximo 2 frases.", "fmt": "\nVá direto ao ponto. Sem títulos, sem saudações."},
-                "full": {"max_tok": 200, "hint": "Responda em no máximo 4 frases.", "fmt": "\nResponda de forma natural. Sem markdown. Parágrafos curtos."},
-                "research": {"max_tok": 600, "hint": "Responda em no máximo 3 parágrafos.", "fmt": "\nResponda de forma detalhada e organizada. Sem markdown. Parágrafos curtos."},
+                "short": {"max_tok": 150, "hint": "Seja breve.", "fmt": "\nSem markdown, sem títulos."},
+                "full": {"max_tok": 300, "hint": "", "fmt": "\nSem markdown, sem títulos."},
+                "research": {"max_tok": 600, "hint": "", "fmt": "\nSem markdown. Parágrafos curtos."},
             }
 
             def chat_only():
