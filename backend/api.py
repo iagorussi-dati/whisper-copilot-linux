@@ -17,6 +17,8 @@ from .transcription import GroqClient, GroqError
 from .diarization import VoiceBank, extract_embedding
 from .llm import BedrockClient
 from .config import AppConfig, Participant, load_config, save_config
+from .platform import (get_platform, register_global_hotkey, unregister_global_hotkeys,
+                        focus_popup_window, position_sidebar)
 
 load_dotenv()
 log = logging.getLogger("whisper-copilot")
@@ -55,7 +57,7 @@ class Api:
     def set_window(self, window):
         self._window = window
 
-    HOTKEY_FILE = "/tmp/whisper-copilot-toggle"
+    HOTKEY_FILE = os.path.join(os.environ.get("TEMP", "/tmp"), "whisper-copilot-toggle")
     _hotkey_key: str = ""
 
     def _start_hotkey_watcher(self):
@@ -83,42 +85,20 @@ class Api:
         threading.Thread(target=watch, daemon=True).start()
 
     def register_global_hotkey(self, key: str):
-        """Register SUPER+key for toggle and SUPER+snapshot_key for snapshot."""
+        """Register global hotkeys via platform module."""
         self.unregister_global_hotkey()
         if not key:
             return
         self._hotkey_key = key
-        import subprocess
-        base = os.path.dirname(os.path.abspath(__file__))
-        toggle_script = os.path.join(base, "..", "whisper-toggle.sh")
-        snapshot_script = os.path.join(base, "..", "whisper-snapshot.sh")
-        try:
-            subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{key},exec,{toggle_script}"],
-                           capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Registered SUPER+{key} (toggle)")
-            if self._snapshot_key:
-                subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{self._snapshot_key},exec,{snapshot_script}"],
-                               capture_output=True, timeout=3)
-                log.info(f"[Hotkey] Registered SUPER+{self._snapshot_key} (snapshot)")
-        except Exception as e:
-            log.error(f"[Hotkey] Failed: {e}")
+        register_global_hotkey(
+            key, self.toggle_recording,
+            snapshot_key=self._snapshot_key,
+            snapshot_callback=self.snapshot if self._snapshot_key else None
+        )
 
     def unregister_global_hotkey(self):
-        """Remove global hotkey binds."""
-        import subprocess
-        if self._hotkey_key:
-            try:
-                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
-                               capture_output=True, timeout=3)
-            except Exception:
-                pass
-        if getattr(self, '_snapshot_key', ''):
-            try:
-                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._snapshot_key}"],
-                               capture_output=True, timeout=3)
-            except Exception:
-                pass
-        log.info(f"[Hotkey] Unregistered all")
+        """Remove global hotkeys."""
+        unregister_global_hotkeys()
         self._hotkey_key = ""
 
     def toggle_recording(self):
@@ -476,64 +456,13 @@ class Api:
 
 
 
-    def _position_sidebar(self):
-        """Position the chat popup as a sidebar on the right edge."""
-        import shutil
-        if not shutil.which("hyprctl"):
-            return
-
-        def do_position():
-            import subprocess, json as _json
-            # Retry finding the window
-            chat = None
-            for attempt in range(10):
-                time.sleep(0.5)
-                r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
-                clients = _json.loads(r.stdout)
-                our = [c for c in clients if "main.py" in c.get("class", "")]
-                if len(our) >= 2:
-                    chat = min(our, key=lambda c: c["size"][0] * c["size"][1])
-                    break
-                log.debug(f"[SIDEBAR] Attempt {attempt+1}: {len(our)} windows found")
-
-            if not chat:
-                log.warning("[SIDEBAR] Chat window not found after retries")
-                return
-
-            addr = chat["address"]
-            r2 = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
-            monitors = _json.loads(r2.stdout)
-            mon = next((m for m in monitors if m.get("focused")), monitors[0])
-            mx, my = mon.get("x", 0), mon.get("y", 0)
-            mw = int(mon["width"] / mon["scale"])
-            mh = int(mon["height"] / mon["scale"])
-            sw = 420
-            x = mx + mw - sw
-            subprocess.run(["hyprctl", "dispatch", f"setfloating address:{addr}"], capture_output=True, timeout=2)
-            time.sleep(0.1)
-            subprocess.run(["hyprctl", "dispatch", f"resizewindowpixel exact {sw} {mh},address:{addr}"], capture_output=True, timeout=2)
-            subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {x} {my},address:{addr}"], capture_output=True, timeout=2)
-            subprocess.run(["hyprctl", "dispatch", f"pin address:{addr}"], capture_output=True, timeout=2)
-            log.info(f"[SIDEBAR] {sw}x{mh} at ({x},{my}) monitor={mon['name']} addr={addr}")
-
-        threading.Thread(target=do_position, daemon=True).start()
-
     def _focus_popup(self):
-        """Focus the popup window via hyprctl (Wayland/Hyprland)."""
-        if not self._chat_window:
-            return
-        try:
-            import subprocess, json as _json
-            r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
-            clients = _json.loads(r.stdout)
-            our_windows = [c for c in clients if "main.py" in c.get("class", "")]
-            if len(our_windows) > 1:
-                popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
-                subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
-                               capture_output=True, timeout=2)
-                log.info(f"[FOCUS] Focused popup: {popup['address']}")
-        except Exception as e:
-            log.debug(f"[FOCUS] Failed: {e}")
+        """Focus the popup window."""
+        focus_popup_window()
+
+    def _position_sidebar(self):
+        """Position chat as sidebar."""
+        position_sidebar(self._chat_window)
 
     def _emit_to_popup(self, event, data):
         """Send event only to popup window."""

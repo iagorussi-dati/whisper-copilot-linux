@@ -90,8 +90,11 @@ class AudioCapture:
         return (wav_bytes, ts)
 
     def _run(self):
-        # Linux: use parec/pw-cat for PulseAudio/PipeWire devices
-        if self.device_id.startswith("alsa_") or ".monitor" in self.device_id or self.source_type == "monitor":
+        import sys
+        if self.device_id.startswith("wasapi:"):
+            log.info(f"[Capture] Using WASAPI loopback for {self.device_id}")
+            self._capture_wasapi()
+        elif sys.platform != "win32" and (self.device_id.startswith("alsa_") or ".monitor" in self.device_id or self.source_type == "monitor"):
             log.info(f"[Capture] Using parec/pw-cat for {self.device_id}")
             self._capture_parec()
         else:
@@ -220,5 +223,44 @@ class AudioCapture:
                         self._process_buffer(pcm_buf, rms_buf, silence)
         except Exception as e:
             log.error(f"[Capture] sounddevice error: {e}")
+            if self.on_status:
+                self.on_status(self.source_type, "error")
+
+    def _capture_wasapi(self):
+        """Capture from WASAPI loopback device (Windows)."""
+        dev_idx = int(self.device_id.replace("wasapi:", ""))
+        pcm_buf: list[int] = []
+        rms_buf: list[float] = []
+        silence = {"last_signal": time.time(), "notified": False}
+
+        try:
+            import pyaudiowpatch as pyaudio
+            p = pyaudio.PyAudio()
+            dev = p.get_device_info_by_index(dev_idx)
+            rate = int(dev['defaultSampleRate'])
+
+            stream = p.open(format=pyaudio.paInt16, channels=2, rate=rate,
+                            input=True, input_device_index=dev_idx,
+                            frames_per_buffer=rate // 10)
+
+            while self._running.is_set():
+                data = stream.read(rate // 10, exception_on_overflow=False)
+                # Convert stereo to mono, resample to 16kHz
+                samples = np.frombuffer(data, dtype=np.int16)[::2]  # take left channel
+                if rate != SAMPLE_RATE:
+                    # Simple resample
+                    indices = np.linspace(0, len(samples) - 1, int(len(samples) * SAMPLE_RATE / rate)).astype(int)
+                    samples = samples[indices]
+                pcm_buf.extend(samples.tolist())
+                rms_buf.extend((samples.astype(np.float32) / 32768.0).tolist())
+                self._process_buffer(pcm_buf, rms_buf, silence)
+
+            stream.stop_stream()
+            stream.close()
+            p.terminate()
+        except ImportError:
+            log.error("[Capture] PyAudioWPatch not installed. pip install PyAudioWPatch")
+        except Exception as e:
+            log.error(f"[Capture] WASAPI error: {e}")
             if self.on_status:
                 self.on_status(self.source_type, "error")

@@ -4,51 +4,42 @@ import sys
 import shutil
 import subprocess
 import logging
+import threading
 
 log = logging.getLogger("whisper-copilot")
+
+_platform = None
 
 
 def detect_platform() -> dict:
     """Detect the current platform and available tools."""
     info = {
         "os": sys.platform,  # linux, win32, darwin
+        "windows": sys.platform == "win32",
+        "linux": sys.platform == "linux",
         "wsl": False,
-        "wayland": False,
         "hyprland": False,
-        "x11": False,
         "has_hyprctl": False,
-        "has_xdotool": False,
-        "has_pactl": False,
-        "has_pw_cat": False,
+        "has_keyboard_lib": False,
     }
 
-    # WSL detection
-    if sys.platform == "linux":
+    if info["linux"]:
         try:
             with open("/proc/version", "r") as f:
                 version = f.read().lower()
                 info["wsl"] = "microsoft" in version or "wsl" in version
         except Exception:
             pass
+        info["hyprland"] = bool(os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"))
+        info["has_hyprctl"] = shutil.which("hyprctl") is not None
 
-    # Display server
-    session_type = os.environ.get("XDG_SESSION_TYPE", "").lower()
-    info["wayland"] = session_type == "wayland"
-    info["x11"] = session_type == "x11" or bool(os.environ.get("DISPLAY"))
-
-    # Hyprland
-    info["hyprland"] = bool(os.environ.get("HYPRLAND_INSTANCE_SIGNATURE"))
-
-    # Tools
-    info["has_hyprctl"] = shutil.which("hyprctl") is not None
-    info["has_xdotool"] = shutil.which("xdotool") is not None
-    info["has_pactl"] = shutil.which("pactl") is not None
-    info["has_pw_cat"] = shutil.which("pw-cat") is not None
+    try:
+        import keyboard
+        info["has_keyboard_lib"] = True
+    except ImportError:
+        pass
 
     return info
-
-
-_platform = None
 
 
 def get_platform() -> dict:
@@ -59,48 +50,86 @@ def get_platform() -> dict:
     return _platform
 
 
-def register_global_hotkey(key: str, toggle_script: str) -> bool:
-    """Register a global hotkey. Returns True if successful."""
+# ── Global Hotkeys ──
+
+_hotkey_ids = []
+
+
+def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_callback=None):
+    """Register global hotkeys. Returns True if successful."""
+    unregister_global_hotkeys()
     p = get_platform()
 
+    # Hyprland: use hyprctl + file watcher
     if p["hyprland"] and p["has_hyprctl"]:
-        cmd = f"SUPER,{key},exec,{toggle_script}"
+        base = os.path.dirname(os.path.abspath(__file__))
+        toggle_script = os.path.join(base, "..", "whisper-toggle.sh")
+        snapshot_script = os.path.join(base, "..", "whisper-snapshot.sh")
         try:
-            subprocess.run(["hyprctl", "keyword", "bind", cmd],
+            subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{key},exec,{toggle_script}"],
                            capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Registered SUPER+{key} via hyprctl")
+            log.info(f"[Hotkey] Registered SUPER+{key} (toggle) via hyprctl")
+            if snapshot_key:
+                subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{snapshot_key},exec,{snapshot_script}"],
+                               capture_output=True, timeout=3)
+                log.info(f"[Hotkey] Registered SUPER+{snapshot_key} (snapshot) via hyprctl")
+            _hotkey_ids.append(("hyprctl", key, snapshot_key))
             return True
         except Exception as e:
             log.error(f"[Hotkey] hyprctl failed: {e}")
 
-    if p["x11"] and p["has_xdotool"]:
-        # X11: use xbindkeys or just log that it's not supported
-        log.warning("[Hotkey] X11 global hotkeys not implemented. Use in-app Espaço/T.")
-        return False
-
-    if p["wsl"]:
-        log.warning("[Hotkey] WSL: global hotkeys not available. Use in-app Espaço/T.")
-        return False
-
-    log.warning(f"[Hotkey] No global hotkey support for this platform")
-    return False
-
-
-def unregister_global_hotkey(key: str) -> bool:
-    """Unregister a global hotkey."""
-    p = get_platform()
-
-    if p["hyprland"] and p["has_hyprctl"]:
+    # Windows/Linux fallback: use keyboard lib
+    if p["has_keyboard_lib"]:
         try:
-            subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{key}"],
-                           capture_output=True, timeout=3)
-            log.info(f"[Hotkey] Unregistered SUPER+{key}")
-            return True
-        except Exception:
-            pass
+            import keyboard
+            # Map key names
+            key_map = {"space": "space", "F1": "f1", "F2": "f2", "F3": "f3", "F4": "f4",
+                       "F5": "f5", "F6": "f6", "F7": "f7", "F8": "f8", "F9": "f9",
+                       "F10": "f10", "F11": "f11", "F12": "f12"}
+            hotkey_str = f"windows+{key_map.get(key, key.lower())}"
+            keyboard.add_hotkey(hotkey_str, callback, suppress=True)
+            _hotkey_ids.append(("keyboard", hotkey_str, ""))
+            log.info(f"[Hotkey] Registered {hotkey_str} (toggle) via keyboard lib")
 
+            if snapshot_key and snapshot_callback:
+                snap_str = f"windows+{key_map.get(snapshot_key, snapshot_key.lower())}"
+                keyboard.add_hotkey(snap_str, snapshot_callback, suppress=True)
+                _hotkey_ids.append(("keyboard", snap_str, ""))
+                log.info(f"[Hotkey] Registered {snap_str} (snapshot) via keyboard lib")
+            return True
+        except Exception as e:
+            log.error(f"[Hotkey] keyboard lib failed: {e}")
+
+    log.warning("[Hotkey] No global hotkey support. Use in-app keys.")
     return False
 
+
+def unregister_global_hotkeys():
+    """Remove all registered hotkeys."""
+    p = get_platform()
+    for entry in _hotkey_ids:
+        method = entry[0]
+        if method == "hyprctl":
+            key, snap_key = entry[1], entry[2]
+            try:
+                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{key}"],
+                               capture_output=True, timeout=3)
+                if snap_key:
+                    subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{snap_key}"],
+                                   capture_output=True, timeout=3)
+            except Exception:
+                pass
+        elif method == "keyboard":
+            try:
+                import keyboard
+                keyboard.remove_hotkey(entry[1])
+            except Exception:
+                pass
+    _hotkey_ids.clear()
+    log.info("[Hotkey] Unregistered all")
+
+
+# ── Window Focus ──
 
 def focus_popup_window():
     """Focus the popup window using OS-specific method."""
@@ -112,26 +141,89 @@ def focus_popup_window():
             r = subprocess.run(["hyprctl", "clients", "-j"],
                                capture_output=True, text=True, timeout=2)
             clients = json.loads(r.stdout)
-            our_windows = [c for c in clients if "main.py" in c.get("class", "")]
-            if len(our_windows) > 1:
-                popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
+            our = [c for c in clients if "main.py" in c.get("class", "")]
+            if len(our) > 1:
+                popup = min(our, key=lambda c: c["size"][0] * c["size"][1])
                 subprocess.run(["hyprctl", "dispatch", "focuswindow",
                                f"address:{popup['address']}"],
                                capture_output=True, timeout=2)
-                log.info(f"[Focus] hyprctl focused: {popup['address']}")
+                log.info(f"[Focus] hyprctl: {popup['address']}")
                 return True
         except Exception as e:
             log.debug(f"[Focus] hyprctl failed: {e}")
 
-    if p["x11"] and p["has_xdotool"]:
-        try:
-            subprocess.run(["xdotool", "search", "--name", "Whisper Chat",
-                           "windowactivate"], capture_output=True, timeout=2)
-            log.info("[Focus] xdotool focused Whisper Chat")
-            return True
-        except Exception as e:
-            log.debug(f"[Focus] xdotool failed: {e}")
-
-    # Fallback: no OS-level focus, rely on JS
-    log.debug("[Focus] No OS-level focus available, relying on JS")
+    # Windows: pywebview handles focus via show()
+    log.debug("[Focus] Using JS fallback")
     return False
+
+
+# ── Sidebar Positioning ──
+
+def position_sidebar(chat_window):
+    """Position chat window as sidebar on the right edge."""
+    import time as _time
+    p = get_platform()
+
+    if p["hyprland"] and p["has_hyprctl"]:
+        def do_position():
+            import json as _json
+            chat = None
+            for attempt in range(10):
+                _time.sleep(0.5)
+                r = subprocess.run(["hyprctl", "clients", "-j"],
+                                   capture_output=True, text=True, timeout=2)
+                clients = _json.loads(r.stdout)
+                our = [c for c in clients if "main.py" in c.get("class", "")]
+                if len(our) >= 2:
+                    chat = min(our, key=lambda c: c["size"][0] * c["size"][1])
+                    break
+
+            if not chat:
+                log.warning("[SIDEBAR] Window not found")
+                return
+
+            addr = chat["address"]
+            r2 = subprocess.run(["hyprctl", "monitors", "-j"],
+                                capture_output=True, text=True, timeout=2)
+            monitors = _json.loads(r2.stdout)
+            mon = next((m for m in monitors if m.get("focused")), monitors[0])
+            mx, my = mon.get("x", 0), mon.get("y", 0)
+            mw = int(mon["width"] / mon["scale"])
+            mh = int(mon["height"] / mon["scale"])
+            sw = 420
+            x = mx + mw - sw
+
+            subprocess.run(["hyprctl", "dispatch", f"setfloating address:{addr}"],
+                           capture_output=True, timeout=2)
+            _time.sleep(0.1)
+            subprocess.run(["hyprctl", "dispatch", f"resizewindowpixel exact {sw} {mh},address:{addr}"],
+                           capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {x} {my},address:{addr}"],
+                           capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"pin address:{addr}"],
+                           capture_output=True, timeout=2)
+            log.info(f"[SIDEBAR] {sw}x{mh} at ({x},{my}) monitor={mon['name']}")
+
+        threading.Thread(target=do_position, daemon=True).start()
+        return
+
+    # Windows: position via pywebview API
+    if p["windows"] and chat_window:
+        def do_position_win():
+            _time.sleep(1)
+            try:
+                import ctypes
+                user32 = ctypes.windll.user32
+                screen_w = user32.GetSystemMetrics(0)
+                screen_h = user32.GetSystemMetrics(1)
+                sw = 420
+                chat_window.move(screen_w - sw, 0)
+                chat_window.resize(sw, screen_h)
+                log.info(f"[SIDEBAR] Windows: {sw}x{screen_h} at x={screen_w - sw}")
+            except Exception as e:
+                log.debug(f"[SIDEBAR] Windows positioning failed: {e}")
+
+        threading.Thread(target=do_position_win, daemon=True).start()
+        return
+
+    log.debug("[SIDEBAR] No sidebar positioning available")
