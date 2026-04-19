@@ -10,7 +10,7 @@
   .msg { margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
   .msg-user .label { color: #a78bfa; font-weight: 600; }
   .msg-bot .label { color: #fbbf24; font-weight: 600; }
-  .msg-bot .text { background: #1e293b; border-radius: 8px; padding: 8px 12px; margin-top: 4px; }
+  .msg-bot .text { background: #1e293b; border-radius: 8px; padding: 10px 14px; margin-top: 4px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
   .msg-system { color: #64748b; font-style: italic; font-size: 13px; }
   .msg-transcript { color: #94a3b8; font-size: 13px; }
   .msg-transcript .speaker { color: #60a5fa; font-weight: 600; }
@@ -50,6 +50,19 @@
   const btn = document.getElementById('send-btn');
   let isRecording = false;
   let hasTranscript = false;
+  let transcriptionDone = false;
+  let pendingSend = null;
+  let recStartTime = null;
+  let recTimerInterval = null;
+
+  function updateRecTimer() {
+    const el = document.getElementById('rec-timer');
+    if (!el || !recStartTime) return;
+    const s = Math.floor((Date.now() - recStartTime) / 1000);
+    const m = String(Math.floor(s / 60)).padStart(2, '0');
+    const sec = String(s % 60).padStart(2, '0');
+    el.textContent = `${m}:${sec}`;
+  }
 
   function addMsg(cls, html) {
     const div = document.createElement('div');
@@ -111,15 +124,20 @@
       case 'recording_state':
         isRecording = data.recording;
         if (data.recording) {
-          setStatus('status-recording', '🔴 <span class="pulse">Gravando...</span>');
+          transcriptionDone = false;
+          recStartTime = Date.now();
+          recTimerInterval = setInterval(updateRecTimer, 1000);
+          setStatus('status-recording', '🔴 <span class="pulse">Gravando</span> <span id="rec-timer">00:00</span>');
           disableInput();
         } else {
+          if (recTimerInterval) { clearInterval(recTimerInterval); recTimerInterval = null; }
           setStatus('', '');
         }
         break;
       case 'recording_stopped':
-        // Don't enable input yet — wait for transcription to finish
-        // The focus_input event will enable it after transcription + hyprctl focus
+        // Enable input immediately so user can type while transcription happens
+        setStatus('status-ready', '⏳ Transcrevendo... digite sua instrução');
+        enableInput('Instrução (Enter envia após transcrição)');
         break;
       case 'transcript':
         hasTranscript = true;
@@ -142,6 +160,20 @@
   async function send() {
     const msg = input.value.trim();
     input.value = '';
+
+    if (!transcriptionDone) {
+      // Queue it — will send after transcription finishes
+      pendingSend = msg;
+      if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
+      setStatus('status-thinking', '⏳ <span class="pulse">Aguardando transcrição...</span>');
+      disableInput();
+      return;
+    }
+
+    doSend(msg);
+  }
+
+  async function doSend(msg) {
     disableInput();
     if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
     setStatus('status-thinking', '⏳ <span class="pulse">Copiloto pensando...</span>');
@@ -167,10 +199,27 @@
     disableInput();
   });
 
+  window.addEventListener('backend:snapshot_started', () => {
+    setStatus('status-ready', '📸 Snapshot — transcrevendo...');
+    transcriptionDone = false;
+    enableInput('Instrução (Enter envia após transcrição)');
+  });
+
+  window.addEventListener('backend:session_reset', () => {
+    msgs.innerHTML = '<div class="msg msg-system">Nova sessão. Copiloto pronto.</div>';
+    hasTranscript = false;
+    disableInput();
+  });
+
   window.addEventListener('backend:focus_input', () => {
-    console.log('[POPUP] focus_input received');
-    setStatus('status-ready', '✅ Transcrição pronta — digite instrução ou aperte Enter');
-    enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
+    transcriptionDone = true;
+    setStatus('status-ready', '✅ Transcrição pronta');
+    // If user already typed and pressed Enter, send now
+    if (pendingSend !== null) {
+      const msg = pendingSend;
+      pendingSend = null;
+      doSend(msg);
+    }
   });
 
   // Init

@@ -17,7 +17,6 @@ from .transcription import GroqClient, GroqError
 from .diarization import VoiceBank, extract_embedding
 from .llm import BedrockClient
 from .config import AppConfig, Participant, load_config, save_config
-from .platform import get_platform, register_global_hotkey, unregister_global_hotkey, focus_popup_window
 
 load_dotenv()
 log = logging.getLogger("whisper-copilot")
@@ -69,9 +68,14 @@ class Api:
                 try:
                     p = pathlib.Path(self.HOTKEY_FILE)
                     if p.exists():
+                        cmd = p.read_text().strip()
                         p.unlink(missing_ok=True)
-                        log.info("[Hotkey] Global toggle received")
-                        self.toggle_recording()
+                        if cmd == "snapshot":
+                            log.info("[Hotkey] Snapshot received")
+                            self.snapshot()
+                        else:
+                            log.info("[Hotkey] Global toggle received")
+                            self.toggle_recording()
                 except Exception as e:
                     log.error(f"[Hotkey] Error: {e}")
                 self._hotkey_stop.wait(0.2)
@@ -79,19 +83,42 @@ class Api:
         threading.Thread(target=watch, daemon=True).start()
 
     def register_global_hotkey(self, key: str):
-        """Register global hotkey via platform-specific method."""
+        """Register SUPER+key for toggle and SUPER+snapshot_key for snapshot."""
         self.unregister_global_hotkey()
         if not key:
             return
         self._hotkey_key = key
-        toggle_script = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "whisper-toggle.sh")
-        register_global_hotkey(key, toggle_script)
+        import subprocess
+        base = os.path.dirname(os.path.abspath(__file__))
+        toggle_script = os.path.join(base, "..", "whisper-toggle.sh")
+        snapshot_script = os.path.join(base, "..", "whisper-snapshot.sh")
+        try:
+            subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{key},exec,{toggle_script}"],
+                           capture_output=True, timeout=3)
+            log.info(f"[Hotkey] Registered SUPER+{key} (toggle)")
+            if self._snapshot_key:
+                subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{self._snapshot_key},exec,{snapshot_script}"],
+                               capture_output=True, timeout=3)
+                log.info(f"[Hotkey] Registered SUPER+{self._snapshot_key} (snapshot)")
+        except Exception as e:
+            log.error(f"[Hotkey] Failed: {e}")
 
     def unregister_global_hotkey(self):
-        """Remove global hotkey."""
-        if not self._hotkey_key:
-            return
-        unregister_global_hotkey(self._hotkey_key)
+        """Remove global hotkey binds."""
+        import subprocess
+        if self._hotkey_key:
+            try:
+                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._hotkey_key}"],
+                               capture_output=True, timeout=3)
+            except Exception:
+                pass
+        if getattr(self, '_snapshot_key', ''):
+            try:
+                subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{self._snapshot_key}"],
+                               capture_output=True, timeout=3)
+            except Exception:
+                pass
+        log.info(f"[Hotkey] Unregistered all")
         self._hotkey_key = ""
 
     def toggle_recording(self):
@@ -106,6 +133,47 @@ class Api:
             self._recording = True
             self._emit("recording_state", {"recording": True})
             self.start_recording()
+
+    def snapshot(self):
+        """Transcribe what's recorded so far WITHOUT stopping. Recording continues."""
+        if not self._start_time or not self._recording:
+            return
+        log.info("[SNAPSHOT] Flushing current audio (recording continues)...")
+        self._emit("snapshot_started", {})
+
+        mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
+        mon_pcm = self._monitor_capture.flush_pcm() if self._monitor_capture else None
+        log.info(f"[SNAPSHOT] mic={'None' if mic_pcm is None else f'{len(mic_pcm)} samples'} mon={'None' if mon_pcm is None else f'{len(mon_pcm)} samples'}")
+
+        if mic_pcm is None and mon_pcm is None:
+            log.info("[SNAPSHOT] No audio to flush")
+            return
+
+        if mic_pcm is not None and mon_pcm is not None:
+            max_len = max(len(mic_pcm), len(mon_pcm))
+            mic_f = np.zeros(max_len, dtype=np.float32)
+            mon_f = np.zeros(max_len, dtype=np.float32)
+            mic_f[:len(mic_pcm)] = mic_pcm.astype(np.float32)
+            mon_f[:len(mon_pcm)] = mon_pcm.astype(np.float32)
+            mixed = np.clip(mic_f + mon_f, -32768, 32767).astype(np.int16)
+        else:
+            mixed = mic_pcm if mic_pcm is not None else mon_pcm
+
+        from .audio.wav import pcm_to_wav
+        wav = pcm_to_wav(mixed, 16000)
+        log.info(f"[SNAPSHOT] {len(mixed)/16000:.1f}s of audio")
+
+        def process():
+            self._process_auto_chunk(wav)
+            log.info(f"[SNAPSHOT] Done. Transcript: {len(self._transcript)} entries. Recording continues.")
+            if self._auto_response:
+                self.submit_recording('')
+            else:
+                self._focus_popup()
+                time.sleep(0.3)
+                self._emit_to_popup("focus_input", {})
+
+        threading.Thread(target=process, daemon=True).start()
 
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js (non-blocking)."""
@@ -130,31 +198,34 @@ class Api:
         return self.APP_FORMAT_SUGGESTION
 
     def _open_chat_popup(self):
-        """Open a floating chat window (reuse if already open)."""
+        """Open chat as sidebar on the right."""
         import webview
-        # Check if window still exists
         if self._chat_window:
             try:
-                # Test if window is still alive by checking its property
                 _ = self._chat_window.title
-                return  # still open
+                return
             except Exception:
                 self._chat_window = None
+
+        # Will position as sidebar after window loads
+        self._needs_sidebar_position = True
+
         chat_html = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "chat-popup.html")
         self._chat_window = webview.create_window(
             "Whisper Chat",
             url=chat_html,
             js_api=self,
-            width=500,
-            height=400,
+            width=420,
+            height=1080,
             on_top=True,
             background_color="#0f172a",
         )
-        # Clear reference when user closes the window
         self._chat_window_ready = False
         def on_loaded():
             self._chat_window_ready = True
             log.info("[POPUP] Window loaded and ready")
+            if getattr(self, '_needs_sidebar_position', False):
+                self._position_sidebar()
         def on_closed():
             self._chat_window = None
             self._chat_window_ready = False
@@ -227,6 +298,10 @@ class Api:
         import pathlib
         base = pathlib.Path(__file__).parent.parent
         paths = {
+            "conversa": base / "prompts" / "conversa-natural.md",
+            "sugestoes": base / "prompts" / "sugestoes.md",
+            "assistente": base / "prompts" / "assistente-objetivo.md",
+            "pesquisa": base / "prompts" / "pesquisa.md",
             "discovery": base / "Prompt_Modelo.md",
             "tecnico": base / "prompts" / "consultor-tecnico.md",
             "piadas": base / "prompts" / "piadas.md",
@@ -261,28 +336,42 @@ class Api:
             threading.Thread(target=prewarm, daemon=True).start()
 
         # Build participants context
-        ctx_parts = []
-        for p in cfg.participants:
-            name = p.name if isinstance(p, Participant) else p.get("name", "")
-            role = p.role if isinstance(p, Participant) else p.get("role", "")
-            if not name:
-                continue
-            desc = f"{name} - {role}" if role else name
-            ctx_parts.append(f"- {desc}")
-        self._participants_context = (
-            f"Participantes da reunião:\n" + "\n".join(ctx_parts) if ctx_parts else ""
-        )
+        if cfg.participant_mode == "many":
+            ctx = cfg.many_context or ""
+            self._participants_context = (
+                f"Contexto: {ctx}\n" if ctx else ""
+            ) + "Várias pessoas falando. Identifique pelos nomes mencionados na conversa."
+        elif cfg.participant_mode == "none":
+            identity = cfg.user_identity or ""
+            self._participants_context = (
+                f"Sobre o usuário: {identity}\n" if identity else ""
+            ) + "Identifique os participantes pelos nomes mencionados na conversa. Ajude o usuário diretamente."
+        else:
+            ctx_parts = []
+            for p in cfg.participants:
+                name = p.name if isinstance(p, Participant) else p.get("name", "")
+                role = p.role if isinstance(p, Participant) else p.get("role", "")
+                if not name:
+                    continue
+                desc = f"{name} - {role}" if role else name
+                ctx_parts.append(f"- {desc}")
+            self._participants_context = (
+                f"Participantes da reunião:\n" + "\n".join(ctx_parts) if ctx_parts else ""
+            )
 
         self._my_label = cfg.my_name or "EU"
         self._suggestions_target = cfg.suggestions_target or self._my_label
         self._raw_system_prompt = cfg.custom_system_prompt or ""
-        self._custom_system_prompt = self._build_system_prompt(cfg.custom_system_prompt)
+        if cfg.extra_context:
+            self._raw_system_prompt += f"\n\nContexto adicional do usuário:\n{cfg.extra_context}"
+        self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
         self._response_mode = cfg.response_mode or "short"
         self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
         self._start_time = time.time()
+        self._emit("session_reset", {})
 
         log.info(f"[START] === MEETING STARTED ===")
         log.info(f"[START] response_mode={self._response_mode}")
@@ -315,6 +404,7 @@ class Api:
                 manual_mode=False,
             )
 
+        self._snapshot_key = cfg.snapshot_hotkey or ""
         if cfg.global_hotkey:
             self.register_global_hotkey(cfg.global_hotkey)
 
@@ -385,9 +475,65 @@ class Api:
         threading.Thread(target=flush_and_respond, daemon=True).start()
 
 
+
+    def _position_sidebar(self):
+        """Position the chat popup as a sidebar on the right edge."""
+        import shutil
+        if not shutil.which("hyprctl"):
+            return
+
+        def do_position():
+            import subprocess, json as _json
+            # Retry finding the window
+            chat = None
+            for attempt in range(10):
+                time.sleep(0.5)
+                r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
+                clients = _json.loads(r.stdout)
+                our = [c for c in clients if "main.py" in c.get("class", "")]
+                if len(our) >= 2:
+                    chat = min(our, key=lambda c: c["size"][0] * c["size"][1])
+                    break
+                log.debug(f"[SIDEBAR] Attempt {attempt+1}: {len(our)} windows found")
+
+            if not chat:
+                log.warning("[SIDEBAR] Chat window not found after retries")
+                return
+
+            addr = chat["address"]
+            r2 = subprocess.run(["hyprctl", "monitors", "-j"], capture_output=True, text=True, timeout=2)
+            monitors = _json.loads(r2.stdout)
+            mon = next((m for m in monitors if m.get("focused")), monitors[0])
+            mx, my = mon.get("x", 0), mon.get("y", 0)
+            mw = int(mon["width"] / mon["scale"])
+            mh = int(mon["height"] / mon["scale"])
+            sw = 420
+            x = mx + mw - sw
+            subprocess.run(["hyprctl", "dispatch", f"setfloating address:{addr}"], capture_output=True, timeout=2)
+            time.sleep(0.1)
+            subprocess.run(["hyprctl", "dispatch", f"resizewindowpixel exact {sw} {mh},address:{addr}"], capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"movewindowpixel exact {x} {my},address:{addr}"], capture_output=True, timeout=2)
+            subprocess.run(["hyprctl", "dispatch", f"pin address:{addr}"], capture_output=True, timeout=2)
+            log.info(f"[SIDEBAR] {sw}x{mh} at ({x},{my}) monitor={mon['name']} addr={addr}")
+
+        threading.Thread(target=do_position, daemon=True).start()
+
     def _focus_popup(self):
-        """Focus the popup window via platform-specific method."""
-        focus_popup_window()
+        """Focus the popup window via hyprctl (Wayland/Hyprland)."""
+        if not self._chat_window:
+            return
+        try:
+            import subprocess, json as _json
+            r = subprocess.run(["hyprctl", "clients", "-j"], capture_output=True, text=True, timeout=2)
+            clients = _json.loads(r.stdout)
+            our_windows = [c for c in clients if "main.py" in c.get("class", "")]
+            if len(our_windows) > 1:
+                popup = min(our_windows, key=lambda c: c["size"][0] * c["size"][1])
+                subprocess.run(["hyprctl", "dispatch", "focuswindow", f"address:{popup['address']}"],
+                               capture_output=True, timeout=2)
+                log.info(f"[FOCUS] Focused popup: {popup['address']}")
+        except Exception as e:
+            log.debug(f"[FOCUS] Failed: {e}")
 
     def _emit_to_popup(self, event, data):
         """Send event only to popup window."""
@@ -408,6 +554,20 @@ class Api:
     )
 
     @staticmethod
+    def _trim_to_sentence(text: str) -> str:
+        """Trim text at the last complete sentence."""
+        text = text.strip()
+        if not text:
+            return text
+        if text[-1] in '.!?")\':':
+            return text
+        # Find last sentence-ending punctuation
+        for i in range(len(text) - 1, -1, -1):
+            if text[i] in '.!?':
+                return text[:i + 1]
+        return text  # no punctuation found, return as-is
+
+    @staticmethod
     def _clean_md(text: str) -> str:
         import re
         text = re.sub(r'#{1,6}\s*', '', text)                    # ### headers
@@ -415,7 +575,14 @@ class Api:
         text = re.sub(r'^-\s+', '', text, flags=re.MULTILINE)    # - list items
         text = re.sub(r'^\d+\.\s+', '', text, flags=re.MULTILINE) # 1. numbered
         text = re.sub(r'`([^`]+)`', r'\1', text)                 # `code`
-        text = re.sub(r'\n{3,}', '\n\n', text)                   # excess newlines
+        # Remove title-like first line (no punctuation, followed by blank line)
+        lines = text.strip().split('\n')
+        if len(lines) >= 2 and lines[1].strip() == '':
+            first = lines[0].strip()
+            if first and first[-1] not in '.,;:!?' and len(first) < 80:
+                lines = lines[2:]
+        text = '\n'.join(lines)
+        text = re.sub(r'\n{3,}', '\n\n', text)
         return text.strip()
 
     def submit_recording(self, user_instruction: str = ""):
@@ -436,24 +603,46 @@ class Api:
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 100, "hint": "Dê no máximo 3 respostas em 1 frase cada."},
-                "full": {"max_tok": 512, "hint": "Dê até 10 respostas detalhadas."},
-                "research": {"max_tok": 2048, "hint": "Faça uma análise profunda e completa."},
+                "short": {"max_tok": 150, "hint": "Seja breve.", "fmt": "\nSem markdown, sem títulos."},
+                "full": {"max_tok": 300, "hint": "", "fmt": "\nSem markdown, sem títulos."},
+                "research": {"max_tok": 600, "hint": "", "fmt": "\nSem markdown. Parágrafos curtos."},
             }
 
             def chat_only():
                 try:
                     context = self._build_full_context()
+                    participants = self._participants_context
                     system = self._raw_system_prompt or "Você é um copiloto de reuniões."
                     mode = RESPONSE_MODES.get(self._response_mode, RESPONSE_MODES["short"])
                     max_tok = mode["max_tok"]
                     hint = mode["hint"] if not user_instruction else ""
-                    copilot_fmt = "\nResponda em texto corrido, como se estivesse falando. Sem títulos, sem listas, sem formatação."
-                    no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto. Foque no que é novo."
-                    user_msg = f"Contexto da conversa:\n{context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
+                    copilot_fmt = mode["fmt"]
+                    no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto." if "[Copiloto respondeu]" in context else ""
+
+                    # Ask Bedrock if web search is needed
+                    search_context = ""
+                    if user_instruction or self._transcript:
+                        last_text = " ".join(e['text'] for e in self._transcript[-5:])
+                        check_msg = f"Contexto: {last_text[:200]}\nInstrução: {effective_instruction}\n\nVocê precisa pesquisar na internet pra responder? Responda APENAS 'SIM: query de busca' ou 'NAO'."
+                        check = self._bedrock.call_raw("Responda apenas SIM ou NAO.", check_msg, max_tokens=30)
+                        check = check.strip()
+                        log.info(f"[Chat] Search check: {check[:60]}")
+                        if check.upper().startswith("SIM"):
+                            from .search import web_search
+                            query = check.split(":", 1)[1].strip() if ":" in check else effective_instruction
+                            # Add transcript context to query for better results
+                            query = f'{query} "{last_text[:60]}"'
+                            log.info(f"[Chat] Web search: '{query[:80]}'")
+                            results = web_search(query, max_results=5)
+                            search_context = f"\n\nResultados da pesquisa web:\n{results}"
+                            log.info(f"[Chat] Search: {len(results)} chars")
+
+                    user_msg = f"{participants}\n\nContexto da conversa:\n{context}{search_context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
+                    # Trim at last complete sentence to avoid mid-sentence cutoff
+                    result = self._trim_to_sentence(result)
                     log.info(f"[Chat] Response ({len(result)} chars): {result[:150]}")
                     self._emit("copilot_response", {"response": result, "had_instruction": bool(user_instruction)})
                 except Exception as e:
@@ -509,6 +698,8 @@ class Api:
             earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
 
             system = ("Você identifica quem fala em reuniões. "
+                      "Se alguém é chamado pelo nome na conversa, use esse nome como speaker. "
+                      "Se não souber o nome, use Pessoa 1, Pessoa 2, etc mantendo consistência. "
                       "Responda SOMENTE JSON puro: {\"transcript\": [{\"speaker\": \"Nome\", \"text\": \"fala\"}]}")
             user_msg = (
                 f"{participants_str}{earlier_block}\n"

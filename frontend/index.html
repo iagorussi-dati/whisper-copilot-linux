@@ -45,7 +45,10 @@ const state = {
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
-    response_mode: 'short', auto_response: true,
+    snapshot_hotkey: 'F2',
+    response_mode: 'short', auto_response: true, extra_context: '',
+    participant_mode: 'named', many_context: '',
+    user_identity: '',
   },
   devices: [],
   micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
@@ -105,7 +108,7 @@ function renderSetup() {
   const inputDevs = state.devices.filter(d => d.deviceType === 'input');
   const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
   const hasDevice = (c.mic_device_id && c.mic_device_id !== 'none') || (c.monitor_device_id && c.monitor_device_id !== 'none');
-  const canStart = hasDevice && state.awsValid === 'ok';
+  const canStart = hasDevice && state.awsValid === 'ok' && c.custom_system_prompt;
 
   return `
     <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
@@ -124,48 +127,82 @@ function renderSetup() {
       ${state.awsInfo ? `<span class="text-xs text-slate-400">${state.awsInfo}</span>` : ''}
     </div>
 
-    <!-- Contexto da conversa -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">Contexto</h2>
-    <p class="text-xs text-slate-500 mb-3">Quem participa da conversa? A IA usa isso para identificar falas e direcionar respostas.</p>
-    <div class="space-y-2 mb-3">
-      ${c.participants.map((p, i) => `
-        <div class="flex gap-2 items-center bg-slate-800/50 rounded-lg p-2 ${c.suggestions_target === p.name && p.name ? 'ring-1 ring-emerald-500/50' : ''}">
-          <button data-action="setTarget" data-idx="${i}" title="Direcionar copiloto para esta pessoa"
-            class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${c.suggestions_target === p.name && p.name ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-500 hover:bg-slate-600'}">
-            ${c.suggestions_target === p.name && p.name ? '🎯' : '👤'}
-          </button>
-          <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
-            class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
-          <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Papel (ex: cliente, dev, gestor)"
-            class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
-          <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1 transition-colors">×</button>
-        </div>
-      `).join('')}
-    </div>
-    <div class="flex gap-2 items-center mb-4">
-      <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">+ Adicionar pessoa</button>
-      ${c.suggestions_target ? `<span class="text-xs text-emerald-400 ml-auto">🎯 Copiloto focado em: ${c.suggestions_target}</span>` : '<span class="text-xs text-slate-500 ml-auto">Copiloto sem foco específico</span>'}
+    <!-- Identificação de participantes -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Participantes</h2>
+    <div class="flex gap-2 mb-3">
+      <button data-action="setParticipantMode" data-val="named" class="flex-1 py-2 text-xs rounded border transition-colors ${c.participant_mode === 'named' ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        👥 Pessoas específicas
+      </button>
+      <button data-action="setParticipantMode" data-val="many" class="flex-1 py-2 text-xs rounded border transition-colors ${c.participant_mode === 'many' ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        🌐 Muitas pessoas
+      </button>
+      <button data-action="setParticipantMode" data-val="none" class="flex-1 py-2 text-xs rounded border transition-colors ${c.participant_mode === 'none' ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        🤖 Automático
+      </button>
     </div>
 
-    <!-- System Prompt -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">System Prompt (opcional)</h2>
-    <p class="text-xs text-slate-500 mb-2">Define o contexto e comportamento do copiloto. Selecione um template ou carregue um arquivo.</p>
+    ${c.participant_mode === 'named' ? `
+      <p class="text-xs text-slate-500 mb-2">Adicione quem vai falar. A IA identifica melhor com nome + papel.</p>
+      <div class="space-y-2 mb-3">
+        ${c.participants.map((p, i) => `
+          <div class="flex gap-2 items-center bg-slate-800/50 rounded-lg p-2 ${c.suggestions_target === p.name && p.name ? 'ring-1 ring-emerald-500/50' : ''}">
+            <button data-action="setTarget" data-idx="${i}" title="Direcionar copiloto"
+              class="w-8 h-8 rounded-full flex items-center justify-center text-sm transition-all ${c.suggestions_target === p.name && p.name ? 'bg-emerald-600 text-white' : 'bg-slate-700 text-slate-500 hover:bg-slate-600'}">
+              ${c.suggestions_target === p.name && p.name ? '🎯' : '👤'}
+            </button>
+            <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="name" value="${p.name}" placeholder="Nome"
+              class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+            <input type="text" data-action="updateParticipant" data-idx="${i}" data-field="role" value="${p.role}" placeholder="Papel (ex: dev, gestor)"
+              class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+            <button data-action="removeParticipant" data-idx="${i}" class="text-slate-500 hover:text-red-400 text-lg px-1 transition-colors">×</button>
+          </div>
+        `).join('')}
+      </div>
+      <button data-action="addParticipant" class="text-xs text-slate-400 hover:text-emerald-400 transition-colors">+ Adicionar pessoa</button>
+    ` : c.participant_mode === 'many' ? `
+      <p class="text-xs text-slate-500 mb-2">A IA identifica automaticamente pelos nomes mencionados na conversa.</p>
+      <textarea data-bind="many_context" rows="2" placeholder="Contexto (opcional): Ex: Daily standup de equipe de desenvolvimento..."
+        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.many_context || ''}</textarea>
+    ` : `
+      <p class="text-xs text-slate-500 mb-2">O copiloto vai te ajudar diretamente. Diga quem você é pra ele te conhecer.</p>
+      <textarea data-bind="user_identity" rows="2" placeholder="Ex: Sou o Leo, estagiário de DevOps. Estou aprendendo sobre AWS e quero entender o que está sendo discutido."
+        class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.user_identity || ''}</textarea>
+    `}
+    ${c.suggestions_target ? `<p class="text-xs text-emerald-400 mt-2">🎯 Copiloto focado em: ${c.suggestions_target}</p>` : ''}
+
+    <!-- Template do Copiloto -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Template</h2>
+    <p class="text-xs text-slate-500 mb-2">Define como o copiloto se comporta. Obrigatório.</p>
     <div class="flex gap-2 mb-2">
       <select data-action="selectTemplate"
         class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
         <option value="">Selecione um template...</option>
-        <option value="discovery">📋 Discovery Comercial (Dati)</option>
-        <option value="tecnico">🔧 Consultor Técnico AWS</option>
-        <option value="piadas">🎭 Piadas e Humor</option>
-        <option value="vendas">💰 Copiloto de Vendas</option>
+        <optgroup label="Uso geral">
+          <option value="conversa">💬 Conversa Natural (tipo GPT)</option>
+          <option value="sugestoes">📋 Sugestões (ações com emojis)</option>
+          <option value="assistente">⚡ Assistente Objetivo (máx 3 frases)</option>
+          <option value="pesquisa">🔍 Pesquisa (análise profunda)</option>
+        </optgroup>
+        <optgroup label="Específicos">
+          <option value="discovery">📋 Discovery Comercial (Dati)</option>
+          <option value="tecnico">🔧 Consultor Técnico AWS</option>
+          <option value="vendas">💰 Copiloto de Vendas</option>
+          <option value="piadas">🎭 Piadas e Humor</option>
+        </optgroup>
         <option value="custom">📄 Carregar arquivo...</option>
       </select>
     </div>
     <input type="file" data-action="loadPromptFile" accept=".md,.txt,.markdown"
       class="text-xs text-slate-400 mb-2" style="display:none" id="promptFileInput" />
-    <textarea data-bind="custom_system_prompt" rows="6" placeholder="Ex: Você é um copiloto de vendas. Sugira técnicas de fechamento quando o cliente demonstrar interesse..."
-      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.custom_system_prompt}</textarea>
-    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ System prompt carregado (${c.custom_system_prompt.length} chars)</p>` : ''}
+    <textarea data-bind="custom_system_prompt" rows="3" placeholder="Selecione um template acima ou escreva seu próprio..."
+      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y text-xs">${c.custom_system_prompt}</textarea>
+    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ Template carregado</p>` : '<p class="text-xs text-amber-400 mt-1">⚠️ Selecione um template</p>'}
+
+    <!-- Instruções adicionais -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Instruções adicionais</h2>
+    <p class="text-xs text-slate-500 mb-2">Contexto extra que o copiloto deve considerar. Opcional.</p>
+    <textarea data-bind="extra_context" rows="2" placeholder="Ex: Estamos discutindo migração pra AWS. Foco em custos e prazos. O cliente é conservador..."
+      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
 
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
@@ -187,9 +224,9 @@ function renderSetup() {
     <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
       ${[
-        {id:'short', label:'⚡ Curta', desc:'~2s', detail:'Até 3 respostas rápidas'},
-        {id:'full', label:'📋 Completa', desc:'~5s', detail:'Até 10 respostas'},
-        {id:'research', label:'🔍 Pesquisa', desc:'~10s', detail:'Análise profunda'}
+        {id:'short', label:'⚡ Curta', desc:'~1s', detail:'Até 2 frases'},
+        {id:'full', label:'💬 Normal', desc:'~2s', detail:'Até 4 frases'},
+        {id:'research', label:'🔍 Detalhada', desc:'~5s', detail:'Pesquisa web + análise'}
       ].map(m => `
         <button data-action="setResponseMode" data-val="${m.id}" class="flex-1 py-2 px-2 rounded border transition-colors ${c.response_mode === m.id ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
           <div class="text-xs font-medium">${m.label}</div>
@@ -212,23 +249,36 @@ function renderSetup() {
       </div>
     </div>
 
-    <!-- Global hotkey -->
+    <!-- Global hotkeys -->
     <div class="mb-4">
-      <label class="text-xs text-slate-400">Atalho global (funciona fora do app)</label>
-      <div class="flex gap-2 mt-1 items-center">
-        <select data-bind="global_hotkey"
-          class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
-          <option value="" ${!c.global_hotkey ? 'selected' : ''}>Desativado</option>
-          ${['space','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'].map(k =>
-            `<option value="${k}" ${c.global_hotkey === k ? 'selected' : ''}>SUPER + ${k === 'space' ? 'Espaço' : k}</option>`
-          ).join('')}
-        </select>
-        ${c.global_hotkey ? `<span class="text-xs text-emerald-400">SUPER+${c.global_hotkey === 'space' ? 'Espaço' : c.global_hotkey}</span>` : ''}
+      <label class="text-xs text-slate-400">Atalhos globais (funcionam fora do app)</label>
+      <div class="grid grid-cols-2 gap-2 mt-1">
+        <div>
+          <span class="text-xs text-slate-500">Gravar/Parar</span>
+          <select data-bind="global_hotkey"
+            class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+            <option value="" ${!c.global_hotkey ? 'selected' : ''}>Desativado</option>
+            ${['space','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12','D','F','H'].map(k =>
+              `<option value="${k}" ${c.global_hotkey === k ? 'selected' : ''}>SUPER + ${k === 'space' ? 'Espaço' : k}</option>`
+            ).join('')}
+          </select>
+        </div>
+        <div>
+          <span class="text-xs text-slate-500">Snapshot (sem parar)</span>
+          <select data-bind="snapshot_hotkey"
+            class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+            <option value="" ${!c.snapshot_hotkey ? 'selected' : ''}>Desativado</option>
+            ${['D','F','H','F1','F2','F3','F4','F5','F6','F7','F8','F9','F10','F11','F12'].map(k =>
+              `<option value="${k}" ${c.snapshot_hotkey === k ? 'selected' : ''}>SUPER + ${k}</option>`
+            ).join('')}
+          </select>
+        </div>
       </div>
     </div>
 
     <!-- Start -->
     ${!hasDevice ? '<p class="text-xs text-amber-400 mb-2">⚠️ Selecione pelo menos um dispositivo (microfone ou autofalante)</p>' : ''}
+    ${!c.custom_system_prompt ? '<p class="text-xs text-amber-400 mb-2">⚠️ Selecione um template de System Prompt</p>' : ''}
     <button data-action="startMeeting" ${!canStart ? 'disabled' : ''}
       class="w-full py-3 rounded font-semibold text-lg transition-colors ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white' : 'bg-slate-700 text-slate-500 cursor-not-allowed'}">
       Iniciar
@@ -523,6 +573,10 @@ function bindEvents() {
           break;
         case 'setAutoResponse':
           state.config.auto_response = el.dataset.val === 'true';
+          render();
+          break;
+        case 'setParticipantMode':
+          state.config.participant_mode = el.dataset.val;
           render();
           break;
         case 'triggerTranscription':

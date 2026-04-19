@@ -62,7 +62,7 @@ class BedrockClient:
         params = {
             "modelId": self.model_id,
             "messages": [{"role": "user", "content": [{"text": user_msg}]}],
-            "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature},
+            "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature, "topP": 0.5},
         }
         if system:
             params["system"] = [

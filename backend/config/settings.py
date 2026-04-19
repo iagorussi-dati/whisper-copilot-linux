@@ -34,8 +34,13 @@ class AppConfig:
     suggestions_target: str = ""  # nome do participante que recebe as sugestões
     custom_system_prompt: str = ""  # system prompt customizado para sugestões
     global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
+    snapshot_hotkey: str = "D"  # tecla para SUPER+tecla snapshot
     response_mode: str = "short"  # "short", "full", "research"
     auto_response: bool = True  # True = responde sozinho, False = espera instrução
+    many_context: str = ""  # contexto para modo 'muitas pessoas'
+    participant_mode: str = "named"  # "named", "many", "none"
+    user_identity: str = ""  # quem é o usuário (modo 'none')
+    extra_context: str = ""  # contexto adicional do usuário
 
     def to_dict(self) -> dict:
         d = asdict(self)
