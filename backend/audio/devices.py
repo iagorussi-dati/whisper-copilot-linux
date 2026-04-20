@@ -191,42 +191,28 @@ def _test_sounddevice(device_id: str, duration: int, on_level) -> float:
 
 def _test_wasapi(device_id: str, duration: int, on_level) -> float:
     dev_idx = int(device_id.replace("wasapi:", ""))
-    script = f"""
-import sys, time, numpy as np
-try:
-    import pyaudiowpatch as pyaudio
-    p = pyaudio.PyAudio()
-    dev = p.get_device_info_by_index({dev_idx})
-    rate = int(dev['defaultSampleRate'])
-    stream = p.open(format=pyaudio.paInt16, channels=2, rate=rate,
-                    input=True, input_device_index={dev_idx}, frames_per_buffer=rate//10)
     peak = 0.0
-    start = time.time()
-    while time.time() - start < {duration}:
-        data = stream.read(rate//10, exception_on_overflow=False)
-        samples = np.frombuffer(data, dtype=np.int16)[::2].astype(np.float32) / 32768.0
-        rms = float(np.sqrt(np.mean(samples ** 2)))
-        peak = max(peak, rms)
-        print(rms, flush=True)
-    stream.stop_stream(); stream.close(); p.terminate()
-    print(f"PEAK:{{peak}}", flush=True)
-except Exception as e:
-    print(f"ERROR:{{e}}", file=sys.stderr, flush=True)
-"""
     try:
-        proc = subprocess.Popen([sys.executable, "-c", script],
-                                stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1)
-        peak = 0.0
-        for line in proc.stdout:
-            line = line.strip()
-            if line.startswith("PEAK:"):
-                peak = float(line[5:])
-            elif on_level:
-                try:
-                    on_level(float(line))
-                except ValueError:
-                    pass
-        proc.wait(timeout=duration + 2)
-        return peak
+        import pyaudiowpatch as pyaudio
+        p = pyaudio.PyAudio()
+        dev = p.get_device_info_by_index(dev_idx)
+        rate = int(dev['defaultSampleRate'])
+        stream = p.open(format=pyaudio.paInt16, channels=2, rate=rate,
+                        input=True, input_device_index=dev_idx,
+                        frames_per_buffer=rate // 10)
+        start = time.time()
+        while time.time() - start < duration:
+            data = stream.read(rate // 10, exception_on_overflow=False)
+            samples = np.frombuffer(data, dtype=np.int16)[::2].astype(np.float32) / 32768.0
+            rms = float(np.sqrt(np.mean(samples ** 2)))
+            peak = max(peak, rms)
+            if on_level:
+                on_level(rms)
+        stream.stop_stream()
+        stream.close()
+        p.terminate()
+    except ImportError:
+        pass
     except Exception:
-        return 0.0
+        pass
+    return peak

@@ -17,17 +17,14 @@ class Participant:
 
 @dataclass
 class AppConfig:
-    transcription_provider: str = "groq"
-    diarization_provider: str = "local"
     groq_api_key: str = ""
     bedrock_api_key: str = ""
     aws_profile: str = "poc_iago"
     aws_region: str = "us-east-1"
     bedrock_model_id: str = "us.anthropic.claude-sonnet-4-20250514-v1:0"
     whisper_model: str = "whisper-large-v3-turbo"
-    language: str = "pt"
+    language: str = ""
     chunk_seconds: int = 60
-    diarization_threshold: float = 0.25
     mic_device_id: str = ""
     monitor_device_id: str = ""
     my_name: str = ""

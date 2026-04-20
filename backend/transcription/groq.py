@@ -21,7 +21,7 @@ class GroqError(Exception):
 
 class GroqClient:
     def __init__(self, api_key: str, model: str = "whisper-large-v3-turbo",
-                 language: str = "pt"):
+                 language: str = ""):
         self.api_key = api_key
         self.model = model
         self.language = language
@@ -53,12 +53,14 @@ class GroqClient:
     def transcribe(self, wav_bytes: bytes) -> str:
         """Simple transcription — returns text string."""
         self._wait_for_rate_limit()
+        data = {"model": self.model, "response_format": "text"}
+        if self.language:
+            data["language"] = self.language
         resp = self._http.post(
             f"{BASE_URL}/audio/transcriptions",
             headers={"Authorization": f"Bearer {self.api_key}"},
             files={"file": ("audio.wav", wav_bytes, "audio/wav")},
-            data={"model": self.model, "language": self.language,
-                  "response_format": "text"},
+            data=data,
         )
         self._update_rate_limit(resp)
         if resp.status_code == 401:
@@ -73,13 +75,15 @@ class GroqClient:
     def transcribe_verbose(self, wav_bytes: bytes) -> list[GroqSegment]:
         """Verbose transcription — returns segments with timestamps."""
         self._wait_for_rate_limit()
+        data = {"model": self.model, "response_format": "verbose_json",
+                "timestamp_granularities[]": "segment"}
+        if self.language:
+            data["language"] = self.language
         resp = self._http.post(
             f"{BASE_URL}/audio/transcriptions",
             headers={"Authorization": f"Bearer {self.api_key}"},
             files={"file": ("audio.wav", wav_bytes, "audio/wav")},
-            data={"model": self.model, "language": self.language,
-                  "response_format": "verbose_json",
-                  "timestamp_granularities[]": "segment"},
+            data=data,
         )
         self._update_rate_limit(resp)
         if not resp.is_success:

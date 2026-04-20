@@ -213,13 +213,52 @@ def position_sidebar(chat_window):
             _time.sleep(1)
             try:
                 import ctypes
+                import ctypes.wintypes
+
                 user32 = ctypes.windll.user32
-                screen_w = user32.GetSystemMetrics(0)
-                screen_h = user32.GetSystemMetrics(1)
+
+                # Find the monitor where the main window is
+                # EnumWindows to find our main window hwnd
+                main_hwnd = None
+                WNDENUMPROC = ctypes.WINFUNCTYPE(ctypes.c_bool, ctypes.wintypes.HWND, ctypes.wintypes.LPARAM)
+                def enum_cb(hwnd, lparam):
+                    nonlocal main_hwnd
+                    length = user32.GetWindowTextLengthW(hwnd)
+                    if length > 0:
+                        buf = ctypes.create_unicode_buffer(length + 1)
+                        user32.GetWindowTextW(hwnd, buf, length + 1)
+                        if "Whisper Copilot" in buf.value and "Chat" not in buf.value:
+                            main_hwnd = hwnd
+                    return True
+                user32.EnumWindows(WNDENUMPROC(enum_cb), 0)
+
+                # Get monitor info for that window (or primary if not found)
+                MONITOR_DEFAULTTOPRIMARY = 1
+                if main_hwnd:
+                    hmon = user32.MonitorFromWindow(main_hwnd, MONITOR_DEFAULTTOPRIMARY)
+                else:
+                    hmon = user32.MonitorFromPoint(ctypes.wintypes.POINT(0, 0), MONITOR_DEFAULTTOPRIMARY)
+
+                class MONITORINFO(ctypes.Structure):
+                    _fields_ = [("cbSize", ctypes.wintypes.DWORD),
+                                ("rcMonitor", ctypes.wintypes.RECT),
+                                ("rcWork", ctypes.wintypes.RECT),
+                                ("dwFlags", ctypes.wintypes.DWORD)]
+
+                mi = MONITORINFO()
+                mi.cbSize = ctypes.sizeof(MONITORINFO)
+                user32.GetMonitorInfoW(hmon, ctypes.byref(mi))
+
+                work = mi.rcWork
+                work_x, work_y = work.left, work.top
+                work_w = work.right - work.left
+                work_h = work.bottom - work.top
+
                 sw = 420
-                chat_window.move(screen_w - sw, 0)
-                chat_window.resize(sw, screen_h)
-                log.info(f"[SIDEBAR] Windows: {sw}x{screen_h} at x={screen_w - sw}")
+                pad_top = 4
+                chat_window.move(work_x + work_w - sw, work_y + pad_top)
+                chat_window.resize(sw, work_h - pad_top)
+                log.info(f"[SIDEBAR] Windows: {sw}x{work_h - pad_top} at x={work_x + work_w - sw} y={work_y + pad_top} workarea={work_w}x{work_h}")
             except Exception as e:
                 log.debug(f"[SIDEBAR] Windows positioning failed: {e}")
 

@@ -14,7 +14,6 @@ from dotenv import load_dotenv
 
 from .audio import list_audio_devices, test_device, AudioCapture, wav_to_pcm
 from .transcription import GroqClient, GroqError
-from .diarization import VoiceBank, extract_embedding
 from .llm import BedrockClient
 from .config import AppConfig, Participant, load_config, save_config
 from .platform import (get_platform, register_global_hotkey, unregister_global_hotkeys,
@@ -38,16 +37,16 @@ class Api:
         self._suggestions: list[str] = []
         self._groq: GroqClient | None = None
         self._bedrock: BedrockClient | None = None
-        self._voice_bank: VoiceBank | None = None
         self._participants_context: str = ""
         self._my_label: str = "EU"
         self._start_time: float | None = None
-        self._diarization_enabled: bool = True
         self._custom_system_prompt: str = ""
         self._suggestions_target: str = ""
         self._lock = threading.Lock()
         self._monitor_threads: dict[str, threading.Event] = {}
         self._recording = False
+        self._auto_response = True
+        self._behavior_template = ""
         self._pending_wav = None
         self._pending_instruction = ""
         self._chat_history: list[dict] = []
@@ -56,6 +55,68 @@ class Api:
 
     def set_window(self, window):
         self._window = window
+
+    def minimize_window(self):
+        if self._window:
+            self._window.minimize()
+
+    def toggle_maximize(self):
+        if self._window:
+            self._window.toggle_fullscreen()
+
+    def move_window(self, dx: int, dy: int):
+        if self._window:
+            self._window.move(self._window.x + dx, self._window.y + dy)
+
+    def close_window(self):
+        if self._window:
+            self._window.destroy()
+
+    def minimize_chat(self):
+        if self._chat_window:
+            self._chat_window.minimize()
+
+    def move_chat(self, dx: int, dy: int):
+        if self._chat_window:
+            self._chat_window.move(self._chat_window.x + dx, self._chat_window.y + dy)
+
+    def resize_chat(self, w: int, h: int):
+        if self._chat_window:
+            self._chat_window.resize(max(300, w), max(400, h))
+
+    def get_chat_size(self) -> dict:
+        if self._chat_window:
+            return {"w": self._chat_window.width, "h": self._chat_window.height}
+        return {"w": 420, "h": 800}
+
+    def close_session(self):
+        """End session and show summary screen in chat popup."""
+        if self._recording:
+            self._recording = False
+            self._emit("recording_state", {"recording": False})
+        self.unregister_global_hotkey()
+        if self._mic_capture:
+            self._mic_capture.stop()
+            self._mic_capture = None
+        if self._monitor_capture:
+            self._monitor_capture.stop()
+            self._monitor_capture = None
+        # Show summary screen in chat popup
+        self._emit_to_popup("show_summary", {})
+
+    def new_session(self):
+        """Close chat popup and go back to setup."""
+        if self._chat_window:
+            try:
+                self._chat_window.destroy()
+            except Exception:
+                pass
+            self._chat_window = None
+        self._start_time = None
+        if self._window:
+            self._window.show()
+            self._window.restore()
+            self._window.evaluate_js("window.__emit('session_ended', {})")
 
     HOTKEY_FILE = os.path.join(os.environ.get("TEMP", "/tmp"), "whisper-copilot-toggle")
     _hotkey_key: str = ""
@@ -127,6 +188,10 @@ class Api:
 
         if mic_pcm is None and mon_pcm is None:
             log.info("[SNAPSHOT] No audio to flush")
+            if self._auto_response:
+                self._emit("copilot_response", {"response": "🎤 Não captei áudio. Grave novamente.", "had_instruction": False})
+            else:
+                self._request_user_input()
             return
 
         if mic_pcm is not None and mon_pcm is not None:
@@ -149,9 +214,7 @@ class Api:
             if self._auto_response:
                 self.submit_recording('')
             else:
-                self._focus_popup()
-                time.sleep(0.3)
-                self._emit_to_popup("focus_input", {})
+                self._request_user_input()
 
         threading.Thread(target=process, daemon=True).start()
 
@@ -160,6 +223,12 @@ class Api:
         # Save chat-relevant events to history
         if event in ('transcript', 'copilot_response', 'recording_state', 'recording_stopped'):
             self._chat_history.append({"event": event, "data": data})
+        # Restore chat popup on copilot response
+        if event == 'copilot_response' and data.get('response') and self._chat_window:
+            try:
+                self._chat_window.restore()
+            except Exception:
+                pass
         payload = json.dumps(data, ensure_ascii=True)
         js = f"window.__emit('{event}', {payload})"
         for w in [self._window, self._chat_window]:
@@ -172,6 +241,10 @@ class Api:
     def get_chat_history(self) -> list[dict]:
         """Return chat history for popup restore."""
         return list(self._chat_history)
+
+    def get_auto_response(self) -> bool:
+        """Return whether auto_response is enabled."""
+        return self._auto_response
 
     def get_suggestion_format(self) -> str:
         """Return the suggestion format instruction (read-only preview)."""
@@ -197,6 +270,8 @@ class Api:
             js_api=self,
             width=420,
             height=1080,
+            min_size=(300, 400),
+            resizable=True,
             on_top=True,
             background_color="#0f172a",
         )
@@ -209,6 +284,14 @@ class Api:
         def on_closed():
             self._chat_window = None
             self._chat_window_ready = False
+            self._start_time = None
+            if self._window:
+                try:
+                    self._window.show()
+                    self._window.restore()
+                    self._window.evaluate_js("window.__emit('session_ended', {})")
+                except Exception:
+                    pass
         self._chat_window.events.loaded += on_loaded
         self._chat_window.events.closed += on_closed
 
@@ -323,6 +406,7 @@ class Api:
             "tecnico": base / "prompts" / "consultor-tecnico.md",
             "piadas": base / "prompts" / "piadas.md",
             "vendas": base / "prompts" / "vendas.md",
+            "shazam": base / "prompts" / "shazam.md",
         }
         path = paths.get(name)
         if path and path.exists():
@@ -393,15 +477,19 @@ class Api:
         self._raw_system_prompt = "\n\n".join(parts)
         self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
         self._response_mode = cfg.response_mode or "short"
+        self._behavior_template = cfg.behavior_template or ""
         self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
+        self._pending_wav = None
+        self._pending_instruction = ""
         self._start_time = time.time()
         self._emit("session_reset", {})
 
         log.info(f"[START] === SESSION STARTED ===")
         log.info(f"[START] response_mode={self._response_mode}")
+        log.info(f"[START] behavior={self._behavior_template}")
         log.info(f"[START] auto_response={self._auto_response}")
         log.info(f"[START] target={self._suggestions_target}")
         log.info(f"[START] system_prompt={len(self._raw_system_prompt)} chars: {self._raw_system_prompt[:80]}")
@@ -435,8 +523,10 @@ class Api:
         if cfg.global_hotkey:
             self.register_global_hotkey(cfg.global_hotkey)
 
-        # Open chat popup immediately
+        # Open chat popup and hide main window
         self._open_chat_popup()
+        if self._window:
+            self._window.hide()
 
     def start_recording(self):
         """Start capturing audio."""
@@ -461,6 +551,10 @@ class Api:
         self._emit("recording_stopped", {"had_audio": mic_pcm is not None or mon_pcm is not None})
 
         if mic_pcm is None and mon_pcm is None:
+            if self._auto_response:
+                self._emit("copilot_response", {"response": "🎤 Não captei áudio. Grave novamente.", "had_instruction": False})
+            else:
+                self._request_user_input()
             return
 
         if mic_pcm is not None and mon_pcm is not None:
@@ -495,9 +589,7 @@ class Api:
                 self.submit_recording('')
             else:
                 log.info("[REC] Waiting for user instruction (auto_response=False)")
-                # Focus input inside popup AFTER window has focus
-                time.sleep(0.3)
-                self._emit_to_popup("focus_input", {})
+                self._request_user_input()
 
         threading.Thread(target=flush_and_respond, daemon=True).start()
 
@@ -506,6 +598,19 @@ class Api:
     def _focus_popup(self):
         """Focus the popup window."""
         focus_popup_window()
+
+    def _request_user_input(self):
+        """Restore chat popup, focus it, and enable input field."""
+        log.info("[Focus] Requesting user input — restoring popup")
+        if self._chat_window:
+            try:
+                self._chat_window.restore()
+            except Exception:
+                pass
+        self._focus_popup()
+        time.sleep(0.3)
+        self._emit_to_popup("focus_input", {})
+        log.info("[Focus] focus_input emitted")
 
     def _position_sidebar(self):
         """Position chat as sidebar."""
@@ -567,16 +672,21 @@ class Api:
         self._pending_wav = None
 
         if user_instruction:
+            log.info(f"[Chat] User: '{user_instruction[:100]}'")
             self._chat_history.append({"event": "user_instruction", "data": {"text": user_instruction}})
 
         # No audio: chat-only mode
         if not wav:
             if not user_instruction and not self._transcript:
-                self._emit("recording_done", {"had_audio": False})
+                log.info("[Chat] No transcript and no instruction, nothing to do")
+                self._emit("copilot_response", {"response": "🎤 Não captei nada ainda. Tente novamente.", "had_instruction": False})
                 return
             self._emit("chat_thinking", {})
-            effective_instruction = user_instruction or "Analise a conversa e dê sua opinião em poucas frases."
+            effective_instruction = user_instruction or "Responda conforme seu comportamento configurado."
             log.info(f"[Chat] Pure chat: '{effective_instruction[:80]}'")
+            log.info(f"[Chat] behavior={self._behavior_template} response_mode={self._response_mode} auto={self._auto_response}")
+            log.info(f"[Chat] system_prompt: {self._raw_system_prompt[:120]}")
+            log.info(f"[Chat] transcript ({len(self._transcript)} entries): {' | '.join(e['text'][:50] for e in self._transcript[-5:])}")
 
             RESPONSE_MODES = {
                 "short": {"max_tok": 150, "hint": "Seja breve.", "fmt": "\nSem markdown, sem títulos."},
@@ -595,9 +705,24 @@ class Api:
                     copilot_fmt = mode["fmt"]
                     no_repeat = "\nNão repita informações que o Copiloto já respondeu no contexto." if "[Copiloto respondeu]" in context else ""
 
-                    # Ask Bedrock if web search is needed
+                    # Web search: only for research mode or shazam
                     search_context = ""
-                    if user_instruction or self._transcript:
+                    is_shazam = getattr(self, '_behavior_template', '') == 'shazam'
+                    is_research = self._response_mode == 'research'
+                    if is_shazam and self._transcript:
+                        # Shazam: Bedrock extracts lyrics query, always search
+                        last_text = " ".join(e['text'] for e in self._transcript[-5:])
+                        extract_msg = f"Transcricao (pode conter fala e musica misturada):\n{last_text[:400]}\n\nExtraia APENAS o trecho que parece ser letra de musica. Responda so o trecho, nada mais."
+                        lyrics_query = self._bedrock.call_raw("Extraia trechos de letra de musica.", extract_msg, max_tokens=80).strip()
+                        log.info(f"[Shazam] Extracted lyrics: {lyrics_query[:100]}")
+                        if lyrics_query and len(lyrics_query) > 10:
+                            from .search import web_search
+                            query = f'song lyrics "{lyrics_query[:80]}"'
+                            log.info(f"[Shazam] Web search: {query[:100]}")
+                            results = web_search(query, max_results=5)
+                            search_context = f"\n\nResultados da pesquisa web:\n{results}"
+                            log.info(f"[Shazam] Search: {len(results)} chars")
+                    elif is_research and (user_instruction or self._transcript):
                         last_text = " ".join(e['text'] for e in self._transcript[-5:])
                         check_msg = f"Contexto: {last_text[:200]}\nInstrução: {effective_instruction}\n\nVocê precisa pesquisar na internet pra responder? Responda APENAS 'SIM: query de busca' ou 'NAO'."
                         check = self._bedrock.call_raw("Responda apenas SIM ou NAO.", check_msg, max_tokens=30)
@@ -667,6 +792,7 @@ class Api:
                 return
             groq_time = _time.time() - t1
             log.info(f"[AUTO] Groq OK: {len(transcript_text)} chars em {groq_time:.2f}s")
+            log.info(f"[AUTO] Transcrição: {transcript_text[:200]}")
 
             # Bedrock: identify speakers only
             earlier_ctx = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
@@ -960,7 +1086,6 @@ class Api:
         transcript = list(self._transcript)
         suggestions = list(self._suggestions)
 
-        self._voice_bank = VoiceBank(0.30)
         self._start_time = None
 
         return {"transcript": transcript, "suggestions": suggestions, "summary": ""}

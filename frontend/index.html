@@ -8,7 +8,9 @@
   <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
   <style>
     body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; }
-    select { color: #f1f5f9 !important; background-color: #1e293b !important; -webkit-appearance: none; }
+    select { color: #f1f5f9 !important; background-color: #1e293b !important; -webkit-appearance: none; appearance: none;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M2 4l4 4 4-4'/%3E%3C/svg%3E");
+      background-repeat: no-repeat; background-position: right 10px center; padding-right: 28px !important; }
     select option { color: #f1f5f9; background-color: #1e293b; }
     .vu-bar { transition: width 150ms ease; }
     .fade-in { animation: fadeIn 0.3s ease; }
@@ -20,9 +22,64 @@
     .markdown-body p { margin-bottom: 0.5rem; }
     .markdown-body ul { list-style: disc; padding-left: 1.5rem; margin-bottom: 0.5rem; }
     .markdown-body li { margin-bottom: 0.25rem; }
+
+    /* Modern scrollbar */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+    * { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
   </style>
 </head>
 <body class="min-h-screen">
+
+<!-- Custom Titlebar (Spotify-style) -->
+<div id="titlebar" style="position:fixed;top:0;left:0;right:0;height:32px;background:#0f172a;display:flex;align-items:center;z-index:9999;user-select:none;border-bottom:1px solid #1e293b;cursor:default;">
+  <div style="display:flex;align-items:center;gap:8px;padding-left:12px;flex:1;overflow:hidden;pointer-events:none;">
+    <svg width="18" height="18" viewBox="0 0 512 416" xmlns="http://www.w3.org/2000/svg" fill="#94a3b8" fill-rule="evenodd" clip-rule="evenodd" stroke-linejoin="round" stroke-miterlimit="2"><path d="M181.33 266.143c0-11.497 9.32-20.818 20.818-20.818 11.498 0 20.819 9.321 20.819 20.818v38.373c0 11.497-9.321 20.818-20.819 20.818-11.497 0-20.818-9.32-20.818-20.818v-38.373zM308.807 245.325c-11.477 0-20.798 9.321-20.798 20.818v38.373c0 11.497 9.32 20.818 20.798 20.818 11.497 0 20.818-9.32 20.818-20.818v-38.373c0-11.497-9.32-20.818-20.818-20.818z" fill-rule="nonzero"/><path d="M512.002 246.393v57.384c-.02 7.411-3.696 14.638-9.67 19.011C431.767 374.444 344.695 416 256 416c-98.138 0-196.379-56.542-246.33-93.21-5.975-4.374-9.65-11.6-9.671-19.012v-57.384a35.347 35.347 0 016.857-20.922l15.583-21.085c8.336-11.312 20.757-14.31 33.98-14.31 4.988-56.953 16.794-97.604 45.024-127.354C155.194 5.77 226.56 0 256 0c29.441 0 100.807 5.77 154.557 62.722 28.19 29.75 40.036 70.401 45.025 127.354 13.263 0 25.602 2.936 33.958 14.31l15.583 21.127c4.476 6.077 6.878 13.345 6.878 20.88zm-97.666-26.075c-.677-13.058-11.292-18.19-22.338-21.824-11.64 7.309-25.848 10.183-39.46 10.183-14.454 0-41.432-3.47-63.872-25.869-5.667-5.625-9.527-14.454-12.155-24.247a212.902 212.902 0 00-20.469-1.088c-6.098 0-13.099.349-20.551 1.088-2.628 9.793-6.509 18.622-12.155 24.247-22.4 22.4-49.418 25.87-63.872 25.87-13.612 0-27.86-2.855-39.501-10.184-11.005 3.613-21.558 8.828-22.277 21.824-1.17 24.555-1.272 49.11-1.375 73.645-.041 12.318-.082 24.658-.288 36.976.062 7.166 4.374 13.818 10.882 16.774 52.97 24.124 103.045 36.278 149.137 36.278 46.01 0 96.085-12.154 149.014-36.278 6.508-2.956 10.84-9.608 10.881-16.774.637-36.832.124-73.809-1.642-110.62h.041zM107.521 168.97c8.643 8.623 24.966 14.392 42.56 14.392 13.448 0 39.03-2.874 60.156-24.329 9.28-8.951 15.05-31.35 14.413-54.079-.657-18.231-5.769-33.28-13.448-39.665-8.315-7.371-27.203-10.574-48.33-8.644-22.399 2.238-41.267 9.588-50.875 19.833-20.798 22.728-16.323 80.317-4.476 92.492zm130.556-56.008c.637 3.51.965 7.35 1.273 11.517 0 2.875 0 5.77-.308 8.952 6.406-.636 11.847-.636 16.959-.636s10.553 0 16.959.636c-.329-3.182-.329-6.077-.329-8.952.329-4.167.657-8.007 1.294-11.517-6.735-.637-12.812-.965-17.924-.965s-11.21.328-17.924.965zm49.275-8.008c-.637 22.728 5.133 45.128 14.413 54.08 21.105 21.454 46.708 24.328 60.155 24.328 17.596 0 33.918-5.769 42.561-14.392 11.847-12.175 16.322-69.764-4.476-92.492-9.608-10.245-28.476-17.595-50.875-19.833-21.127-1.93-40.015 1.273-48.33 8.644-7.679 6.385-12.791 21.434-13.448 39.665z"/></svg>
+    <span style="font-size:12px;color:#94a3b8;font-family:system-ui;white-space:nowrap;">Whisper Copilot</span>
+  </div>
+  <div style="display:flex;">
+    <button onclick="window.__wv_minimize()" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='transparent'" style="width:46px;height:32px;border:none;background:transparent;color:#94a3b8;font-size:16px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;">
+      <svg width="12" height="1" viewBox="0 0 12 1"><rect width="12" height="1" fill="#94a3b8"/></svg>
+    </button>
+    <button onclick="window.__wv_maximize()" onmouseover="this.style.background='#1e293b'" onmouseout="this.style.background='transparent'" style="width:46px;height:32px;border:none;background:transparent;color:#94a3b8;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#94a3b8" stroke-width="1"><rect x="0.5" y="0.5" width="9" height="9"/></svg>
+    </button>
+    <button onclick="window.__wv_close()" onmouseover="this.style.background='#e11d48';this.querySelector('svg').style.stroke='#fff'" onmouseout="this.style.background='transparent';this.querySelector('svg').style.stroke='#94a3b8'" style="width:46px;height:32px;border:none;background:transparent;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:background .15s;">
+      <svg width="10" height="10" viewBox="0 0 10 10" fill="none" stroke="#94a3b8" stroke-width="1.2"><line x1="0" y1="0" x2="10" y2="10"/><line x1="10" y1="0" x2="0" y2="10"/></svg>
+    </button>
+  </div>
+</div>
+<script>
+  window.__wv_minimize = () => { if(window.pywebview) pywebview.api.minimize_window(); };
+  let __maximized = false;
+  window.__wv_maximize = () => { if(window.pywebview) { pywebview.api.toggle_maximize(); __maximized = !__maximized; } };
+  window.__wv_close = () => { if(window.pywebview) pywebview.api.close_window(); };
+
+  // Manual drag on titlebar only (disabled when maximized)
+  (function() {
+    const tb = document.getElementById('titlebar');
+    let dragging = false, startX, startY;
+    tb.addEventListener('mousedown', (e) => {
+      if (e.target.closest('button') || __maximized) return;
+      dragging = true; startX = e.screenX; startY = e.screenY;
+    });
+    document.addEventListener('mousemove', (e) => {
+      if (!dragging) return;
+      const dx = e.screenX - startX, dy = e.screenY - startY;
+      startX = e.screenX; startY = e.screenY;
+      if (window.pywebview) pywebview.api.move_window(dx, dy);
+    });
+    document.addEventListener('mouseup', () => { dragging = false; });
+  })();
+
+  // Hide custom titlebar on Linux (not frameless)
+  if (navigator.platform.indexOf('Linux') !== -1 || navigator.platform.indexOf('X11') !== -1) {
+    document.getElementById('titlebar').style.display = 'none';
+    document.getElementById('app').style.marginTop = '0';
+  }
+</script>
 
 <!-- Event bus -->
 <script>
@@ -31,18 +88,18 @@
   };
 </script>
 
-<div id="app" class="max-w-3xl mx-auto p-4"></div>
+<div id="app" class="max-w-3xl mx-auto p-4" style="margin-top:32px;"></div>
 
 <script>
 // ── State ──
 const state = {
   page: 'setup', // setup | meeting | summary
   config: {
-    transcription_provider: 'groq', diarization_provider: 'local',
+    transcription_provider: 'groq',
     groq_api_key: '', bedrock_api_key: '', aws_region: 'us-east-1',
     bedrock_model_id: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
-    whisper_model: 'whisper-large-v3-turbo', language: 'pt',
-    chunk_seconds: 60, diarization_threshold: 0.25,
+    whisper_model: 'whisper-large-v3-turbo', language: '',
+    chunk_seconds: 60,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
     suggestions_target: '', custom_system_prompt: '', behavior_template: '', behavior_prompt: '', role_template: '', role_prompt: '', global_hotkey: '',
     snapshot_hotkey: 'F2',
@@ -119,6 +176,11 @@ function renderSetup() {
     ${renderDeviceSelector('mic', '🎙️ Microfone', inputDevs, c.mic_device_id, state.micTest)}
     ${renderDeviceSelector('monitor', '🔊 Autofalante', monitorDevs, c.monitor_device_id, state.monitorTest)}
 
+      <div class="mb-3">
+        <label class="text-xs text-slate-400">API Key do Groq <span class="text-slate-600">(obrigatória — <a href="https://console.groq.com/keys" style="color:#8b5cf6" target="_blank">criar aqui</a>)</span></label>
+        <input type="password" data-bind="groq_api_key" value="${c.groq_api_key}" placeholder="gsk_..."
+          class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
+      </div>
       <div class="flex gap-2 items-center">
         <button data-action="validateAws" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">Validar APIs</button>
         ${state.awsValid !== 'idle' ? `<span class="text-sm">${state.awsValid === 'testing' ? '⏳' : state.awsValid === 'ok' ? '✅' : '❌'}</span>` : ''}
@@ -126,6 +188,23 @@ function renderSetup() {
       </div>
     </div>
 
+    <!-- Instruções do Copiloto -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Instruções</h2>
+
+    <!-- Comportamento -->
+    <label class="text-xs text-slate-400">Comportamento <span class="text-slate-600">(como responde)</span></label>
+    <select data-action="selectTemplate" data-target="behavior"
+      class="w-full mt-1 mb-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+      <option value="">Selecione...</option>
+      <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>💬 Conversa Natural</option>
+      <option value="sugestoes" ${c.behavior_template === 'sugestoes' ? 'selected' : ''}>📋 Sugestões</option>
+      <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>⚡ Assistente Objetivo</option>
+      <option value="pesquisa" ${c.behavior_template === 'pesquisa' ? 'selected' : ''}>🔍 Pesquisa</option>
+      <option value="shazam" ${c.behavior_template === 'shazam' ? 'selected' : ''}>🎵 Shazam</option>
+    </select>
+    ${c.behavior_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.behavior_template || 'Custom'}</p>` : '<p class="text-xs text-amber-400 mb-3">⚠️ Selecione um comportamento</p>'}
+
+    ${c.behavior_template === 'shazam' ? '' : `
     <!-- Identificação de participantes -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Participantes</h2>
     <div class="flex gap-2 mb-3">
@@ -169,21 +248,6 @@ function renderSetup() {
     `}
     ${c.suggestions_target ? `<p class="text-xs text-emerald-400 mt-2">🎯 Copiloto focado em: ${c.suggestions_target}</p>` : ''}
 
-    <!-- Instruções do Copiloto -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">Instruções</h2>
-
-    <!-- Comportamento -->
-    <label class="text-xs text-slate-400">Comportamento <span class="text-slate-600">(como responde)</span></label>
-    <select data-action="selectTemplate" data-target="behavior"
-      class="w-full mt-1 mb-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
-      <option value="">Selecione...</option>
-      <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>💬 Conversa Natural</option>
-      <option value="sugestoes" ${c.behavior_template === 'sugestoes' ? 'selected' : ''}>📋 Sugestões</option>
-      <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>⚡ Assistente Objetivo</option>
-      <option value="pesquisa" ${c.behavior_template === 'pesquisa' ? 'selected' : ''}>🔍 Pesquisa</option>
-    </select>
-    ${c.behavior_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.behavior_template || 'Custom'}</p>` : '<p class="text-xs text-amber-400 mb-3">⚠️ Selecione um comportamento</p>'}
-
     <!-- Atuação -->
     <label class="text-xs text-slate-400">Atuação <span class="text-slate-600">(em que área atua)</span></label>
     <div class="flex gap-2 mt-1 mb-1">
@@ -206,6 +270,7 @@ function renderSetup() {
     <textarea data-bind="extra_context" rows="2" placeholder="Ex: Estamos discutindo migração pra AWS. Foco em custos e prazos. O cliente é conservador..."
       class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
     <p class="text-xs text-slate-500 mt-1">📌 Sempre priorizado sobre as outras instruções.</p>
+    `}
 
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
@@ -223,6 +288,7 @@ function renderSetup() {
       </button>
     </div>
 
+    ${c.behavior_template === 'shazam' ? '' : `
     <!-- Response mode -->
     <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
@@ -237,11 +303,12 @@ function renderSetup() {
         </button>
       `).join('')}
     </div>
+    `}
 
     <div class="grid grid-cols-2 gap-4 mb-4">
       <div>
         <label class="text-xs text-slate-400">Idioma</label>
-        <input type="text" data-bind="language" value="${c.language}"
+        <input type="text" data-bind="language" value="${c.language}" placeholder="auto-detect"
           class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500" />
       </div>
       <div>
@@ -316,7 +383,7 @@ function renderDeviceSelector(type, label, devices, selected, testState) {
           <div class="flex items-center gap-2 text-xs text-slate-400 mb-1">
             <span>Volume:</span>
             <div class="flex-1 h-2 bg-slate-700 rounded overflow-hidden">
-              <div id="vu-${type}" class="h-full ${type === 'mic' ? 'bg-emerald-500' : 'bg-blue-500'} transition-all duration-150" style="width: ${Math.min(level * 500, 100)}%"></div>
+              <div id="vu-${type}" class="h-full ${type === 'mic' ? 'bg-emerald-500' : 'bg-blue-500'} transition-all duration-150" style="width: ${Math.min(level * (type === 'mic' ? 2000 : 500), 100)}%"></div>
             </div>
           </div>
           <p class="text-xs text-slate-500">Fale no microfone ou toque um som no autofalante...</p>
@@ -339,7 +406,7 @@ function renderMeeting() {
         <span class="text-xs text-slate-500">${state.isRecording ? 'Gravando' : 'Parado'} | ${state.transcript.length} entradas</span>
       </div>
       <div class="flex gap-4 text-xs text-slate-400">
-        ${state.config.mic_device_id && state.config.mic_device_id !== 'none' ? `<span>Mic: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-emerald-500 rounded" style="width:${Math.min(state.micLevel * 500, 100)}%"></span></span></span>` : ''}
+        ${state.config.mic_device_id && state.config.mic_device_id !== 'none' ? `<span>Mic: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-emerald-500 rounded" style="width:${Math.min(state.micLevel * 2000, 100)}%"></span></span></span>` : ''}
         ${state.config.monitor_device_id && state.config.monitor_device_id !== 'none' ? `<span>Mon: <span class="inline-block w-16 h-2 bg-slate-700 rounded overflow-hidden align-middle"><span class="vu-bar block h-full bg-blue-500 rounded" style="width:${Math.min(state.monitorLevel * 500, 100)}%"></span></span></span>` : ''}
       </div>
       <button data-action="stopMeeting" class="px-4 py-1.5 bg-red-600 hover:bg-red-500 rounded text-sm font-medium transition-colors">Encerrar</button>
@@ -476,10 +543,6 @@ function bindEvents() {
           state.config.transcription_provider = el.dataset.val;
           render();
           break;
-        case 'setDiar':
-          state.config.diarization_provider = el.dataset.val;
-          render();
-          break;
         case 'selectDevice':
           console.log(`[SELECT DEVICE] type=${el.dataset.type}, value="${el.value}"`);
           if (el.dataset.type === 'mic') {
@@ -545,6 +608,11 @@ function bindEvents() {
             if (content && target === 'behavior') {
               state.config.behavior_template = tpl;
               state.config.behavior_prompt = content;
+              if (tpl === 'shazam') {
+                state.config.role_template = '';
+                state.config.role_prompt = '';
+                state.config.extra_context = '';
+              }
             } else if (content && target === 'role') {
               state.config.role_template = tpl;
               state.config.role_prompt = content;
@@ -766,6 +834,13 @@ window.addEventListener('backend:recording_state', (e) => {
   render();
 });
 
+window.addEventListener('backend:session_ended', () => {
+  state.summary = '';
+  state.summaryLoading = false;
+  state.page = 'summary';
+  render();
+});
+
 window.addEventListener('backend:recording_stopped', (e) => {
   state.isRecording = false;
   render();
@@ -793,7 +868,7 @@ window.addEventListener('backend:audio_level', (e) => {
   // Update VU meters without full re-render
   if (state.page === 'meeting') {
     const bars = document.querySelectorAll('.vu-bar');
-    if (bars[0] && src === 'mic') bars[0].style.width = Math.min(level * 500, 100) + '%';
+    if (bars[0] && src === 'mic') bars[0].style.width = Math.min(level * 2000, 100) + '%';
     if (bars[1] && src === 'monitor') bars[1].style.width = Math.min(level * 500, 100) + '%';
   }
   // Update test VU meters on setup page
@@ -808,7 +883,7 @@ window.addEventListener('backend:test_level', (e) => {
   if (isMic) state.micLevel = level;
   else state.monitorLevel = level;
   const bar = document.getElementById(isMic ? 'vu-mic' : 'vu-monitor');
-  if (bar) bar.style.width = Math.min(level * 500, 100) + '%';
+  if (bar) bar.style.width = Math.min(level * (isMic ? 2000 : 500), 100) + '%';
 });
 
 window.addEventListener('backend:test_done', (e) => {

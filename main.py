@@ -19,6 +19,7 @@ FRONTEND_DIR = os.path.join(os.path.dirname(__file__), "frontend")
 
 def main():
     api = Api()
+    is_windows = sys.platform == "win32"
     window = webview.create_window(
         "Whisper Copilot",
         url=os.path.join(FRONTEND_DIR, "index.html"),
@@ -27,6 +28,8 @@ def main():
         height=700,
         min_size=(700, 500),
         background_color="#0f172a",
+        frameless=is_windows,
+        easy_drag=False,
     )
     api.set_window(window)
     webview.start(debug="--debug" in sys.argv)
