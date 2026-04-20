@@ -258,19 +258,15 @@ class Api:
             mode_cfg = {"short": 150, "full": 300, "research": 600}
             max_tok = mode_cfg.get(self._response_mode, 150)
 
-            # Check if web search is needed
+            # Web search: always search for technical/objective prompts
             search_context = ""
             last_text = " ".join(e['text'] for e in self._transcript[-10:])
-            check_msg = f"Contexto recente:\n{last_text[:300]}\n\nVocê precisa pesquisar na internet pra responder (preço, spec, dados atuais)? Responda APENAS 'SIM: query de busca' ou 'NAO'."
-            check = self._bedrock.call_raw("Responda apenas SIM ou NAO.", check_msg, max_tokens=30).strip()
-            log.info(f"[SNAPSHOT] Search check: {check[:60]}")
-            if check.upper().startswith("SIM"):
+            if last_text:
                 from .search import web_search
-                query = check.split(":", 1)[1].strip() if ":" in check else last_text[:60]
-                query += " 2026"
+                query = last_text[:120] + " AWS pricing specs 2026"
                 log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
-                results = web_search(query, max_results=5)
-                search_context = f"\n\nResultados da pesquisa web (use esses dados na resposta):\n{results}"
+                results = web_search(query, max_results=3)
+                search_context = f"\n\nDados atualizados da web (use na resposta se relevante):\n{results}"
                 log.info(f"[SNAPSHOT] Search: {len(results)} chars")
 
             user_msg = (
