@@ -258,12 +258,28 @@ class Api:
             mode_cfg = {"short": 150, "full": 300, "research": 600}
             max_tok = mode_cfg.get(self._response_mode, 150)
 
+            # Check if web search is needed
+            search_context = ""
+            last_text = " ".join(e['text'] for e in self._transcript[-10:])
+            check_msg = f"Contexto recente:\n{last_text[:300]}\n\nVocê precisa pesquisar na internet pra responder (preço, spec, dados atuais)? Responda APENAS 'SIM: query de busca' ou 'NAO'."
+            check = self._bedrock.call_raw("Responda apenas SIM ou NAO.", check_msg, max_tokens=30).strip()
+            log.info(f"[SNAPSHOT] Search check: {check[:60]}")
+            if check.upper().startswith("SIM"):
+                from .search import web_search
+                query = check.split(":", 1)[1].strip() if ":" in check else last_text[:60]
+                query += " 2026"
+                log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
+                results = web_search(query, max_results=5)
+                search_context = f"\n\nResultados da pesquisa web (use esses dados na resposta):\n{results}"
+                log.info(f"[SNAPSHOT] Search: {len(results)} chars")
+
             user_msg = (
                 f"{self._participants_context}\n\n"
                 f"Contexto da conversa (fluxo contínuo):\n{context}\n\n"
                 f"Instrução: Analise o trecho MAIS RECENTE da conversa. "
                 f"Siga o fluxo natural — como um colega acompanhando ao vivo. "
                 f"Foque no que é NOVO: novas dores, perguntas, temas.{no_repeat_hint}"
+                f"{search_context}"
                 f"\nSem markdown, sem títulos."
             )
 
