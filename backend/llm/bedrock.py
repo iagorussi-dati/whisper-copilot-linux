@@ -8,9 +8,9 @@ import boto3
 
 log = logging.getLogger("whisper-copilot")
 
-COPILOT_SYSTEM_PROMPT = """Você é um copiloto de reuniões em tempo real.
+COPILOT_SYSTEM_PROMPT = """Você é um copiloto em tempo real.
 "EU" é o usuário. Outros participantes são identificados por voz.
-Você recebe transcrições incrementais da reunião.
+Você recebe transcrições incrementais da sessão.
 
 Responda APENAS quando tiver algo útil para sugerir ao usuário.
 Se não tiver nada relevante, responda exatamente: {}
@@ -24,9 +24,9 @@ REGRAS:
 - Só sugira quando for realmente útil
 - Baseie-se apenas no contexto recebido"""
 
-SPEAKER_ID_SYSTEM = """Você é um especialista em identificar participantes de reuniões.
+SPEAKER_ID_SYSTEM = """Você é um especialista em identificar participantes de conversas.
 Quando alguém diz "Oi X", quem fala NÃO é X.
-Quem conduz a reunião é o organizador. Quem apresenta conteúdo técnico é o especialista.
+Quem conduz a conversa é o organizador. Quem apresenta conteúdo técnico é o especialista.
 Responda APENAS com JSON válido, sem markdown."""
 
 
@@ -65,10 +65,7 @@ class BedrockClient:
             "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature, "topP": 0.5},
         }
         if system:
-            params["system"] = [
-                {"text": system},
-                {"cachePoint": {"type": "default"}},
-            ]
+            params["system"] = [{"text": system}]
 
         response = self._client.converse(**params)
         text = ""
@@ -128,7 +125,7 @@ class BedrockClient:
     def generate_summary(self, transcript: str, suggestions: list[str]) -> str:
         sug_text = "\n".join(f"{i+1}. {s}" for i, s in enumerate(suggestions)) or "Nenhuma."
         return self._call(
-            "Gere um resumo da reunião em Markdown com: Participantes, Pontos discutidos, Decisões, Próximos passos.",
+            "Gere um resumo da sessão em Markdown com: Participantes, Pontos discutidos, Decisões, Próximos passos.",
             f"## Transcrição:\n{transcript}\n\n## Sugestões:\n{sug_text}",
             max_tokens=4096,
         )

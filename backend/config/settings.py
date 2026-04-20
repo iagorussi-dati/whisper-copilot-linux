@@ -20,6 +20,7 @@ class AppConfig:
     transcription_provider: str = "groq"
     diarization_provider: str = "local"
     groq_api_key: str = ""
+    bedrock_api_key: str = ""
     aws_profile: str = "poc_iago"
     aws_region: str = "us-east-1"
     bedrock_model_id: str = "us.anthropic.claude-sonnet-4-20250514-v1:0"
@@ -33,6 +34,10 @@ class AppConfig:
     participants: list = field(default_factory=list)
     suggestions_target: str = ""  # nome do participante que recebe as sugestões
     custom_system_prompt: str = ""  # system prompt customizado para sugestões
+    behavior_template: str = ""
+    behavior_prompt: str = ""
+    role_template: str = ""
+    role_prompt: str = ""
     global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
     snapshot_hotkey: str = "D"  # tecla para SUPER+tecla snapshot
     response_mode: str = "short"  # "short", "full", "research"

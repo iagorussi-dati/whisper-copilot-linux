@@ -70,6 +70,7 @@ def _list_sounddevice() -> list[dict]:
                 "name": f"🎙️ {d['name']}",
                 "deviceType": "input",
                 "isDefault": i == default_in,
+                "recommended": i == default_in,
             })
     return devices
 
@@ -91,11 +92,16 @@ def _list_windows() -> list[dict]:
                 "name": f"🎙️ {d['name']}",
                 "deviceType": "input",
                 "isDefault": i == default_in,
+                "recommended": i == default_in,
             })
 
     try:
         import pyaudiowpatch as pyaudio
         p = pyaudio.PyAudio()
+        try:
+            default_loopback_idx = p.get_default_wasapi_loopback()["index"]
+        except Exception:
+            default_loopback_idx = -1
         for i in range(p.get_device_count()):
             try:
                 dev = p.get_device_info_by_index(i)
@@ -104,7 +110,8 @@ def _list_windows() -> list[dict]:
                         "id": f"wasapi:{i}",
                         "name": f"🔊 {dev['name']}",
                         "deviceType": "monitor",
-                        "isDefault": False,
+                        "isDefault": i == default_loopback_idx,
+                        "recommended": i == default_loopback_idx,
                     })
             except Exception:
                 pass

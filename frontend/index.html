@@ -39,19 +39,19 @@ const state = {
   page: 'setup', // setup | meeting | summary
   config: {
     transcription_provider: 'groq', diarization_provider: 'local',
-    groq_api_key: '', aws_profile: 'poc_iago', aws_region: 'us-east-1',
+    groq_api_key: '', bedrock_api_key: '', aws_region: 'us-east-1',
     bedrock_model_id: 'us.anthropic.claude-sonnet-4-20250514-v1:0',
     whisper_model: 'whisper-large-v3-turbo', language: 'pt',
     chunk_seconds: 60, diarization_threshold: 0.25,
     mic_device_id: '', monitor_device_id: '', my_name: '', participants: [],
-    suggestions_target: '', custom_system_prompt: '', global_hotkey: '',
+    suggestions_target: '', custom_system_prompt: '', behavior_template: '', behavior_prompt: '', role_template: '', role_prompt: '', global_hotkey: '',
     snapshot_hotkey: 'F2',
     response_mode: 'short', auto_response: true, extra_context: '',
     participant_mode: 'named', many_context: '',
     user_identity: '',
   },
   devices: [],
-  micTest: 'idle', monitorTest: 'idle', awsValid: 'idle', awsInfo: '',
+  micTest: 'idle', monitorTest: 'idle', awsValid: 'ok', awsInfo: '',
   tab: 'admin',
   // Meeting
   transcript: [],
@@ -108,23 +108,22 @@ function renderSetup() {
   const inputDevs = state.devices.filter(d => d.deviceType === 'input');
   const monitorDevs = state.devices.filter(d => d.deviceType === 'output' || d.deviceType === 'monitor');
   const hasDevice = (c.mic_device_id && c.mic_device_id !== 'none') || (c.monitor_device_id && c.monitor_device_id !== 'none');
-  const canStart = hasDevice && state.awsValid === 'ok' && c.custom_system_prompt;
+  const canStart = hasDevice && c.behavior_prompt;
 
   return `
     <h1 class="text-2xl font-bold text-center mb-6">Whisper Copilot</h1>
-    <p class="text-xs text-slate-500 mb-4">Copiloto de reuniões em tempo real.</p>
+    <p class="text-xs text-slate-500 mb-4">Copiloto inteligente em tempo real.</p>
 
     <!-- Audio devices -->
     <h2 class="text-lg font-semibold mb-2">Dispositivos de Áudio</h2>
     ${renderDeviceSelector('mic', '🎙️ Microfone', inputDevs, c.mic_device_id, state.micTest)}
     ${renderDeviceSelector('monitor', '🔊 Autofalante', monitorDevs, c.monitor_device_id, state.monitorTest)}
 
-    <!-- AWS -->
-    <h2 class="text-lg font-semibold mb-2">Sugestões IA (Bedrock)</h2>
-    <div class="flex gap-2 items-center mb-2">
-      <button data-action="validateAws" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">Validar AWS</button>
-      ${state.awsValid !== 'idle' ? `<span class="text-sm">${state.awsValid === 'testing' ? '⏳' : state.awsValid === 'ok' ? '✅' : '❌'}</span>` : ''}
-      ${state.awsInfo ? `<span class="text-xs text-slate-400">${state.awsInfo}</span>` : ''}
+      <div class="flex gap-2 items-center">
+        <button data-action="validateAws" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded text-sm transition-colors">Validar APIs</button>
+        ${state.awsValid !== 'idle' ? `<span class="text-sm">${state.awsValid === 'testing' ? '⏳' : state.awsValid === 'ok' ? '✅' : '❌'}</span>` : ''}
+        ${state.awsInfo ? `<span class="text-xs text-slate-400">${state.awsInfo}</span>` : ''}
+      </div>
     </div>
 
     <!-- Identificação de participantes -->
@@ -170,39 +169,43 @@ function renderSetup() {
     `}
     ${c.suggestions_target ? `<p class="text-xs text-emerald-400 mt-2">🎯 Copiloto focado em: ${c.suggestions_target}</p>` : ''}
 
-    <!-- Template do Copiloto -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">Template</h2>
-    <p class="text-xs text-slate-500 mb-2">Define como o copiloto se comporta. Obrigatório.</p>
-    <div class="flex gap-2 mb-2">
-      <select data-action="selectTemplate"
+    <!-- Instruções do Copiloto -->
+    <h2 class="text-lg font-semibold mt-4 mb-2">Instruções</h2>
+
+    <!-- Comportamento -->
+    <label class="text-xs text-slate-400">Comportamento <span class="text-slate-600">(como responde)</span></label>
+    <select data-action="selectTemplate" data-target="behavior"
+      class="w-full mt-1 mb-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
+      <option value="">Selecione...</option>
+      <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>💬 Conversa Natural</option>
+      <option value="sugestoes" ${c.behavior_template === 'sugestoes' ? 'selected' : ''}>📋 Sugestões</option>
+      <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>⚡ Assistente Objetivo</option>
+      <option value="pesquisa" ${c.behavior_template === 'pesquisa' ? 'selected' : ''}>🔍 Pesquisa</option>
+    </select>
+    ${c.behavior_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.behavior_template || 'Custom'}</p>` : '<p class="text-xs text-amber-400 mb-3">⚠️ Selecione um comportamento</p>'}
+
+    <!-- Atuação -->
+    <label class="text-xs text-slate-400">Atuação <span class="text-slate-600">(em que área atua)</span></label>
+    <div class="flex gap-2 mt-1 mb-1">
+      <select data-action="selectTemplate" data-target="role"
         class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
-        <option value="">Selecione um template...</option>
-        <optgroup label="Uso geral">
-          <option value="conversa">💬 Conversa Natural (tipo GPT)</option>
-          <option value="sugestoes">📋 Sugestões (ações com emojis)</option>
-          <option value="assistente">⚡ Assistente Objetivo (máx 3 frases)</option>
-          <option value="pesquisa">🔍 Pesquisa (análise profunda)</option>
-        </optgroup>
-        <optgroup label="Específicos">
-          <option value="discovery">📋 Discovery Comercial (Dati)</option>
-          <option value="tecnico">🔧 Consultor Técnico AWS</option>
-          <option value="vendas">💰 Copiloto de Vendas</option>
-          <option value="piadas">🎭 Piadas e Humor</option>
-        </optgroup>
+        <option value="">Nenhuma (opcional)</option>
+        <option value="discovery" ${c.role_template === 'discovery' ? 'selected' : ''}>📋 Discovery Comercial</option>
+        <option value="tecnico" ${c.role_template === 'tecnico' ? 'selected' : ''}>🔧 Consultor Técnico AWS</option>
+        <option value="vendas" ${c.role_template === 'vendas' ? 'selected' : ''}>💰 Copiloto de Vendas</option>
+        <option value="piadas" ${c.role_template === 'piadas' ? 'selected' : ''}>🎭 Piadas e Humor</option>
         <option value="custom">📄 Carregar arquivo...</option>
       </select>
     </div>
     <input type="file" data-action="loadPromptFile" accept=".md,.txt,.markdown"
       class="text-xs text-slate-400 mb-2" style="display:none" id="promptFileInput" />
-    <textarea data-bind="custom_system_prompt" rows="3" placeholder="Selecione um template acima ou escreva seu próprio..."
-      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y text-xs">${c.custom_system_prompt}</textarea>
-    ${c.custom_system_prompt ? `<p class="text-xs text-emerald-400 mt-1">✅ Template carregado</p>` : '<p class="text-xs text-amber-400 mt-1">⚠️ Selecione um template</p>'}
+    ${c.role_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.role_template || 'Custom'}</p>` : '<p class="text-xs text-slate-500 mb-3">Opcional — define a especialidade</p>'}
 
-    <!-- Instruções adicionais -->
-    <h2 class="text-lg font-semibold mt-4 mb-2">Instruções adicionais</h2>
-    <p class="text-xs text-slate-500 mb-2">Contexto extra que o copiloto deve considerar. Opcional.</p>
+    <!-- Contexto Adicional -->
+    <label class="text-xs text-slate-400">Contexto Adicional <span class="text-slate-600">(prioridade máxima)</span></label>
     <textarea data-bind="extra_context" rows="2" placeholder="Ex: Estamos discutindo migração pra AWS. Foco em custos e prazos. O cliente é conservador..."
-      class="w-full bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
+      class="w-full mt-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500 resize-y">${c.extra_context || ''}</textarea>
+    <p class="text-xs text-slate-500 mt-1">📌 Sempre priorizado sobre as outras instruções.</p>
 
     <!-- Settings -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Configurações</h2>
@@ -389,8 +392,8 @@ function renderMeeting() {
 // ── SUMMARY PAGE ──
 function renderSummary() {
   return `
-    <h1 class="text-2xl font-bold mb-4">Finalizar Reunião</h1>
-    <p class="text-sm text-slate-400 mb-4">Transcrição: ${state.transcript.length} entradas. O que deseja fazer com a reunião?</p>
+    <h1 class="text-2xl font-bold mb-4">Resumo</h1>
+    <p class="text-sm text-slate-400 mb-4">Transcrição: ${state.transcript.length} entradas. O que deseja gerar a partir desta sessão?</p>
     
     <div class="mb-4">
       <textarea id="reportInstruction" rows="3" placeholder="Ex: Gere um resumo executivo, liste os action items, faça uma ata..."
@@ -411,7 +414,7 @@ function renderSummary() {
       </div>
     ` : ''}
 
-    <button data-action="newMeeting" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-medium transition-colors">Nova Reunião</button>
+    <button data-action="newMeeting" class="w-full py-2 bg-emerald-600 hover:bg-emerald-500 rounded text-sm font-medium transition-colors">Nova Sessão</button>
   `;
 }
 
@@ -426,7 +429,7 @@ function bindEvents() {
       const isValid = e.key === ' ' || e.key === 't' || e.key === 'T';
       keyTest.textContent = `Tecla: "${e.key === ' ' ? 'Espaço' : e.key}" (code: ${e.code})`;
       if (result) {
-        result.textContent = isValid ? '✅ Tecla reconhecida! Vai funcionar na reunião.' : `⚠️ Use Espaço ou T`;
+        result.textContent = isValid ? '✅ Tecla reconhecida! Vai funcionar na sessão.' : `⚠️ Use Espaço ou T`;
         result.className = `text-xs mt-1 ${isValid ? 'text-emerald-400' : 'text-amber-400'}`;
       }
     });
@@ -500,7 +503,7 @@ function bindEvents() {
         case 'validateAws':
           state.awsValid = 'testing'; state.awsInfo = ''; render();
           try {
-            const info = await callApi('validate_aws', state.config.aws_profile, state.config.aws_region);
+            const info = await callApi('validate_apis', state.config.groq_api_key, state.config.bedrock_api_key);
             state.awsValid = 'ok'; state.awsInfo = info || 'OK';
           } catch (e) { state.awsValid = 'fail'; state.awsInfo = String(e); }
           render();
@@ -533,22 +536,39 @@ function bindEvents() {
         }
         case 'selectTemplate': {
           const tpl = el.value;
+          const target = el.dataset.target; // 'behavior' or 'role'
           if (tpl === 'custom') {
             document.getElementById('promptFileInput')?.click();
+            document.getElementById('promptFileInput').dataset.target = target;
           } else if (tpl) {
             const content = await callApi('load_prompt_template', tpl);
-            if (content) {
-              state.config.custom_system_prompt = content;
-              render();
+            if (content && target === 'behavior') {
+              state.config.behavior_template = tpl;
+              state.config.behavior_prompt = content;
+            } else if (content && target === 'role') {
+              state.config.role_template = tpl;
+              state.config.role_prompt = content;
             }
+            render();
+          } else if (target === 'role') {
+            state.config.role_template = '';
+            state.config.role_prompt = '';
+            render();
           }
           break;
         }
         case 'loadPromptFile':
           if (el.files && el.files[0]) {
+            const target = el.dataset.target || 'role';
             const reader = new FileReader();
             reader.onload = (ev) => {
-              state.config.custom_system_prompt = ev.target.result;
+              if (target === 'behavior') {
+                state.config.behavior_template = 'custom';
+                state.config.behavior_prompt = ev.target.result;
+              } else {
+                state.config.role_template = 'custom';
+                state.config.role_prompt = ev.target.result;
+              }
               render();
             };
             reader.readAsText(el.files[0]);
@@ -596,14 +616,20 @@ function bindEvents() {
             await callApi('trigger_transcription');
           }
           break;
-        case 'stopMeeting':
+        case 'stopMeeting': {
+          // Prevent double-click
+          if (state._stopping) break;
+          state._stopping = true;
+          el.disabled = true; el.textContent = '⏳ Finalizando...';
           stopTimer();
-          await callApi('stop_meeting');
+          try { await callApi('stop_meeting'); } catch(e) { console.error(e); }
           state.summary = '';
           state.summaryLoading = false;
           state.page = 'summary';
+          state._stopping = false;
           render();
           break;
+        }
         case 'generateReport': {
           const instruction = document.getElementById('reportInstruction')?.value || '';
           state.summaryLoading = true;
@@ -624,7 +650,7 @@ function bindEvents() {
           const url = URL.createObjectURL(blob);
           const a = document.createElement('a');
           a.href = url;
-          a.download = 'reuniao-' + new Date().toISOString().slice(0,10) + '.md';
+          a.download = 'sessao-' + new Date().toISOString().slice(0,10) + '.md';
           a.click();
           URL.revokeObjectURL(url);
           break;
@@ -634,6 +660,7 @@ function bindEvents() {
           state.transcript = [];
           state.suggestions = [];
           state.summary = '';
+          state.isRecording = false;
           render();
           break;
       }
@@ -777,7 +804,7 @@ window.addEventListener('backend:audio_level', (e) => {
 
 window.addEventListener('backend:test_level', (e) => {
   const { deviceId, level } = e.detail;
-  const isMic = !deviceId.includes('monitor') && !deviceId.includes('loopback');
+  const isMic = deviceId === state.config.mic_device_id;
   if (isMic) state.micLevel = level;
   else state.monitorLevel = level;
   const bar = document.getElementById(isMic ? 'vu-mic' : 'vu-monitor');
@@ -786,7 +813,7 @@ window.addEventListener('backend:test_level', (e) => {
 
 window.addEventListener('backend:test_done', (e) => {
   const { deviceId, peak } = e.detail;
-  const isMic = !deviceId.includes('monitor') && !deviceId.includes('loopback');
+  const isMic = deviceId === state.config.mic_device_id;
   const hasAudio = peak > (isMic ? 0.003 : 0.001);
   if (isMic) { state.micTest = hasAudio ? 'ok' : 'fail'; state.micLevel = 0; }
   else { state.monitorTest = hasAudio ? 'ok' : 'fail'; state.monitorLevel = 0; }
@@ -822,6 +849,11 @@ window.addEventListener('pywebviewready', async () => {
   try {
     const saved = await callApi('load_config');
     if (saved) Object.assign(state.config, saved);
+    const envKeys = await callApi('get_env_keys');
+    if (envKeys) {
+      if (!state.config.groq_api_key && envKeys.groq_api_key) state.config.groq_api_key = envKeys.groq_api_key;
+      if (!state.config.bedrock_api_key && envKeys.bedrock_api_key) state.config.bedrock_api_key = envKeys.bedrock_api_key;
+    }
   } catch(e) { console.error('load_config error:', e); }
 
   try {

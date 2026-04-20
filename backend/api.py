@@ -263,6 +263,36 @@ class Api:
         client = BedrockClient()
         return client.validate()
 
+    def validate_apis(self, groq_key: str = "", bedrock_key: str = "") -> str:
+        """Validate both Groq and Bedrock API keys."""
+        import os
+        results = []
+        # Validate Groq
+        if groq_key:
+            try:
+                import httpx
+                r = httpx.get("https://api.groq.com/openai/v1/models",
+                              headers={"Authorization": f"Bearer {groq_key}"}, timeout=10)
+                if r.status_code == 200:
+                    results.append("Groq ✅")
+                else:
+                    raise Exception(f"HTTP {r.status_code}")
+            except Exception as e:
+                raise Exception(f"Groq falhou: {e}")
+        # Validate Bedrock
+        if bedrock_key:
+            try:
+                os.environ["AWS_BEARER_TOKEN_BEDROCK"] = bedrock_key
+                client = BedrockClient()
+                client.validate()
+                results.append("Bedrock ✅")
+            except Exception as e:
+                raise Exception(f"Bedrock falhou: {e}")
+        # Save keys to .env
+        if groq_key:
+            os.environ["GROQ_API_KEY"] = groq_key
+        return " | ".join(results) if results else "Nenhuma key informada"
+
     # ── Config ──
 
     def save_config(self, config_dict: dict):
@@ -272,6 +302,13 @@ class Api:
     def load_config(self) -> dict | None:
         cfg = load_config()
         return cfg.to_dict() if cfg else None
+
+    def get_env_keys(self) -> dict:
+        """Return API keys from environment for pre-populating UI."""
+        return {
+            "groq_api_key": os.getenv("GROQ_API_KEY", ""),
+            "bedrock_api_key": os.getenv("AWS_BEARER_TOKEN_BEDROCK", ""),
+        }
 
     def load_prompt_template(self, name: str) -> str:
         """Load a built-in prompt template by name."""
@@ -302,6 +339,8 @@ class Api:
         self._groq = GroqClient(api_key, cfg.whisper_model, cfg.language)
 
         # Init Bedrock
+        if cfg.bedrock_api_key:
+            os.environ["AWS_BEARER_TOKEN_BEDROCK"] = cfg.bedrock_api_key
         self._bedrock = BedrockClient()
 
         # Pre-warm prompt cache in background
@@ -336,14 +375,22 @@ class Api:
                 desc = f"{name} - {role}" if role else name
                 ctx_parts.append(f"- {desc}")
             self._participants_context = (
-                f"Participantes da reunião:\n" + "\n".join(ctx_parts) if ctx_parts else ""
+                f"Participantes da sessão:\n" + "\n".join(ctx_parts) if ctx_parts else ""
             )
 
         self._my_label = cfg.my_name or "EU"
         self._suggestions_target = cfg.suggestions_target or self._my_label
-        self._raw_system_prompt = cfg.custom_system_prompt or ""
+        # Build system prompt with hierarchy: extra_context (priority) > role > behavior
+        parts = []
         if cfg.extra_context:
-            self._raw_system_prompt += f"\n\nContexto adicional do usuário:\n{cfg.extra_context}"
+            parts.append(f"[PRIORIDADE MÁXIMA - Contexto Adicional]\n{cfg.extra_context}")
+        if cfg.role_prompt:
+            parts.append(f"[Atuação]\n{cfg.role_prompt}")
+        if cfg.behavior_prompt:
+            parts.append(f"[Comportamento]\n{cfg.behavior_prompt}")
+        elif cfg.custom_system_prompt:
+            parts.append(cfg.custom_system_prompt)
+        self._raw_system_prompt = "\n\n".join(parts)
         self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
         self._response_mode = cfg.response_mode or "short"
         self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
@@ -353,7 +400,7 @@ class Api:
         self._start_time = time.time()
         self._emit("session_reset", {})
 
-        log.info(f"[START] === MEETING STARTED ===")
+        log.info(f"[START] === SESSION STARTED ===")
         log.info(f"[START] response_mode={self._response_mode}")
         log.info(f"[START] auto_response={self._auto_response}")
         log.info(f"[START] target={self._suggestions_target}")
@@ -541,7 +588,7 @@ class Api:
                 try:
                     context = self._build_full_context()
                     participants = self._participants_context
-                    system = self._raw_system_prompt or "Você é um copiloto de reuniões."
+                    system = self._raw_system_prompt or "Você é um copiloto."
                     mode = RESPONSE_MODES.get(self._response_mode, RESPONSE_MODES["short"])
                     max_tok = mode["max_tok"]
                     hint = mode["hint"] if not user_instruction else ""
@@ -626,7 +673,7 @@ class Api:
             participants_str = self._participants_context or "Participantes não informados. Deduza pelos conteúdos."
             earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
 
-            system = ("Você identifica quem fala em reuniões. "
+            system = ("Você identifica quem fala em conversas. "
                       "Se alguém é chamado pelo nome na conversa, use esse nome como speaker. "
                       "Se não souber o nome, use Pessoa 1, Pessoa 2, etc mantendo consistência. "
                       "Responda SOMENTE JSON puro: {\"transcript\": [{\"speaker\": \"Nome\", \"text\": \"fala\"}]}")
@@ -718,7 +765,7 @@ class Api:
             speaker_instruction = (
                 "\n\nCOMO IDENTIFICAR QUEM FALA:\n"
                 "- Analise o PAPEL de cada participante para atribuir as falas\n"
-                "- Quem conduz a reunião (faz perguntas, propõe soluções) geralmente é o organizador\n"
+                "- Quem conduz a conversa (faz perguntas, propõe soluções) geralmente é o organizador\n"
                 "- Quem responde sobre sua empresa/situação geralmente é o cliente\n"
                 "- Quem PERGUNTA 'vocês são de [cidade]?' NÃO é dessa cidade\n"
                 "- Quem RESPONDE 'sim, somos de [cidade]' É dessa cidade\n"
@@ -751,7 +798,7 @@ class Api:
 
             system = self._custom_system_prompt or ""
             system += (
-                "\nVocê é um copiloto de reuniões. Atribui falas aos participantes e responde ao usuário. "
+                "\nVocê é um copiloto. Atribui falas aos participantes e responde ao usuário. "
                 "Responda SOMENTE JSON puro sem markdown, sem explicações."
             )
 
@@ -893,6 +940,9 @@ class Api:
         return "\n".join(lines)
 
     def stop_meeting(self) -> dict:
+        if self._recording:
+            self._recording = False
+            self._emit("recording_state", {"recording": False})
         self.unregister_global_hotkey()
         if self._chat_window:
             try:
@@ -918,9 +968,9 @@ class Api:
     def generate_final_report(self, user_instruction: str = "") -> str:
         """Generate a final MD report based on user instruction."""
         context = self._build_full_context()
-        system = self._raw_system_prompt or "Você é um copiloto de reuniões."
-        instruction = user_instruction or "Gere um resumo completo da reunião."
-        user_msg = f"Contexto completo da reunião:\n{context}\n\nInstrução: {instruction}\nGere um relatório em formato Markdown bem estruturado."
+        system = self._raw_system_prompt or "Você é um copiloto."
+        instruction = user_instruction or "Gere um resumo completo da sessão."
+        user_msg = f"Contexto completo da sessão:\n{context}\n\nInstrução: {instruction}\nGere um relatório em formato Markdown bem estruturado."
 
         log.info(f"[Report] Generating with instruction: {instruction[:80]}")
         try:
