@@ -55,7 +55,8 @@ def get_platform() -> dict:
 _hotkey_ids = []
 
 
-def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_callback=None):
+def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_callback=None,
+                          fullcontext_key: str = "", fullcontext_callback=None):
     """Register global hotkeys. Returns True if successful."""
     unregister_global_hotkeys()
     p = get_platform()
@@ -65,6 +66,7 @@ def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_
         base = os.path.dirname(os.path.abspath(__file__))
         toggle_script = os.path.join(base, "..", "whisper-toggle.sh")
         snapshot_script = os.path.join(base, "..", "whisper-snapshot.sh")
+        fullcontext_script = os.path.join(base, "..", "whisper-fullcontext.sh")
         try:
             subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{key},exec,{toggle_script}"],
                            capture_output=True, timeout=3)
@@ -73,7 +75,11 @@ def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_
                 subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{snapshot_key},exec,{snapshot_script}"],
                                capture_output=True, timeout=3)
                 log.info(f"[Hotkey] Registered SUPER+{snapshot_key} (snapshot) via hyprctl")
-            _hotkey_ids.append(("hyprctl", key, snapshot_key))
+            if fullcontext_key:
+                subprocess.run(["hyprctl", "keyword", "bind", f"SUPER,{fullcontext_key},exec,{fullcontext_script}"],
+                               capture_output=True, timeout=3)
+                log.info(f"[Hotkey] Registered SUPER+{fullcontext_key} (fullcontext) via hyprctl")
+            _hotkey_ids.append(("hyprctl", key, snapshot_key, fullcontext_key))
             return True
         except Exception as e:
             log.error(f"[Hotkey] hyprctl failed: {e}")
@@ -82,7 +88,6 @@ def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_
     if p["has_keyboard_lib"]:
         try:
             import keyboard
-            # Map key names
             key_map = {"space": "space", "F1": "f1", "F2": "f2", "F3": "f3", "F4": "f4",
                        "F5": "f5", "F6": "f6", "F7": "f7", "F8": "f8", "F9": "f9",
                        "F10": "f10", "F11": "f11", "F12": "f12"}
@@ -96,6 +101,12 @@ def register_global_hotkey(key: str, callback, snapshot_key: str = "", snapshot_
                 keyboard.add_hotkey(snap_str, snapshot_callback, suppress=True)
                 _hotkey_ids.append(("keyboard", snap_str, ""))
                 log.info(f"[Hotkey] Registered {snap_str} (snapshot) via keyboard lib")
+
+            if fullcontext_key and fullcontext_callback:
+                fc_str = f"windows+{key_map.get(fullcontext_key, fullcontext_key.lower())}"
+                keyboard.add_hotkey(fc_str, fullcontext_callback, suppress=True)
+                _hotkey_ids.append(("keyboard", fc_str, ""))
+                log.info(f"[Hotkey] Registered {fc_str} (fullcontext) via keyboard lib")
             return True
         except Exception as e:
             log.error(f"[Hotkey] keyboard lib failed: {e}")
@@ -111,11 +122,15 @@ def unregister_global_hotkeys():
         method = entry[0]
         if method == "hyprctl":
             key, snap_key = entry[1], entry[2]
+            fc_key = entry[3] if len(entry) > 3 else ""
             try:
                 subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{key}"],
                                capture_output=True, timeout=3)
                 if snap_key:
                     subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{snap_key}"],
+                                   capture_output=True, timeout=3)
+                if fc_key:
+                    subprocess.run(["hyprctl", "keyword", "unbind", f"SUPER,{fc_key}"],
                                    capture_output=True, timeout=3)
             except Exception:
                 pass

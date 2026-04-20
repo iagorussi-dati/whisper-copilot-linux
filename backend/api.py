@@ -136,6 +136,9 @@ class Api:
                         if cmd == "snapshot":
                             log.info("[Hotkey] Snapshot received")
                             self.snapshot()
+                        elif cmd == "fullcontext":
+                            log.info("[Hotkey] Full context received")
+                            self.full_context_snapshot()
                         else:
                             log.info("[Hotkey] Global toggle received")
                             self.toggle_recording()
@@ -154,7 +157,9 @@ class Api:
         register_global_hotkey(
             key, self.toggle_recording,
             snapshot_key=self._snapshot_key,
-            snapshot_callback=self.snapshot if self._snapshot_key else None
+            snapshot_callback=self.snapshot if self._snapshot_key else None,
+            fullcontext_key=self._fullcontext_key,
+            fullcontext_callback=self.full_context_snapshot if self._fullcontext_key else None,
         )
 
     def unregister_global_hotkey(self):
@@ -176,10 +181,11 @@ class Api:
             self.start_recording()
 
     def snapshot(self):
-        """Transcribe what's recorded so far WITHOUT stopping. Recording continues."""
+        """Transcribe what's recorded so far WITHOUT stopping. Recording continues.
+        This is a CHECKPOINT — only processes audio since last snapshot."""
         if not self._start_time or not self._recording:
             return
-        log.info("[SNAPSHOT] Flushing current audio (recording continues)...")
+        log.info("[SNAPSHOT] Flushing current audio (checkpoint)...")
         self._emit("snapshot_started", {})
 
         mic_pcm = self._mic_capture.flush_pcm() if self._mic_capture else None
@@ -189,7 +195,7 @@ class Api:
         if mic_pcm is None and mon_pcm is None:
             log.info("[SNAPSHOT] No audio to flush")
             if self._auto_response:
-                self._emit("copilot_response", {"response": "🎤 Não captei áudio. Grave novamente.", "had_instruction": False})
+                self._emit("copilot_response", {"response": "🎤 Não captei áudio novo desde o último snapshot.", "had_instruction": False})
             else:
                 self._request_user_input()
             return
@@ -206,17 +212,94 @@ class Api:
 
         from .audio.wav import pcm_to_wav
         wav = pcm_to_wav(mixed, 16000)
-        log.info(f"[SNAPSHOT] {len(mixed)/16000:.1f}s of audio")
+        log.info(f"[SNAPSHOT] {len(mixed)/16000:.1f}s of audio (checkpoint)")
 
         def process():
             self._process_auto_chunk(wav)
-            log.info(f"[SNAPSHOT] Done. Transcript: {len(self._transcript)} entries. Recording continues.")
+            log.info(f"[SNAPSHOT] Done. Transcript: {len(self._transcript)} entries.")
+            # Build summary of what copilot already said (for no-repeat)
+            prev_responses = [e['data']['response'][:100] for e in self._chat_history
+                              if e['event'] == 'copilot_response' and e['data'].get('response')]
+            no_repeat_hint = ""
+            if prev_responses:
+                no_repeat_hint = f"\n\nVocê já sugeriu sobre: {'; '.join(prev_responses[-5:])}. NÃO repita. Foque no que é NOVO neste trecho."
+
             if self._auto_response:
-                self.submit_recording('')
+                self._emit("chat_thinking", {})
+                self._generate_snapshot_response(no_repeat_hint)
             else:
                 self._request_user_input()
 
         threading.Thread(target=process, daemon=True).start()
+
+    def full_context_snapshot(self):
+        """Analyze the ENTIRE accumulated transcript. Does NOT reset checkpoint."""
+        if not self._start_time:
+            return
+        log.info("[FULL_CTX] Full context analysis requested")
+        self._emit("fullcontext_started", {})
+
+        if not self._transcript:
+            self._emit("copilot_response", {"response": "🎤 Nenhuma transcrição ainda.", "had_instruction": False})
+            return
+
+        self._emit("chat_thinking", {})
+
+        def process():
+            self._generate_fullcontext_response()
+
+        threading.Thread(target=process, daemon=True).start()
+
+    def _generate_snapshot_response(self, no_repeat_hint: str = ""):
+        """Generate response for incremental snapshot — natural flow, no repeats."""
+        try:
+            context = self._build_full_context()
+            system = self._raw_system_prompt or "Você é um copiloto."
+            mode_cfg = {"short": 150, "full": 300, "research": 600}
+            max_tok = mode_cfg.get(self._response_mode, 150)
+
+            user_msg = (
+                f"{self._participants_context}\n\n"
+                f"Contexto da conversa (fluxo contínuo):\n{context}\n\n"
+                f"Instrução: Analise o trecho MAIS RECENTE da conversa. "
+                f"Siga o fluxo natural — como um colega acompanhando ao vivo. "
+                f"Foque no que é NOVO: novas dores, perguntas, temas.{no_repeat_hint}"
+                f"\nSem markdown, sem títulos."
+            )
+
+            result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
+            result = self._clean_md(result)
+            result = self._trim_to_sentence(result)
+            log.info(f"[SNAPSHOT] Response: {result[:150]}")
+            self._emit("copilot_response", {"response": result, "had_instruction": False})
+        except Exception as e:
+            log.error(f"[SNAPSHOT] Error: {e}", exc_info=True)
+            self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": False})
+
+    def _generate_fullcontext_response(self):
+        """Generate response for full context — analytical, can repeat key points."""
+        try:
+            context = self._build_full_context()
+            system = self._raw_system_prompt or "Você é um copiloto."
+            max_tok = 600  # always detailed for full context
+
+            user_msg = (
+                f"{self._participants_context}\n\n"
+                f"Contexto COMPLETO da sessão:\n{context}\n\n"
+                f"Instrução: Analise a conversa INTEIRA. Seja objetivo e analítico. "
+                f"Priorize: o que ficou sem resposta, dores principais, oportunidades. "
+                f"Pode repetir pontos importantes. Dê o panorama completo."
+                f"\nSem markdown, sem títulos."
+            )
+
+            result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
+            result = self._clean_md(result)
+            result = self._trim_to_sentence(result)
+            log.info(f"[FULL_CTX] Response: {result[:150]}")
+            self._emit("copilot_response", {"response": result, "had_instruction": False})
+        except Exception as e:
+            log.error(f"[FULL_CTX] Error: {e}", exc_info=True)
+            self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": False})
 
     def _emit(self, event: str, data):
         """Send event to frontend via evaluate_js (non-blocking)."""
@@ -520,6 +603,7 @@ class Api:
             )
 
         self._snapshot_key = cfg.snapshot_hotkey or ""
+        self._fullcontext_key = getattr(cfg, 'fullcontext_hotkey', '') or "H"
         if cfg.global_hotkey:
             self.register_global_hotkey(cfg.global_hotkey)
 

@@ -12,3 +12,4 @@ pretrained_models/
 .qdrant-initialized
 .vscode/
 test_onset.py
+tests/fixtures/

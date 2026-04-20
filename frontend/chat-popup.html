@@ -340,6 +340,10 @@
     enableInput('Instrução (Enter envia após transcrição)');
   });
 
+  window.addEventListener('backend:fullcontext_started', () => {
+    setStatus('status-thinking', '🔍 <span class="pulse">Analisando contexto inteiro...</span>');
+  });
+
   window.addEventListener('backend:session_reset', () => {
     msgs.innerHTML = '<div class="msg msg-system">Nova sessão. Copiloto pronto.</div>';
     hasTranscript = false;
