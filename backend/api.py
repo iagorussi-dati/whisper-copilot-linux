@@ -50,6 +50,7 @@ class Api:
         self._pending_wav = None
         self._pending_instruction = ""
         self._chat_history: list[dict] = []
+        self._snapshot_checkpoint: int = 0  # index in _chat_history where last snapshot was
         self._hotkey_stop = threading.Event()
         self._start_hotkey_watcher()
 
@@ -255,8 +256,12 @@ class Api:
         try:
             context = self._build_full_context()
             system = self._raw_system_prompt or "Você é um copiloto."
-            mode_cfg = {"short": 80, "full": 200, "research": 600}
+            mode_cfg = {"short": 150, "full": 300, "research": 600}
             max_tok = mode_cfg.get(self._response_mode, 150)
+            # Dynamic: more transcript lines = more tokens to respond
+            n_lines = len(self._transcript)
+            if self._response_mode == "short" and n_lines > 6:
+                max_tok = min(250, 150 + (n_lines - 6) * 15)
 
             # Web search: only for research mode + templates that need it
             search_context = ""
@@ -272,11 +277,9 @@ class Api:
                     log.info(f"[SNAPSHOT] Search: {len(results)} chars")
 
             user_msg = (
-                f"{self._participants_context}\n\n"
                 f"Conversa:\n{context}\n\n"
-                f"Responda sobre o que acabou de ser dito. Não repita o que foi falado, não liste participantes, não analise — apenas responda.{no_repeat_hint}"
+                f"Contribua com algo útil sobre o que foi dito. Não narre quem falou o quê. Não diga 'Pessoa 1 falou' ou 'Foi mencionado que'. Apenas responda.{no_repeat_hint}"
                 f"{search_context}"
-                f"\nSem markdown, sem títulos, sem listas."
             )
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
@@ -787,8 +790,8 @@ class Api:
             log.info(f"[Chat] transcript ({len(self._transcript)} entries): {' | '.join(e['text'][:50] for e in self._transcript[-5:])}")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 80, "hint": "Seja breve, máximo 2-3 frases.", "fmt": "\nSem markdown, sem títulos."},
-                "full": {"max_tok": 200, "hint": "", "fmt": "\nSem markdown, sem títulos."},
+                "short": {"max_tok": 150, "hint": "Seja breve mas termine suas frases.", "fmt": "\nSem markdown, sem títulos."},
+                "full": {"max_tok": 300, "hint": "", "fmt": "\nSem markdown, sem títulos."},
                 "research": {"max_tok": 600, "hint": "", "fmt": "\nSem markdown. Parágrafos curtos."},
             }
 
