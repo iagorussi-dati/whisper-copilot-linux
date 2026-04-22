@@ -575,7 +575,6 @@ class Api:
         self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
         # Response mode: fixed per template, configurable only for sugestoes
         template_modes = {
-            "conversa": "full",
             "assistente": "research",  # Consultor Técnico AWS: always detailed + web search
             "pesquisa": "research",
             "shazam": "short",

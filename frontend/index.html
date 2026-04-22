@@ -196,7 +196,7 @@ function renderSetup() {
     <select data-action="selectTemplate" data-target="behavior"
       class="w-full mt-1 mb-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
       <option value="">Selecione...</option>
-      <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>💬 Conversa Natural</option>
+      <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>🧠 Copiloto Pessoal</option>
       <option value="sugestoes" ${c.behavior_template === 'sugestoes' ? 'selected' : ''}>📋 Sugestões</option>
       <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>🔧 Consultor Técnico AWS</option>
       <option value="pesquisa" ${c.behavior_template === 'pesquisa' ? 'selected' : ''}>🔍 Pesquisa</option>
@@ -288,8 +288,8 @@ function renderSetup() {
       </button>
     </div>
 
-    ${c.behavior_template === 'sugestoes' ? `
-    <!-- Response mode — only for Sugestões -->
+    ${['sugestoes', 'conversa'].includes(c.behavior_template) ? `
+    <!-- Response mode — only for Sugestões and Copiloto Pessoal -->
     <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
       ${[
