@@ -258,16 +258,18 @@ class Api:
             mode_cfg = {"short": 150, "full": 300, "research": 600}
             max_tok = mode_cfg.get(self._response_mode, 150)
 
-            # Web search: always search for technical/objective prompts
+            # Web search: only for templates that need it (assistente, pesquisa)
             search_context = ""
-            last_text = " ".join(e['text'] for e in self._transcript[-10:])
-            if last_text:
-                from .search import web_search
-                query = last_text[:120] + " AWS pricing specs 2026"
-                log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
-                results = web_search(query, max_results=3)
-                search_context = f"\n\nDados atualizados da web (use na resposta se relevante):\n{results}"
-                log.info(f"[SNAPSHOT] Search: {len(results)} chars")
+            needs_search = self._behavior_template in ("assistente", "pesquisa")
+            if needs_search:
+                last_text = " ".join(e['text'] for e in self._transcript[-10:])
+                if last_text:
+                    from .search import web_search
+                    query = last_text[:120] + " AWS pricing specs 2026"
+                    log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
+                    results = web_search(query, max_results=3)
+                    search_context = f"\n\nDados atualizados da web (use na resposta se relevante):\n{results}"
+                    log.info(f"[SNAPSHOT] Search: {len(results)} chars")
 
             user_msg = (
                 f"{self._participants_context}\n\n"
