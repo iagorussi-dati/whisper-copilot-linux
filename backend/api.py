@@ -255,7 +255,7 @@ class Api:
         try:
             context = self._build_full_context()
             system = self._raw_system_prompt or "Você é um copiloto."
-            mode_cfg = {"short": 150, "full": 300, "research": 600}
+            mode_cfg = {"short": 80, "full": 200, "research": 600}
             max_tok = mode_cfg.get(self._response_mode, 150)
 
             # Web search: only for research mode + templates that need it
@@ -789,8 +789,8 @@ class Api:
             log.info(f"[Chat] transcript ({len(self._transcript)} entries): {' | '.join(e['text'][:50] for e in self._transcript[-5:])}")
 
             RESPONSE_MODES = {
-                "short": {"max_tok": 150, "hint": "Seja breve.", "fmt": "\nSem markdown, sem títulos."},
-                "full": {"max_tok": 300, "hint": "", "fmt": "\nSem markdown, sem títulos."},
+                "short": {"max_tok": 80, "hint": "Seja breve, máximo 2-3 frases.", "fmt": "\nSem markdown, sem títulos."},
+                "full": {"max_tok": 200, "hint": "", "fmt": "\nSem markdown, sem títulos."},
                 "research": {"max_tok": 600, "hint": "", "fmt": "\nSem markdown. Parágrafos curtos."},
             }
 
