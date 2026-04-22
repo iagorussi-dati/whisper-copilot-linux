@@ -839,7 +839,7 @@ class Api:
                             search_context = f"\n\nResultados da pesquisa web:\n{results}"
                             log.info(f"[Chat] Search: {len(results)} chars")
 
-                    user_msg = f"{participants}\n\nContexto da conversa:\n{context}{search_context}\n\nInstrução: {effective_instruction}\n{hint}{copilot_fmt}{no_repeat}"
+                    user_msg = f"Conversa:\n{context}{search_context}\n\n{effective_instruction}\n{hint}{copilot_fmt}{no_repeat}\nResponda direto, sem dizer 'na conversa' ou 'foi mencionado'. Sem narrar quem falou."
                     log.info(f"[Chat] mode={self._response_mode} max_tok={max_tok} context={len(context)} chars")
                     result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
                     result = self._clean_md(result)
