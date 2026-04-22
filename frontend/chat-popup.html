@@ -19,11 +19,10 @@
   .msg-bot .label { color: #fbbf24; font-weight: 600; }
   .msg-bot .text { background: #1e293b; border-radius: 8px; padding: 10px 14px; margin-top: 4px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
   .msg-system { color: #64748b; font-style: italic; font-size: 13px; }
-  .msg-transcript { color: #64748b; font-size: 12px; opacity: 0.6; }
-  .msg-transcript .speaker { color: #475569; font-weight: 600; }
+  .msg-transcript { color: #64748b; font-size: 12px; opacity: 0.5; line-height: 1.4; }
   .transcript-stream { overflow: hidden; max-height: 0; animation: streamIn 0.4s ease forwards; }
   @keyframes streamIn { from { max-height: 0; opacity: 0; } to { max-height: 60px; opacity: 1; } }
-  .transcript-collapse { color: #475569; font-size: 11px; cursor: default; margin-bottom: 4px; }
+  .transcript-counter { color: #475569; font-size: 11px; padding: 2px 8px; background: #1e293b; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
   .msg-action { color: #a78bfa; font-size: 13px; font-weight: 500; }
   .msg-status { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; }
   .status-recording { background: #7f1d1d30; color: #fca5a5; }
@@ -132,6 +131,7 @@
   const inputBar = document.getElementById('input-bar');
   let isRecording = false;
   let hasTranscript = false;
+  let transcriptCount = 0;
   let autoResponse = true;
   let transcriptionDone = true;
   let pendingSend = null;
@@ -256,23 +256,32 @@
         break;
       case 'transcript':
         hasTranscript = true;
-        // Collapse older transcripts into "..."
+        transcriptCount++;
+        // Remove old transcripts, keep last 2
         const transcripts = msgs.querySelectorAll('.msg-transcript');
-        if (transcripts.length >= 3) {
-          // Hide older ones, keep a collapse indicator
-          const older = Array.from(transcripts).slice(0, -2);
-          older.forEach(el => el.remove());
-          if (!msgs.querySelector('.transcript-collapse')) {
-            const dots = document.createElement('div');
-            dots.className = 'transcript-collapse';
-            dots.textContent = '··· transcrição anterior ···';
-            const first = msgs.querySelector('.msg-transcript');
-            if (first) msgs.insertBefore(dots, first);
-          }
+        if (transcripts.length >= 2) {
+          transcripts[0].remove();
         }
+        // Update or create counter badge
+        let counter = msgs.querySelector('.transcript-counter');
+        if (!counter) {
+          counter = document.createElement('div');
+          counter.className = 'transcript-counter';
+          // Insert before first transcript or at end
+          const firstT = msgs.querySelector('.msg-transcript');
+          if (firstT) msgs.insertBefore(counter, firstT);
+          else msgs.appendChild(counter);
+        }
+        counter.textContent = '📝 ' + transcriptCount + (transcriptCount === 1 ? ' linha transcrita' : ' linhas transcritas');
+        // Ensure counter stays above transcripts
+        const firstAfter = msgs.querySelector('.msg-transcript');
+        if (firstAfter && counter.nextSibling !== firstAfter) {
+          msgs.insertBefore(counter, firstAfter);
+        }
+        // Add new transcript line (no speaker)
         const div = document.createElement('div');
         div.className = 'msg msg-transcript transcript-stream';
-        div.innerHTML = '<span class="speaker">[' + data.speaker + ']</span> ' + data.text;
+        div.textContent = data.text;
         msgs.appendChild(div);
         msgs.scrollTop = msgs.scrollHeight;
         break;
@@ -345,8 +354,9 @@
   });
 
   window.addEventListener('backend:session_reset', () => {
-    msgs.innerHTML = '<div class="msg msg-system">Nova sessão. Copiloto pronto.</div>';
+    msgs.innerHTML = '<div class="msg msg-system">Copiloto pronto. Aperte Espaço para gravar.</div>';
     hasTranscript = false;
+    transcriptCount = 0;
     disableInput();
   });
 

@@ -354,15 +354,15 @@ class Api:
                 self._chat_window = None
 
         # Will position as sidebar after window loads
-        self._needs_sidebar_position = True
+        # Disabled: let user position manually to avoid multi-monitor issues
 
         chat_html = os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "frontend", "chat-popup.html")
         self._chat_window = webview.create_window(
             "Whisper Chat",
             url=chat_html,
             js_api=self,
-            width=420,
-            height=1080,
+            width=400,
+            height=700,
             min_size=(300, 400),
             resizable=True,
             on_top=True,
@@ -372,8 +372,6 @@ class Api:
         def on_loaded():
             self._chat_window_ready = True
             log.info("[POPUP] Window loaded and ready")
-            if getattr(self, '_needs_sidebar_position', False):
-                self._position_sidebar()
         def on_closed():
             self._chat_window = None
             self._chat_window_ready = False

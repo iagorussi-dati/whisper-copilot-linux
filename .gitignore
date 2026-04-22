@@ -13,3 +13,6 @@ pretrained_models/
 .vscode/
 test_onset.py
 tests/fixtures/
+installer/
+dist/
+build/
