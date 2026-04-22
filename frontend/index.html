@@ -198,7 +198,7 @@ function renderSetup() {
       <option value="">Selecione...</option>
       <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>💬 Conversa Natural</option>
       <option value="sugestoes" ${c.behavior_template === 'sugestoes' ? 'selected' : ''}>📋 Sugestões</option>
-      <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>⚡ Assistente Objetivo</option>
+      <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>🔧 Consultor Técnico AWS</option>
       <option value="pesquisa" ${c.behavior_template === 'pesquisa' ? 'selected' : ''}>🔍 Pesquisa</option>
       <option value="shazam" ${c.behavior_template === 'shazam' ? 'selected' : ''}>🎵 Shazam</option>
     </select>
@@ -288,8 +288,8 @@ function renderSetup() {
       </button>
     </div>
 
-    ${c.behavior_template === 'shazam' ? '' : `
-    <!-- Response mode -->
+    ${c.behavior_template === 'sugestoes' ? `
+    <!-- Response mode — only for Sugestões -->
     <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
       ${[
@@ -303,7 +303,7 @@ function renderSetup() {
         </button>
       `).join('')}
     </div>
-    `}
+    ` : ''}
 
     <div class="grid grid-cols-2 gap-4 mb-4">
       <div>

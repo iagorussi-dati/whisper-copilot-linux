@@ -571,7 +571,14 @@ class Api:
             parts.append(cfg.custom_system_prompt)
         self._raw_system_prompt = "\n\n".join(parts)
         self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
-        self._response_mode = cfg.response_mode or "short"
+        # Response mode: fixed per template, configurable only for sugestoes
+        template_modes = {
+            "conversa": "full",
+            "assistente": "research",  # Consultor Técnico AWS: always detailed + web search
+            "pesquisa": "research",
+            "shazam": "short",
+        }
+        self._response_mode = template_modes.get(cfg.behavior_template or "", cfg.response_mode or "short")
         self._behavior_template = cfg.behavior_template or ""
         self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
         self._transcript = []
