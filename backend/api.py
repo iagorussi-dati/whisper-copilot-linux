@@ -273,12 +273,10 @@ class Api:
 
             user_msg = (
                 f"{self._participants_context}\n\n"
-                f"Contexto da conversa (fluxo contínuo):\n{context}\n\n"
-                f"Instrução: Analise o trecho MAIS RECENTE da conversa. "
-                f"Siga o fluxo natural — como um colega acompanhando ao vivo. "
-                f"Foque no que é NOVO: novas dores, perguntas, temas.{no_repeat_hint}"
+                f"Conversa:\n{context}\n\n"
+                f"Responda sobre o que acabou de ser dito. Não repita o que foi falado, não liste participantes, não analise — apenas responda.{no_repeat_hint}"
                 f"{search_context}"
-                f"\nSem markdown, sem títulos."
+                f"\nSem markdown, sem títulos, sem listas."
             )
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
@@ -299,11 +297,9 @@ class Api:
 
             user_msg = (
                 f"{self._participants_context}\n\n"
-                f"Contexto COMPLETO da sessão:\n{context}\n\n"
-                f"Instrução: Analise a conversa INTEIRA. Seja objetivo e analítico. "
-                f"Priorize: o que ficou sem resposta, dores principais, oportunidades. "
-                f"Pode repetir pontos importantes. Dê o panorama completo."
-                f"\nSem markdown, sem títulos."
+                f"Conversa completa:\n{context}\n\n"
+                f"Dê uma visão geral da conversa toda. Pode repetir pontos importantes."
+                f"\nSem markdown, sem títulos, sem listas."
             )
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
