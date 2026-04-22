@@ -258,9 +258,9 @@ class Api:
             mode_cfg = {"short": 150, "full": 300, "research": 600}
             max_tok = mode_cfg.get(self._response_mode, 150)
 
-            # Web search: only for templates that need it (assistente, pesquisa)
+            # Web search: only for research mode + templates that need it
             search_context = ""
-            needs_search = self._behavior_template in ("assistente", "pesquisa")
+            needs_search = self._response_mode == "research" and self._behavior_template in ("assistente", "pesquisa")
             if needs_search:
                 last_text = " ".join(e['text'] for e in self._transcript[-10:])
                 if last_text:
