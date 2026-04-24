@@ -256,7 +256,7 @@ class Api:
         try:
             context = self._build_full_context()
             system = self._raw_system_prompt or "Você é um copiloto."
-            mode_cfg = {"short": 150, "full": 300, "research": 5000}
+            mode_cfg = {"short": 150, "full": 300, "research": 5120}
             max_tok = mode_cfg.get(self._response_mode, 150)
             # Dynamic: more transcript lines = more tokens to respond
             n_lines = len(self._transcript)
@@ -339,7 +339,7 @@ class Api:
                         extra_instruction = " IMPORTANTE: o cliente mencionou um concorrente — diferencie a AWS com FATOS baseados nos dados da web, sem atacar o concorrente. Foque em segurança, privacidade e controle dos dados."
                     user_msg = (
                         f"Pontos da conversa:\n{clean_ctx}\n\n"
-                        f"Responda a dúvida técnica de forma objetiva. Tamanho da resposta: {resp_size} — seja proporcional à quantidade de assuntos.{extra_instruction}{no_repeat_hint}"
+                        f"Responda a dúvida técnica de forma objetiva. Tamanho da resposta: {resp_size} — seja proporcional à quantidade de assuntos. NÃO adicione resumo, observações gerais ou conclusão no final — termine na última sugestão 💬.{extra_instruction}{no_repeat_hint}"
                         f"{search_context}"
                     )
             else:
