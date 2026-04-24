@@ -256,7 +256,7 @@ class Api:
         try:
             context = self._build_full_context()
             system = self._raw_system_prompt or "Você é um copiloto."
-            mode_cfg = {"short": 150, "full": 300, "research": 1200}
+            mode_cfg = {"short": 150, "full": 300, "research": 5000}
             max_tok = mode_cfg.get(self._response_mode, 150)
             # Dynamic: more transcript lines = more tokens to respond
             n_lines = len(self._transcript)
@@ -286,15 +286,25 @@ class Api:
             # For technical template: classify if there's a question or just context
             if is_technical and context.strip():
                 classify_msg = (
-                    f"Analise a transcrição e responda TRÊS linhas, sem explicação, sem markdown:\n"
+                    f"Analise a transcrição e responda QUATRO linhas, sem explicação, sem markdown:\n"
                     f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta técnica ou dúvida que precisa resposta?)\n"
                     f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
-                    f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n\n"
+                    f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n"
+                    f"RESPOSTA: CURTA se tem 1 assunto, MÉDIA se tem 2, LONGA se tem 3+\n\n"
                     f"Transcrição: {context[:600]}"
                 )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=120).strip()
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=150).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
+                # Estimate response size
+                resp_size = "CURTA"
+                for line in classify_result.split("\n"):
+                    if line.strip().upper().startswith("RESPOSTA:"):
+                        resp_size = line.split(":", 1)[1].strip().upper()
+                        break
+                size_map = {"CURTA": 1000, "MÉDIA": 2000, "MEDIA": 2000, "LONGA": 4000}
+                max_tok = size_map.get(resp_size, 2000)
+                log.info(f"[SNAPSHOT] Response size estimate: {resp_size} -> {max_tok} tokens")
                 clean_ctx = context
                 for line in classify_result.split("\n"):
                     if line.strip().upper().startswith("PONTOS:"):
