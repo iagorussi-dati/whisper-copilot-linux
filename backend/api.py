@@ -270,8 +270,8 @@ class Api:
             if needs_search:
                 last_text = " ".join(e['text'] for e in self._transcript[-10:])
                 if last_text and len(last_text.strip()) > 30:
-                    query_prompt = f"Extraia o tema técnico principal dessa conversa em uma query de busca curta em inglês (max 10 palavras). Se não houver tema técnico claro, responda NONE.\n\nConversa: {last_text[:300]}"
-                    query = self._bedrock.call_raw("Você extrai queries de busca.", query_prompt, max_tokens=30).strip().strip('"').strip("'")
+                    query_prompt = f"Responda APENAS com uma query de busca em inglês, máximo 8 palavras. Sem explicação, sem markdown, sem análise. Só a query.\nSe não houver tema técnico, responda: NONE\n\nConversa: {last_text[:300]}"
+                    query = self._bedrock.call_raw("Responda APENAS a query de busca, nada mais.", query_prompt, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
                     if query and "NONE" not in query.upper():
                         query += " AWS 2026"
                         from .search import web_search

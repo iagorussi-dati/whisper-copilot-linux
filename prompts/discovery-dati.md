@@ -445,13 +445,3 @@ Emojis:
 💡 "E quando vier pra [cidade], avisa que a gente marca um café."
 ✅ "Boa semana e até a próxima!"
 > Obs: Rapport = relacionamento. WhatsApp = canal direto.
-
-#### Situação 8.1
-**SITUAÇÃO:** Cliente menciona que já usa serviço de outro provedor (Google Gemini, Azure, ChatGPT, etc.) pra resolver um problema — e está satisfeito com o que tem.
-
-**Abordagem 1 — Foco: reconhecer e diferenciar sem atacar**
-💡 "Entendi que vocês já estão usando o Gemini com o Google Drive e automatizando notas fiscais. Vocês já têm bastante dado lá, né?"
-💡 "Se vocês migrarem isso pra AWS, a gente pode fazer o mesmo com os serviços de IA da AWS — sem risco de dados ficarem públicos."
-⚠️ "Construir APIs pra integrar tudo pode ser trabalhoso mesmo em 60 dias. A gente pode acelerar isso com nosso time de IA."
-✅ "Vamos marcar um workshop focado pra mapear como a gente pode migrar esse fluxo já existente de vocês pro nosso time de IA em menos tempo."
-> Obs: Não atacar o concorrente. Reconhecer o que já funciona e diferenciar pela segurança e pelo suporte que a Dati oferece.
