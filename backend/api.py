@@ -292,21 +292,33 @@ class Api:
             self._emit("copilot_response", {"response": f"Erro: {e}", "had_instruction": False})
 
     def _generate_fullcontext_response(self):
-        """Generate response for full context — analytical, can repeat key points."""
+        """Generate response for full context — grouped by topics from the conversation."""
         try:
             context = self._build_full_context()
             system = self._raw_system_prompt or "Você é um copiloto."
-            max_tok = 600  # always detailed for full context
+            max_tok = 600
 
             user_msg = (
-                f"{self._participants_context}\n\n"
                 f"Conversa completa:\n{context}\n\n"
-                f"Dê uma visão geral da conversa toda. Pode repetir pontos importantes."
-                f"\nSem markdown, sem títulos, sem listas."
+                f"Analise a conversa toda e identifique os principais temas que surgiram.\n"
+                f"Para cada tema, gere sugestões no formato abaixo.\n\n"
+                f"FORMATO OBRIGATÓRIO:\n"
+                f"**[EMOJI] Título do tema específico da conversa**\n"
+                f"*Contexto: resuma em 1-2 frases o que foi falado sobre esse tema, referenciando o que o cliente disse.*\n\n"
+                f"💡/⚠️/🔴/✅ \"Frase pronta que o comercial pode falar\"\n"
+                f"(3-4 sugestões por tema)\n\n"
+                f"No último bloco, sempre coloque:\n"
+                f"**✅ Próximos passos**\n"
+                f"✅ \"Resumo do que ficou combinado e o que cada um vai fazer\"\n\n"
+                f"REGRAS:\n"
+                f"- Os temas vêm da conversa, não são categorias fixas\n"
+                f"- O contexto em itálico deve ser específico, referenciando o que o cliente falou\n"
+                f"- As sugestões devem ser frases prontas que o comercial pode falar diretamente\n"
+                f"- Não narre a conversa, não diga 'o cliente falou X' nas sugestões\n"
+                f"- Tom natural e coloquial"
             )
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
-            result = self._clean_md(result)
             result = self._trim_to_sentence(result)
             log.info(f"[FULL_CTX] Response: {result[:150]}")
             self._emit("copilot_response", {"response": result, "had_instruction": False})
