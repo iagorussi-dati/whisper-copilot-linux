@@ -283,11 +283,30 @@ class Api:
                         else:
                             log.info("[SNAPSHOT] Search: no useful results, skipping")
 
-            user_msg = (
-                f"Conversa:\n{context}\n\n"
-                f"Contribua com algo útil sobre o que foi dito. Não narre quem falou o quê. Não diga 'Pessoa 1 falou' ou 'Foi mencionado que'. Apenas responda.{no_repeat_hint}"
-                f"{search_context}"
-            )
+            # For technical template: classify if there's a question or just context
+            if is_technical and context.strip():
+                classify_msg = f"A conversa abaixo contém uma PERGUNTA TÉCNICA direta do cliente? Responda APENAS: SIM ou NAO\n\nConversa: {context[:400]}"
+                has_question = self._bedrock.call_raw("Classifique.", classify_msg, max_tokens=5).strip().upper()
+                log.info(f"[SNAPSHOT] Has question: {has_question}")
+                if "NAO" in has_question or "NÃO" in has_question:
+                    user_msg = (
+                        f"Conversa:\n{context}\n\n"
+                        f"Não há pergunta técnica direta. Reconheça o contexto em 1-2 frases e sugira 3 perguntas que o consultor deveria fazer pro cliente pra avançar a conversa.\n"
+                        f"Formato:\n📌 [contexto em 1-2 frases]\n\n💬 Perguntas pra fazer:\n- \"pergunta 1\"\n- \"pergunta 2\"\n- \"pergunta 3\""
+                        f"{search_context}"
+                    )
+                else:
+                    user_msg = (
+                        f"Conversa:\n{context}\n\n"
+                        f"Responda a dúvida técnica de forma objetiva.{no_repeat_hint}"
+                        f"{search_context}"
+                    )
+            else:
+                user_msg = (
+                    f"Conversa:\n{context}\n\n"
+                    f"Contribua com algo útil sobre o que foi dito. Não narre quem falou o quê. Não diga 'Pessoa 1 falou' ou 'Foi mencionado que'. Apenas responda.{no_repeat_hint}"
+                    f"{search_context}"
+                )
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
             result = self._clean_md(result)
