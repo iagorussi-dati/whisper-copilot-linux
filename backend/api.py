@@ -285,7 +285,7 @@ class Api:
 
             # For technical template: classify if there's a question or just context
             if is_technical and context.strip():
-                classify_msg = f"A conversa abaixo contém uma PERGUNTA TÉCNICA direta do cliente? Uma pergunta técnica é quando o cliente PEDE informação, faz uma PERGUNTA explícita (com ? ou pedindo explicação). Se o cliente apenas DESCREVE algo ou AFIRMA algo, NÃO é pergunta. Responda APENAS: SIM ou NAO\n\nConversa: {context[:400]}"
+                classify_msg = f"A conversa abaixo contém uma PERGUNTA TÉCNICA direta do cliente? Uma pergunta técnica é quando o cliente PEDE informação, faz uma PERGUNTA explícita (com ? ou pedindo explicação), ou expressa uma DÚVIDA que precisa de resposta técnica (ex: 'não sei se vale a pena', 'não faço ideia de como', 'será que', 'tem como', 'não sei se é viável'). Se o cliente apenas DESCREVE algo, AFIRMA uma decisão já tomada, ou INFORMA algo sem pedir resposta, NÃO é pergunta. Responda APENAS: SIM ou NAO\n\nConversa: {context[:400]}"
                 has_question = self._bedrock.call_raw("Classifique.", classify_msg, max_tokens=5).strip().upper()
                 has_q = "SIM" in has_question
                 log.info(f"[SNAPSHOT] Has question: {has_question} -> {has_q}")
