@@ -263,10 +263,10 @@ class Api:
             if self._response_mode == "short" and n_lines > 6:
                 max_tok = min(250, 150 + (n_lines - 6) * 15)
 
-            # Web search: for research mode + templates that need it, OR always for assistente (consultor técnico)
+            # Web search: for research mode + non-technical templates
             search_context = ""
             is_technical = self._behavior_template == "assistente"
-            needs_search = (self._response_mode == "research" and self._behavior_template in ("assistente", "pesquisa")) or is_technical
+            needs_search = not is_technical and (self._response_mode == "research" and self._behavior_template in ("pesquisa",))
             if needs_search:
                 last_text = " ".join(e['text'] for e in self._transcript[-10:])
                 if last_text and len(last_text.strip()) > 30:
@@ -302,18 +302,22 @@ class Api:
                         break
                 log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
 
-                # Force web search when competitor mentioned
-                if has_competitor and not search_context:
+                # Web search: when has question OR competitor
+                if (has_q or has_competitor) and not search_context:
+                    from .search import web_search
                     qp = f"Responda APENAS com uma query de busca em inglês, máximo 8 palavras. Só a query.\n\nConversa: {clean_ctx[:300]}"
                     query = self._bedrock.call_raw("Query de busca.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
                     if query and "NONE" not in query.upper():
-                        query += " vs AWS privacy security 2026"
-                        from .search import web_search
-                        log.info(f"[SNAPSHOT] Competitor search: '{query[:80]}'")
+                        if has_competitor:
+                            query += " vs AWS privacy security 2026"
+                        else:
+                            query += " AWS 2026"
+                        log.info(f"[SNAPSHOT] Tech search: '{query[:80]}'")
                         results = web_search(query, max_results=3)
                         if len(results) > 50:
-                            search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, especialmente sobre diferenças com concorrentes:\n{results}"
+                            search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta:\n{results}"
 
+                # Build user message based on classification
                 if not has_q:
                     user_msg = (
                         f"Pontos da conversa:\n{clean_ctx}\n\n"
