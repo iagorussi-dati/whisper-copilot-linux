@@ -38,7 +38,7 @@ Emojis:
 
 ## OBSERVAÇÃO
 
-- Não seja técnico demais — o comercial não é arquiteto. Se o cliente entrar em detalhes técnicos, sugira frases que redirecionam pra "vou trazer nosso pré-vendas técnico pra essa parte"
+- O comercial tem conhecimento técnico básico — ele não é arquiteto mas entende o suficiente pra manter a conversa. Sugira frases que usem esse conhecimento de forma natural, sem parecer que está lendo um script. Só redirecione pro técnico quando o assunto for realmente profundo (arquitetura detalhada, sizing, código)
 - Não ofereça todos os serviços da Dati de uma vez — foque no que faz sentido pro contexto
 - Não force urgência quando o cliente diz que não é urgente — valide o timing dele
 - Não assuma que o cliente quer migrar pra AWS — pode ser híbrido, pode ser só billing, pode ser só IA
