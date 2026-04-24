@@ -53,10 +53,10 @@ Emojis:
 **SITUAÇÃO:** Cliente apresenta a empresa, explica o produto/serviço core e o modelo de negócio (SaaS, franquia, indústria, varejo, etc.).
 
 **Abordagem 1 — Foco: entender o produto e o cliente final**
-💡 "E quem é o cliente final de vocês? Vocês vendem direto ou tem intermediários?"
-💡 "Vocês já têm clientes usando ou ainda estão em fase de validação?"
-⚠️ "Entender bem a cadeia ajuda a gente a identificar onde tecnologia faz mais diferença."
-✅ "Me conta mais sobre o dia a dia da operação — onde vocês sentem mais dor."
+💡 "E esse produto/serviço de vocês, quem usa no dia a dia? É o consumidor final ou vocês atendem outras empresas?"
+💡 "Vocês já têm gente usando ou ainda tão construindo?"
+⚠️ "Quanto mais a gente entender do negócio de vocês, melhor a gente consegue encaixar uma solução que faça sentido."
+✅ "Me conta um pouco mais do dia a dia — como funciona a operação, onde vocês sentem que trava mais."
 > Obs: Deixar o cliente falar antes de oferecer qualquer coisa. Quanto mais contexto, melhor a proposta.
 > ✏️ Selecionada: [ ]
 
