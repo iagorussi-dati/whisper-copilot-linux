@@ -529,9 +529,7 @@ class Api:
             "conversa": base / "prompts" / "conversa-natural.md",
             "sugestoes": base / "prompts" / "sugestoes.md",
             "assistente": base / "prompts" / "assistente-objetivo.md",
-            "pesquisa": base / "prompts" / "pesquisa.md",
-            "discovery": base / "Prompt_Modelo.md",
-            "tecnico": base / "prompts" / "consultor-tecnico.md",
+            "discovery": base / "prompts" / "discovery-dati.md",
             "piadas": base / "prompts" / "piadas.md",
             "vendas": base / "prompts" / "vendas.md",
             "shazam": base / "prompts" / "shazam.md",
@@ -607,8 +605,7 @@ class Api:
         # Response mode: fixed per template, configurable only for sugestoes
         template_modes = {
             "assistente": "research",  # Consultor Técnico AWS: always detailed + web search
-            "pesquisa": "research",
-            "shazam": "short",
+            "discovery": "short",      # Sugestões Discovery: short mode
         }
         self._response_mode = template_modes.get(cfg.behavior_template or "", cfg.response_mode or "short")
         self._behavior_template = cfg.behavior_template or ""

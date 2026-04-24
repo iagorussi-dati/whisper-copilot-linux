@@ -192,19 +192,17 @@ function renderSetup() {
     <h2 class="text-lg font-semibold mt-4 mb-2">Instruções</h2>
 
     <!-- Comportamento -->
-    <label class="text-xs text-slate-400">Comportamento <span class="text-slate-600">(como responde)</span></label>
+    <label class="text-xs text-slate-400">Comportamento</label>
     <select data-action="selectTemplate" data-target="behavior"
       class="w-full mt-1 mb-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
       <option value="">Selecione...</option>
-      <option value="conversa" ${c.behavior_template === 'conversa' ? 'selected' : ''}>🧠 Copiloto Pessoal</option>
       <option value="sugestoes" ${c.behavior_template === 'sugestoes' ? 'selected' : ''}>📋 Sugestões</option>
+      <option value="discovery" ${c.behavior_template === 'discovery' ? 'selected' : ''}>🎯 Sugestões Discovery</option>
       <option value="assistente" ${c.behavior_template === 'assistente' ? 'selected' : ''}>🔧 Consultor Técnico AWS</option>
-      <option value="pesquisa" ${c.behavior_template === 'pesquisa' ? 'selected' : ''}>🔍 Pesquisa</option>
-      <option value="shazam" ${c.behavior_template === 'shazam' ? 'selected' : ''}>🎵 Shazam</option>
     </select>
-    ${c.behavior_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.behavior_template || 'Custom'}</p>` : '<p class="text-xs text-amber-400 mb-3">⚠️ Selecione um comportamento</p>'}
+    ${c.behavior_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.behavior_template === 'discovery' ? 'Sugestões Discovery' : c.behavior_template === 'assistente' ? 'Consultor Técnico AWS' : c.behavior_template === 'sugestoes' ? 'Sugestões' : c.behavior_template || 'Custom'}</p>` : '<p class="text-xs text-amber-400 mb-3">⚠️ Selecione um comportamento</p>'}
 
-    ${c.behavior_template === 'shazam' ? '' : `
+    ${c.behavior_template === 'assistente' ? '' : `
     <!-- Identificação de participantes -->
     <h2 class="text-lg font-semibold mt-4 mb-2">Participantes</h2>
     <div class="flex gap-2 mb-3">
@@ -248,23 +246,6 @@ function renderSetup() {
     `}
     ${c.suggestions_target ? `<p class="text-xs text-emerald-400 mt-2">🎯 Copiloto focado em: ${c.suggestions_target}</p>` : ''}
 
-    <!-- Atuação -->
-    <label class="text-xs text-slate-400">Atuação <span class="text-slate-600">(em que área atua)</span></label>
-    <div class="flex gap-2 mt-1 mb-1">
-      <select data-action="selectTemplate" data-target="role"
-        class="flex-1 bg-slate-800 border border-slate-700 rounded px-3 py-2 text-sm text-slate-100 outline-none focus:border-slate-500">
-        <option value="">Nenhuma (opcional)</option>
-        <option value="discovery" ${c.role_template === 'discovery' ? 'selected' : ''}>📋 Discovery Comercial</option>
-        <option value="tecnico" ${c.role_template === 'tecnico' ? 'selected' : ''}>🔧 Consultor Técnico AWS</option>
-        <option value="vendas" ${c.role_template === 'vendas' ? 'selected' : ''}>💰 Copiloto de Vendas</option>
-        <option value="piadas" ${c.role_template === 'piadas' ? 'selected' : ''}>🎭 Piadas e Humor</option>
-        <option value="custom">📄 Carregar arquivo...</option>
-      </select>
-    </div>
-    <input type="file" data-action="loadPromptFile" accept=".md,.txt,.markdown"
-      class="text-xs text-slate-400 mb-2" style="display:none" id="promptFileInput" />
-    ${c.role_prompt ? `<p class="text-xs text-emerald-400 mb-3">✅ ${c.role_template || 'Custom'}</p>` : '<p class="text-xs text-slate-500 mb-3">Opcional — define a especialidade</p>'}
-
     <!-- Contexto Adicional -->
     <label class="text-xs text-slate-400">Contexto Adicional <span class="text-slate-600">(prioridade máxima)</span></label>
     <textarea data-bind="extra_context" rows="2" placeholder="Ex: Estamos discutindo migração pra AWS. Foco em custos e prazos. O cliente é conservador..."
@@ -288,7 +269,7 @@ function renderSetup() {
       </button>
     </div>
 
-    ${['sugestoes', 'conversa'].includes(c.behavior_template) ? `
+    ${c.behavior_template === 'sugestoes' ? `
     <!-- Response mode — only for Sugestões and Copiloto Pessoal -->
     <label class="text-xs text-slate-400">Tipo de resposta</label>
     <div class="flex gap-2 mt-1 mb-4">
