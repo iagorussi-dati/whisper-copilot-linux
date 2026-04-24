@@ -286,22 +286,34 @@ class Api:
             # For technical template: classify if there's a question or just context
             if is_technical and context.strip():
                 classify_msg = (
-                    f"Analise a transcrição abaixo e faça DUAS coisas:\n"
-                    f"1. CLASSIFICAÇÃO: SIM ou NAO — tem pergunta técnica? (pergunta = pede informação, expressa dúvida como 'não sei se', 'será que', 'tem como'. Afirmação/descrição = NAO)\n"
-                    f"2. PONTOS CRUCIAIS: Extraia os pontos mais importantes em 2-4 frases limpas e objetivas. Remova ruído (repetições, hesitações). Foque em: dúvidas, tecnologias mencionadas, problemas, decisões.\n\n"
-                    f"Formato EXATO (sem markdown):\n"
-                    f"CLASSIFICAÇÃO: SIM ou NAO\n"
-                    f"PONTOS: texto limpo\n\n"
+                    f"Analise a transcrição e responda TRÊS linhas, sem explicação, sem markdown:\n"
+                    f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta técnica ou dúvida que precisa resposta?)\n"
+                    f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
+                    f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n\n"
                     f"Transcrição: {context[:600]}"
                 )
-                classify_result = self._bedrock.call_raw("Classifique e extraia pontos cruciais.", classify_msg, max_tokens=150).strip()
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=120).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
+                has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
                 clean_ctx = context
                 for line in classify_result.split("\n"):
                     if line.strip().upper().startswith("PONTOS:"):
                         clean_ctx = line.split(":", 1)[1].strip()
                         break
-                log.info(f"[SNAPSHOT] Classification: {'SIM' if has_q else 'NAO'} | Points: {clean_ctx[:120]}")
+                log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
+
+                # Force web search when competitor mentioned
+                if has_competitor and not search_context:
+                    qp = f"Responda APENAS com uma query de busca em inglês, máximo 8 palavras. Só a query.\n\nConversa: {clean_ctx[:300]}"
+                    query = self._bedrock.call_raw("Query de busca.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
+                    if query and "NONE" not in query.upper():
+                        query += " vs AWS privacy security 2026"
+                        from .search import web_search
+                        log.info(f"[SNAPSHOT] Competitor search: '{query[:80]}'")
+                        results = web_search(query, max_results=3)
+                        if len(results) > 50:
+                            search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, especialmente sobre diferenças com concorrentes:\n{results}"
+
                 if not has_q:
                     user_msg = (
                         f"Pontos da conversa:\n{clean_ctx}\n\n"
@@ -310,9 +322,12 @@ class Api:
                         f"{search_context}"
                     )
                 else:
+                    extra_instruction = ""
+                    if has_competitor:
+                        extra_instruction = " IMPORTANTE: o cliente mencionou um concorrente — diferencie a AWS com FATOS baseados nos dados da web, sem atacar o concorrente. Foque em segurança, privacidade e controle dos dados."
                     user_msg = (
                         f"Pontos da conversa:\n{clean_ctx}\n\n"
-                        f"Responda a dúvida técnica de forma objetiva.{no_repeat_hint}"
+                        f"Responda a dúvida técnica de forma objetiva.{extra_instruction}{no_repeat_hint}"
                         f"{search_context}"
                     )
             else:
