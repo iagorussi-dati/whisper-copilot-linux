@@ -1,0 +1,508 @@
+# [Infrabrasil & Dati] Apresentação Técnica
+**Date**: Monday, April 20, 2026 at 2:00 PM  
+**Duration**: 1:06:26  
+**People**: Gustavo Conti, Kiulyn Fernandes, Gladson Bernardino Alves, Bruno Severino Moreira Goes, and Caio Sousa Caires
+
+[0:13] **kiulyn**: Aoba.
+
+[0:14] **Caio Sousa Caires**: Aoba.
+
+[0:15] **kiulyn**: Belezinha? Jogo rápido. Antes de eu aceitar o homem velho, cara, só quero ver se tu curtiu esse modelo de apresentação aqui. Tô apresentando a tela. Tá aparecendo aí?
+
+[0:29] **Caio Sousa Caires**: Tá.
+
+[0:31] **kiulyn**: Não tá aparecendo a apresentação, né? Tá, tá, tá, tá, tá, tá, tá, tá, tá, tá, tá. Beleza, cenário. Traga os objetivos do projeto. Aí a parte da arquitetura, que é onde tu vai aplicar. Calculadora. Aí entra na fase de escopo. Bem, cara, bem em bullet points mesmo. Não entra naquela parte toda técnica. Dos requisitos, o que a gente espera na... Da execução desse projeto. Os benefícios que a gente tem de apresentar pra ele. a fase dos entregáveis, que isso aqui ele fica alinhado ao escopo detalhado lá, né?
+
+[1:15] **Gustavo Conti**: As
+
+[1:15] **kiulyn**: premissas, o que estão fora do escopo, que seja natural, só que em slides distintos, e a parte de investimento. Ficou legal?
+
+[1:24] **Gustavo Conti**: Ficou.
+
+[1:26] **kiulyn**: Alguma opinião, algo do gênero?
+
+[1:30] **Gustavo Conti**: Não. Ficou bom.
+
+[1:32] **kiulyn**: Beleza, então vamos lá. E você, Théo Gladys?
+
+[1:35] **Gustavo Conti**: Beleza.
+
+[1:39] **kiulyn**: Boa tarde Gladson, tudo bom?
+
+[1:41] **Gladson Bernardino Alves**: Olá, boa tarde Como
+
+[1:43] **kiulyn**: é que você tá, 100%?
+
+[1:45] **Gladson Bernardino Alves**: Tudo bem e vocês aí?
+
+[1:47] **kiulyn**: Tudo certo E por aí, como é que passaram essa última semana? Vão parar hoje ou amanhã vão seguir também?
+
+[1:57] **Gladson Bernardino Alves**: Não, amanhã né, hoje é normal
+
+[1:58] **kiulyn**: Hoje normal, hoje normal É
+
+[2:01] **Gladson Bernardino Alves**: normal, é hoje normal
+
+[2:03] **kiulyn**: Não, boa, boa. Gladson, obrigado pela janela. A gente tá fazendo essa nova rodada, mais uma vez. Dando um contexto geral aqui, agora a gente vai te apresentar um pouco do escopo do que a gente conversou a respeito do Data Lake. Aqui eu já consigo te trazer um detalhamento. Deixa eu só aceitar o Bruno.
+
+[2:21] **kiulyn**: A gente já consegue te trazer um detalhamento frente a custos em AWS para ter esse ambiente rodando, a gente também consegue te dar um panorama geral ali frente a custos de execução, o que a gente pode conseguir, e também dar um detalhamento geral aí do que a gente trouxe, o que a gente desenhou para que possa ser implementado aí na Infra Brasil. Mas eu gosto de deixar sempre bem claro, Gladson, isso aqui não está escrito em pedra.
+
+[2:50] **kiulyn**: Então, tudo que a gente te apresentar é passível de a gente dar um passo atrás e, se for necessário, redesenhar. Como eu sempre falo, né, Gladisson?
+
+[2:58] **kiulyn**: Tem que fazer sentido para vocês,
+
+[3:01] **Gladson Bernardino Alves**: tá
+
+[3:02] **kiulyn**: bom? Bom, Gladisson, do teu time... Você consegue
+
+[3:06] **Gladson Bernardino Alves**: gravar essa
+
+[3:08] **kiulyn**: reunião? Consigo, sim. Claro, consigo sim.
+
+[3:12] **Gladson Bernardino Alves**: Se eu
+
+[3:12] **kiulyn**: precisar
+
+[3:12] **Gladson Bernardino Alves**: repetir algumas coisas pra minha chefe...
+
+[3:14] **kiulyn**: Não, não, fica tranquilo.
+
+[3:16] **Gladson Bernardino Alves**: Posso recorrer novamente?
+
+[3:17] **kiulyn**: Consigo sim, deixa eu só... Só puxar aqui. Antes de tudo, Gladisson, tem mais alguém do teu time que vai participar?
+
+[3:24] **Gladson Bernardino Alves**: Não, somos nós aqui.
+
+[3:26] **kiulyn**: Beleza, então. Vou botar pra gravar. Boa! Bom, vamos lá então. Eu vou apresentar a tela aqui pra vocês. Vocês me confiram se está aparecendo, tá?
+
+[4:02] **Gladson Bernardino Alves**: Aqui tá aparecendo sim.
+
+[4:04] **kiulyn**: Boa. Perfeito. Gladson, vamos seguindo aqui com a apresentação. Eu já te falei no momento anterior, né, Gladson, te apresentando sobre a DAT, só que aqui eu quero reforçar mais uma vez para dar uma melhor contextualização, até para ficar bem na mesma página, até mesmo com esse projeto. Então, de novo, A Datilha é um parceiro de camada avançada da AWS.
+
+[4:25] **kiulyn**: Hoje, dentro da AWS, a gente tem essa competência com base em como nós ajudamos as empresas, por exemplo, a Infobrasil a terem seu sucesso na adoção em cloud, falando em AWS, e também inteligência artificial, que é onde nós somos especialistas dentro da AWS voltados para essas frentes. A AWS nos dá diversas competências. Isso, de fato, com base nas entregas que nós conseguimos apresentar aos nossos clientes e como a AWS viu isso. Então, por exemplo, a gente vai falar de operação de sistemas, entregas baseadas em Windows Server, Immersion Day. Eu vou dar um exemplo, Gladson.
+
+[4:59] **kiulyn**: O Immersion Day é uma modalidade onde a DAT pode fazer um dia baseado em imersão, como se fosse um intensivão em alguma... em alguma temática voltada a AWS ou de tecnologia, vou dar exemplo, inteligência artificial, então a AWS pode conceder esses subsídios para fazer um intensivão junto com o time de vocês, de uma maneira bem didática, bem próxima, dentre várias outras competências. É como ela nos enxerga hoje.
+
+[5:23] **kiulyn**: Falando da DAT, então, estamos no mercado desde 2011, entendendo que cada cliente tem sua particularidade, tem sua vontade de adotar tecnologia na empresa, só, claro, tem a sua vontade, mas eventualmente não sabe onde pôr ou onde começar. Então, baseando nisso, a DAT começou a estudar o mercado e entender o que Para se antecipar nessa frente, a gente acabou se tornando esse especialista em cloud. No caso da AWS, que é o nosso core business, e agora que está em alta inteligência artificial. Então a ideia é o que?
+
+[6:01] **kiulyn**: Trazer para os clientes sempre as melhores práticas do mercado. E quando a gente estiver falando em inteligência artificial aqui, Gladson, é com propósito. Não é utilizar a inteligência artificial por usar ou só tem um rótulo lá de que utilizei a. Não, aqui é com propósito. Tem que realmente resolver uma dor de negócio ou acelerar uma operação da empresa. Que é o caso de vocês hoje. Falando um pouco de números, Gladson, da última vez que a gente conversou, lá na primeira apresentação, a gente estava em torno de 65 especialistas.
+
+[6:35] **kiulyn**: Agora estamos com mais de 85 especialistas aqui dentro da DAT. Então, somos empresa de Blumenau, Blumenau é o polo tecnológico de Santa Catarina. Falando das entregas, hoje a gente está falando de mais de 1.400 projetos entregues. Isso vai entre diversos setores e tamanhos de empresas. Não existe segregação por tipo de empresa, por tamanho de empresa, se houve a necessidade do cliente ter sua adoção na adoção de tecnologia, seja na AWS, e ela achou que fez sentido a DAT ser esse parceiro, a gente não vai segregar ela não. Somos bastante democráticos nesse sentido.
+
+[7:14] **kiulyn**: Bom, a gente tem alguns dos principais clientes aqui na DAT, né? Então, até por mais de proximidade aí, né, Gladisson? A De Pascoal é um dos nossos principais clientes aqui na DAT. Porto Belo, que é um dos nossos principais aqui de Santa Catarina, né? Mas ela atende a nível nacional, frente de revestimentos de cerâmica. Grupo SC, voltado para farmácias, dentre outras empresas também. A gente gosta de frisar aqui as principais que são de maior adoção no mercado. Por exemplo, até mesmo a Donto Company, né?
+
+[7:43] **kiulyn**: Falando um pouco de expertise, hoje somados os nossos times aqui, nossos especialistas inclusive, me incluindo nessa, a gente tem mais de 100 certificações. A AWS consegue selos aos parceiros de 100 em 100. Hoje estamos em 186 selos. Isso quer dizer o quê? Que para cada... para cada frente em AWS que vocês queiram trabalhar vai ter time especializado para isso. E certificado, como eu falei, eu também sou certificado, Gustavo é certificado, todo time aqui acaba sendo certificado, que é o que a AWS inclusive nos enxerga como um parceiro estratégico.
+
+[8:24] **kiulyn**: A gente acabou sendo reconhecido, inclusive, nessa frente de reconhecimento estratégico, a AWS nos reconheceu como o principal parceiro da América Latina, baseado justamente nessa excelência das entregas das soluções, como que a gente conseguiu gerar impacto nessas empresas, justamente com o uso da tecnologia. E, não só isso, não só sendo um parceiro da AWS, a gente acabou se tornando também parceiro Telecinex, que a gente faz o fatoramento via boleto em AWS, mas como também nos tornamos parceiros Fortinet e Datadog. A gente acaba se tornando um Trusted Advisor em tecnologia.
+
+[9:01] **kiulyn**: Bom, temos pelo menos dois cases aqui, tá? Que possam fazer sentido para a operação de vocês hoje. Hoje nós temos um case da Linkrus, que a gente aplicou IA generativa para otimizar o processo e confirmação de entrega. Só para vocês entenderem, a Linkrus, ela trabalha com logística, uma Logitech, né? Então a gente conseguiu junto com a Olympus adotar uma inteligência artificial que ganhasse agilidade no processo das entregas, ou seja, geralmente o grande problema das logísticas é a fase entre a saída do caminhão e até a entrega para o cliente final. Existem muitos gaps nesses pontos.
+
+[9:42] **kiulyn**: E com a adoção da inteligência artificial conseguiu preencher esses gaps e ao mesmo tempo melhorar a agilidade, melhorar a precisão, tornar o negócio muito mais escalável e também ter a segurança de ponta a ponta dessas entregas, né? Que hoje é muito fácil. Não sei o caso de vocês, eu já passei comigo, por exemplo, com compra da Choppy.
+
+[10:02] **kiulyn**: e você faz a compra, vai um entregador fazer esse home money, mas eventualmente se ele não te encontra dentro de casa, ele só vai tirar uma foto e deixa teu pacote ali num canto e você depois vai lá e vai buscar. com sorte. Então, nessa fase aqui dali, inclusive, ele ajudou essas grandes empresas a terem maior rastreadibilidade e também assertividade quanto a essas entregas. Aqui eu estou falando de um caso específico, né? Mas é onde como que a gente conseguiu utilizar da IA para resolver esses problemas. Outro caso é o client click super.
+
+[10:35] **kiulyn**: Então, através da AWS e um conjunto do BI, que a Clicksuper utilizava, isso aí a gente tá falando uma massa gigantesca de dados, então a gente conseguiu trabalhar com o IA, junto com o BI da AWS, tá, pra fazer toda a estruturação das camadas de dados, utilizando serviços específicos da AWS, mas que ajudasse a Clicksuper a ter uma ingestão e visualização e análise em tempo real.
+
+[11:02] **kiulyn**: Só pra dar um resumo bem bem institucional e a respeito da ClicSupra, a ClicSupra é uma plataforma voltada à pesquisa de preços no varejo, entrando no consome de uma grande variedade de... de informações, por exemplo, produto, locais onde estão sendo vendidos esses produtos, médias de preço, e consegue te trazer uma análise baseada em AI em tempo real para o cliente lá na outra ponta.
+
+[11:25] **kiulyn**: Então aqui a gente não está falando de uma massa média, aqui a gente está falando de uma massa gigantesca de dados que precisam ser processados e analisados em tempo real e com a necessidade de gerar alguns insights. dentro desses links aqui, que eu vou compartilhar contigo também, Gladson. Vai ter acesso aos cases no detalhe. Bom, falando um pouco agora do modelo de atuação, então a DART vai atuar de ponta a ponta com vocês, Gladson, numa camada multidisciplinar. baseada em gestão em ambiente AWS.
+
+[11:59] **kiulyn**: Então, daqui a gente vai trabalhar de ponta a ponta, em frente de performance, em frente de segurança e, principalmente, controle de custos. A cloud tem que ser utilizada com propósito, sem que o custo fique desenfreado ou o custo tem que ficar proporcional ao crescimento da empresa. Aqui do team, de novo, eu gosto de frisar, vamos em todas as pontas, de ponta a ponta.
+
+[12:19] **kiulyn**: Desde uma fase de arquitetura, que é o que a gente está conversando aqui nesse primeiro momento, desde uma fase de implementação, construir, estruturar todo esse ambiente e partindo disso se for necessário uma visualização muito mais próximo, um monitoramento contínuo, a Dashela também pode entrar. Então a gente não fala num caso muito mais pontual não. Então de quatro camadas de serviços a gente vai estar falando aqui da que somos especialistas em migrações, seja de ambiente local para cloud ou cloud para cloud.
+
+[12:49] **kiulyn**: Então, faz-se um estudo aprofundado de toda a tua infraestrutura atual, entendendo quais são as possibilidades de levar isso para a nuvem, ou até mesmo de uma nuvem que você já esteja vivendo, quais são os potenciais que vocês podem levar isso para a AWS, por exemplo. Consultoria. É o que a gente já está fazendo agora, né, Gladson?
+
+[13:09] **kiulyn**: Mas aqui a gente faz um estudo multidisciplinar, entendendo em viés de tecnologia, entendendo qual é a tecnologia que está por trás da InfraBrasil e também entendendo a nível de negócio, como que a InfraBrasil, ela opera com seus clientes, o que tem de tecnologia por trás, como a tecnologia potencializa as entregas da InfraBrasil, entendendo quais são os desafios atuais que vocês buscam resolvê-los, ou dar a celeridade, ou dar a melhor assertividade, e aqui a gente vai entendendo, vai montando as pecinhas e vai entendendo quais são os potenciais, as possibilidades de vocês terem uma solução escalável, por
+
+[13:43] **kiulyn**: exemplo. O monitoramento de sustentação, aqui de maneira bem enxuta e direta, é uma camada de suporte de MSP que nós temos aqui na DAT, então a gente consegue fazer a gestão do ambiente AWS de via de regra, olhando para o ambiente de maneira proativa, não não deixando que incidentes aconteçam, então a gente consegue ter um time de resposta em incidentes frente à tua infraestrutura.
+
+[14:07] **kiulyn**: E também tem a camada de serviços, que é a porta de entrada das parcerias, que é a gestão de faturamento da AWS, que é uma modalidade onde, ao invés de você faturar a AWS via cartão de crédito, ela pode ser feita via boleto. Até Gladson, eu vou te fazer uma pergunta. Hoje vocês utilizam o Azure, correto?
+
+[14:23] **Gladson Bernardino Alves**: Sim.
+
+[14:25] **kiulyn**: Perfeito. Vocês faturam o Azure via distribuidor ou fazem via cartão de crédito? Viu, entendeu?
+
+[14:30] **Gladson Bernardino Alves**: Ah,
+
+[14:31] **kiulyn**: não, perfeito. Então, aqui daria até, inclusive, para englobar, tá? Mas legal. Mas vamos falar do que importa, tá, Gladson? Vamos falar desse projeto de Data Lake aqui na AWS. Bom, a gente teve uma identificação de alguns pontos aí dentro do cenário atual de vocês, tá? Então, hoje, para a Infobrasil, hoje vocês possuem integrações frágeis e ponto a ponto, então depende de consultas diretas no banco, Hoje existe um processo manual de extração e tratamento desses dados, então acaba gerando um retrabalho do time de vocês, até mesmo um risco de inconsistência.
+
+[15:10] **kiulyn**: O DW hoje está limitado ao offload do BI. Então não existe ainda uma consolidação estruturada desses dados. Os dados mais críticos estão dispersos, não existem padronizações entre eles, até mesmo para um consumo mais recorrente. não tem baixa ou quase nenhuma visibilidade sobre manutenção, ou os custos, ou o uso desses ativos, então ele acaba sendo muito mais reativo, né, Gladson?
+
+[15:45] **kiulyn**: E isso, querendo ou não, gera um impacto direto na receita, porque vocês acabam ficando limitados sobre essa visibilidade, até mesmo disponibilidade dos equipamentos, das máquinas, e pode, inclusive, como consequência, travar essa iniciativa de vocês de tentarem avançar com múltiplas frentes, sem que tenham uma base inicial consolidada. Gladson, essa nossa visão do cenário atual está condizente com a realidade de vocês? Tem algum ponto que precisa ser alterado, que precisa ser corrigido ou acrescentado?
+
+[16:19] **Gladson Bernardino Alves**: Acho que no geral, sim. Está aderente. Sobre visibilidade e manutenção, A informação que a gente tem é a informação que extrai da própria plataforma de manutenção, então não tem garantia que essas informações estão 100%. Eu acho que é isso mesmo, tá?
+
+[16:46] **kiulyn**: Beleza, então considera-se
+
+[16:47] **Gladson Bernardino Alves**: que... Eu acho que é bem isso, vocês conseguiram captar bem aqui o cenário da infra.
+
+[16:53] **kiulyn**: Ah não, legal, é exatamente isso que a gente precisava saber, se realmente a gente entendeu bem, então como você trouxe, confirme-se a informação ou se eventualmente algum ajuste precisaria ser feito. Mas estamos aqui no melhor dos cenários.
+
+[17:09] **kiulyn**: a gente tem pelo menos 6 objetivos dentro desse projeto então fazer a estruturação e a fundação desse data lake para suportar uma fase 1 que pensando nesse projeto ele não morreria aqui então ele seria faseado dentro de todo aquele escopo que você nos trouxe então fazer a estruturação e a fundação desse data lake fazer a consolidação inicial desses dados que são os mais críticos hoje que é o datuótis e o sisma em uma base única reduzir essa dependência e principalmente reduzir esse processo manual de extensão e consolidação, então tirar um pouco desse trabalho manual, esse
+
+[17:44] **kiulyn**: trabalho humano. Partindo disso, fazer a disponibilização de uma base analítica inicial para ajudar na visão operacional, também aqui. criar uma implementação de uma governança mínima, traçando a organização e até mesmo a acessibilidade dos dados, e também, dentro dos objetivos, é preparar essa arquitetura para uma evolução incremental de novas fontes ou, se não, outros cases. De novo, né, Gladys? Não foi como a gente conversou. Essa aqui vai ser a base. Estando ela preparada, ela já fica pronta para receber os demais frentes.
+
+[18:15] **kiulyn**: Então, por exemplo, isso aqui a gente está falando das máquinas em primeiro momento, mas nada impede de daqui a pouco ela estar minimamente preparada e já começar a vir as frentes de relógio ponto, dados do RH, dentre outras frentes. Bom, aqui a gente tem um desenho da arquitetura. Eu vou passar para o Gustavo para ele dar um detalhamento de como que a gente desenhou isso para vocês.
+
+[18:39] **Gustavo Conti**: Pessoal, tá dando pra ver bem aí os ícones, os serviços e tudo mais?
+
+[18:45] **Gladson Bernardino Alves**: Sim, sim, dá pra ver bem.
+
+[18:46] **Gustavo Conti**: Legal. Então, iniciando ali o desenho da arquitetura, tá, da esquerda pra direita, a gente pensou em uma arquitetura que conseguisse trazer bastante dessa confiança, que hoje vocês tem falta, né, e trazer ali dos principais sistemas. Então, focando ali no TOTOS e do CISMA, sendo que o TOTOS a gente vai trazer os dados a partir ali do DW, tá, que é o Postgres em si. A ideia é que a gente tenha um agendador, então aquele EventBridgeScheduler ali, ele é basicamente um agendador de tarefas, tá?
+
+[19:17] **Gustavo Conti**: Ele vai a cada seis horas, a gente pode mudar esse horário, mas idealmente aqui a gente colocou já seis horas, a cada seis horas executar um fluxo de funções. Esse fluxo de funções nada mais é que um orquestrador. Então ele vai iniciar dois processos diferentes que vão consumir dados de um local e jogar para o outro. Ele vai garantir que esses processos não só estejam rodando, mas que caso eles tenham alguma falha, eles consigam ser refeitos e eles rodam em algumas especificações de segurança que a gente definiu.
+
+[19:46] **Gustavo Conti**: Então ele é um orquestrador realmente de todo esse fluxo. Quem vai executar a função de copiar dados de um local e jogar para o outro, que nesse caso vai copiar dados lá dos sistemas e jogar para o nosso Data Lake, vai ser o DMS. O DMS é um serviço que é feito para migração de dados. Então, ele vai buscar dados do TOTOS, uma das funções é buscar dados do TOTOS e jogar para um S3, que é onde a gente vai ter o nosso Data Lake. O S3 é basicamente uma storage de objetos.
+
+[20:17] **Gustavo Conti**: Então, aí o DMS vai ter um procisma também, que vai buscar lá do SQL Server e entregar também para uma camada de uma camada que a gente chama de camada bronze ou camada raw, que é uma camada em que os dados vêm brutos ainda. Então ali ele basicamente só vai fazer a cópia de um local para o outro. O DMS vai rodar a partir de uma máquina. Por trás dos panos ele vai ter uma máquina. Obviamente que a gente não precisa gerenciar ela. Ela é toda gerenciada pela AWS.
+
+[20:42] **Gustavo Conti**: A gente só garante que ele esteja executando. A partir do momento que ele caiu ali dentro do Data Lake, esses objetos já vão ser automaticamente criptografados. Então, questão de segurança, a gente focou bastante na segurança do status. A partir do momento que eles caíram ali, inicia um outro processo, ainda orquestrado por aqueles Step Functions, que é o do Glue. O Glue serve para fazer a transformação desses objetos, então é ele quem vai aplicar toda a camada analítica, todas as regras de negócio, é tudo em cima dele.
+
+[21:13] **Gustavo Conti**: ele vai fazer todo esse processo e jogar para 3 buckets um deles é o .created que na verdade no final dos contos é como se fosse uma pasta só e a gente vai dividindo em barramentos .raw e .created a camada final. O Barra Creator vai ter um só do TOTUS e um outro só do SISMA. Mas quem efetivamente vai ser o local central para os dados serem analisados, que daí já é não só os dados filtrados, mas com os dados já com as regras de negócio aplicada, é o Barra Analytics.
+
+[21:49] **Gustavo Conti**: Então ali no Barra Analytics é onde vocês vão poder consultar esses dados já tratados ou colocar ali um BI ou colocar futuramente uma IA ali dentro para ler os dados. Eu coloquei ali como um usuário, só para vocês terem ideia de que é dali que os dados vão ser lidos. Mas ali, aquele ponto final, é onde vocês podem aplicar qualquer coisa futuramente. Quero aplicar uma IA, seja da AWS, seja de fora, quero aplicar um BI, é dali que ele vai ler. Beleza? Pessoal, ficou alguma dúvida do que eu expliquei até agora?
+
+[22:23] **Gladson Bernardino Alves**: Enquanto não.
+
+[22:26] **Gustavo Conti**: Beleza. Só para explicar os serviços finais, ali na direita tem o Atina. O Atina é basicamente quem vai fazer uma busca via SQL dentro do nosso Lake. O Atina serve exatamente para executar SQLs. Então, seja um BI, seja uma IA, eles vão usar o Atina para constar os dados dentro do Lake. E o Data Catalog, como a própria tradução diz, ele é um catálogo de dados. Então, é ele quem vai ajudar o Athena a fazer essa consulta lá dentro, a traduzir como que ele vai buscar. Então, ele vai basicamente facilitar o processo para vocês. Show.
+
+[23:01] **Gustavo Conti**: Pessoal, o que vocês acharam dessa arquitetura? Era isso que vocês estavam esperando? Deu para entender o que ela vai entregar no final das contas, não só no nível técnico? Ficou bem claro isso para vocês?
+
+[23:16] **Gladson Bernardino Alves**: Estou entendendo que isso daí é uma base, aqui é o Data Lake, ainda não colocando nada em cima dele, só a tinta para fazer consultas de forma genérica.
+
+[23:32] **Gustavo Conti**: Não
+
+[23:33] **Gladson Bernardino Alves**: tô aplicando ainda, não tô construindo, eu entendo que nesse lado direito já é um tipo um data mart aqui já né ou não, conceitualmente?
+
+[23:43] **Gustavo Conti**: Conceitualmente sim. Você tá puxando ali os dados, aplicando regras de negócio, filtrando...
+
+[23:49] **Gladson Bernardino Alves**: Fazendo um LP aqui na verdade né, tô fazendo um load primeiro aqui, transformando, carregando de novo né. Não dá pra enxergar aqui um lake, né? Como é que a gente, assim, o que o Linho explicou, tem uma fase 1 que é montar isso daqui, né? Mas lembra que eu falei lá nas outras reuniões. Montar isso daqui, claro, é algo muito mais sofisticado, robusto, etc., mas endereça vários dos pontos que a gente colocou de confiabilidade de dados e tudo mais. Acredito que essa arquitetura atenda isso, mas como eu falei, para o executivo lá não melhorou tanto.
+
+[24:37] **Gladson Bernardino Alves**: Para a gente TI, Putz, daqui já deu uma grande evolução do que a gente tem agora e temos uma base pra daí pra frente decolar, né? Mas tem que entender como as coisas se encaixam aqui, como que a gente cresce isso daqui.
+
+[24:54] **Gustavo Conti**: É, aí agora pra gente crescer isso basicamente a gente precisaria acoplar uma IA, por exemplo, né? Vamos tratar ali como vocês tinham trazido as ideias, né?
+
+[25:04] **Gladson Bernardino Alves**: Ou com aquele do... o BI, né? Eu não sei como é que chama o... como é que chama?
+
+[25:09] **Gustavo Conti**: Power BI, QuickSight...
+
+[25:10] **Gladson Bernardino Alves**: Não, não, é click site.
+
+[25:12] **Gustavo Conti**: Hoje é o quick switch.
+
+[25:16] **Gladson Bernardino Alves**: Se
+
+[25:17] **Gustavo Conti**: eles não mudarem de novo.
+
+[25:20] **Gladson Bernardino Alves**: E alguma LLM, enfim... Claro que podem, com essa base eu posso colocar Qualquer BI ou qualquer, não precisa ser da AWS sinceramente, mas a gente pode direcionar algumas coisas para a AWS Tanto de A quanto de dashboards
+
+[25:44] **Gustavo Conti**: A ideia do projeto foi justamente essa, ela ser agnóstica, então vocês podem colocar o que vocês quiserem ali no final. Principalmente para uso de IA ela vai ficar bem mais facilitada e ela vai conseguir trazer respostas muito mais concretas e embasadas para vocês. Eu não trouxe IA aqui nesse projeto justamente pela conversa que a gente teve com o Patrick da última vez, porque para a gente colocar IA a gente vai precisar disso pronto. Então de qualquer forma a gente vai precisar fazer esse projeto.
+
+[26:10] **Gustavo Conti**: A diferença é que se eu tentasse colocar a IA dentro desse projeto aqui, junto com o Lake, vocês iam ter que, de qualquer forma, aguardar o Lake ser terminado para o time de IA poder entrar na sprint e começar a agir. Porque eles não conseguem agir em paralelo. São dois projetos que agem em paralelo. Eles precisam de que um seja concluído para que o outro seja feito.
+
+[26:33] **Gustavo Conti**: Então, justamente
+
+[26:34] **Gladson Bernardino Alves**: isso... Tem que primeiro colocar os alicerces, né, pra depois subir as paredes, né. E
+
+[26:42] **Gustavo Conti**: aí agora o que eu recomendo é basicamente que a gente, por exemplo assim, vamos fazer esse projeto, vamos construir o lake. E aí agora a gente foca enquanto o lake tá sendo construído pelo nosso time de dados, ter mais conversas com o nosso time de IA sobre como que a gente vai usar as informações dele e o que que as IAs vão trabalhar em cima desses dados. para que a gente já monte, a partir de agora, um projeto de IA que realmente vá trazer valor para vocês.
+
+[27:08] **Gustavo Conti**: Tem aquelas ideias que a gente conversou da última vez, que a gente corte trazer ali para o Patrick. Então a gente agir com vocês agora num sentido mais de consultoria de IA. para poder montar um projeto que vai fazer sentido, não é a gente montar um projeto que a gente vai dizer assim, não, vai ter IA, mas o que ela está fazendo? Não sei. Então, é mais nesse sentido que eu vejo pelo menos a evolução natural agora para vocês. Não sei, vocês acham, tem alguma leitura diferente?
+
+[27:40] **Gladson Bernardino Alves**: Assim, como eu tinha falado, para contiver, claro, em perspectiva de execução de projeto, esse é o caminho, né? Só que quando a gente vai vender esse projeto para os executivos aqui, ainda que seja uma visão de fase 2, ainda projetária, que não tem detalhes de custo e tudo, mas acho que é importante ter essa visão, entendeu? Porque assim, eu imagino que essa fase 1 a gente já consegue colocar um valor muito próximo do que seria o custo tanto de projeto quanto de consumo que a gente teria aí ao longo dos próximos meses, né?
+
+[28:25] **Gladson Bernardino Alves**: Dá pra estimar, porque a gente já, como você falou, a gente já...
+
+[28:27] **Gladson Bernardino Alves**: Não,
+
+[28:27] **Gustavo Conti**: a fase 1 já tá pronta, tá? Ela
+
+[28:29] **Gladson Bernardino Alves**: tá
+
+[28:29] **Gustavo Conti**: toda
+
+[28:29] **Gladson Bernardino Alves**: estimada.
+
+[28:29] **Gustavo Conti**: Mais pra frente ali tem.
+
+[28:31] **Gladson Bernardino Alves**: Agora, o que que eu acho que seria importante é a gente dar uma visão de fase 2. Ainda que seja budgetário se for possível, se não temos de recursos mesmo. A arquitetura e recursos. Essa arquitetura que está montando, ela se encaixa com o futuro. O futuro aqui quando for colocar o Nova, alguma coisa assim, ele se encaixa aqui, tal, se for calcular o Kickstart, ele vai se encaixar aqui, entendeu?
+
+[28:59] **Gladson Bernardino Alves**: Uma visão de arquitetura, assim, de uma fase 2, ainda que eu entenda a gente não tenha ainda, talvez, nem decisões técnicas, nem avançou muito nesse ponto aí de poder cravar, olha, isso daqui vai custar, são essas exatamente que a gente vai usar e vai custar tanto por mês, né, pelo uso que vocês vão ter que a gente estimou. Ainda não consegue fazer isso porque tem que evoluir as conversas aí com, basicamente, o time do Patrick, né. Mas eu penso assim, mais numa visão executiva, né, de faseamento do projeto.
+
+[29:33] **Gladson Bernardino Alves**: Ó, fase 1 é esse daqui e já tem um custo, né, que é este, demora X tempo, né, fase 2 vai demorar da fase 1 mais X meses, a gente consegue colocar em uma visão que a gente vai ter que colocar de benefício aí, a gente vai ter uma IA generativa, a gente vai juntar mais outras fontes de dados, enfim, o que vai ser feito numa fase 2 com custo aproximado que vai ter esse revisto de tanto, entendeu?
+
+[30:00] **Gustavo Conti**: É muito difícil a gente ter a visão da fase 2 porque a gente ainda não definiu nem o que a IA vai exatamente executar. Mas assim, dizendo a nível de arquitetura, por exemplo, a arquitetura é exatamente a mesma. A gente não vai mudar serviço, não vai mudar nada aí dentro. O que a gente vai mudar? Basicamente pegar aquele usuário que tá ali na direita e trocar ele por um Amazon Kill, trocar ele por um QuickSight, É isso que vai ser alterado.
+
+[30:25] **Gustavo Conti**: Não vai ter serviços a mais ali pra serem aplicados, transformações a mais de dados, a princípio isso não teria. A não ser que vocês queiram puxar dados de alguma outra fonte de origem, que não tá aí. Daí sim. Mas, idealmente, pelo que a gente conversou, não seria. Seria a IA realmente consultar os dados que estão lá no Lake. Então, basicamente vai ser trocar o ícone do usuário por um ícone de uma IA. Não vai ter mais nada complexo para ser feito aí. A questão de horas também depende muito do que a gente vai fazer.
+
+[31:00] **Gustavo Conti**: Então, essa Yala vai fazer o que? Ela vai só consultar o lake e entregar respostas em cima do lake? Quais respostas que ela vai ter que entregar? O que exatamente ela vai consultar lá nesse lake? ela vai ter que fazer uma pesquisa externa, ela vai aceitar receber documentos e aceitar receber transcrições de áudio, por exemplo, ela vai aceitar receber áudio, ela vai aceitar imagem. Então, isso tudo muda bastante o tempo que o projeto vai demorar para ser executado.
+
+[31:29] **Gustavo Conti**: Então, por isso que é difícil de trazer uma visão agora do quanto que vai ser a fase 2 ou como que ela vai funcionar, porque a gente não tem nem a visão do produto final que a gente vai entregar, né?
+
+[31:43] **Gladson Bernardino Alves**: Beleza, entendido.
+
+[31:47] **kiulyn**: Beleza. Ficou claro, Gladson?
+
+[31:53] **Gladson Bernardino Alves**: Sim, sim, tá claro.
+
+[31:55] **kiulyn**: Beleza. Mas até então tá fazendo sentido, como o próprio Gustavo lhe trouxe?
+
+[31:59] **Gladson Bernardino Alves**: Sim, sim, sem dúvida.
+
+[32:01] **kiulyn**: Maravilha. Bom, vou avançando aqui, tá? De novo, qualquer dúvida que vocês tiverem nesse meio tempo, Suargue é mão. O momento é nosso, tá? Bom, trazendo uma estimativa de consumo para este ambiente aqui, ele está partindo aí de 267 dólares e 79 centavos mês. Então a gente está falando aí de um custo mensal de pelo menos R$ 1.554,60. Isso a gente está considerando o dólar a R$ 5,10, já com a acrescentação dos tributos, que hoje valem em torno de 13,83%. Se vocês quiserem visualizar em detalhes, A calculadora, ele vai ter o link aqui.
+
+[32:43] **kiulyn**: Ele já vai ficar detalhado aqui quais são os recursos que foram utilizados, até inclusive... Gustavo, você quer trazer algum detalhamento a respeito dessa calculadora para o Gladson?
+
+[32:54] **Gustavo Conti**: Essa calculadora foi montada com base na volumetria que a gente tinha conversado antes. Todos os serviços que estão aí, eles são serviços baseados em volumetria. Então, quanto mais interações eles tiverem, mais eles vão cobrar, quanto menos também, menos eles vão cobrar. Então, vamos dizer assim, a gente vai desativar agora toda forma de puxar dados do Lake. Então, beleza, não vai mais ter custo desses serviços de integração. O que vocês vão ter ali de custo fixo, entre aspas? Que é o custo do S3, que é o armazenamento de objetos.
+
+[33:30] **Gustavo Conti**: Ali a gente colocou uma boa quantidade de objetos. Clica ali no armazenamento. aqui pra gente ver o quanto que foi ali, foi ali ó, sete teras e duzentos, tá? Isso pra armazenamento de sete teras ali o custo. Então assim, quanto mais objetos forem armazenados, mais vai ser o custo, quanto, se vocês, vamos dizer, excluírem alguma coisa dali, daí vai ter menos custo também. Mas esse é o único que é, entre aspas, fixo, o restante é todo por uso.
+
+[33:58] **Gladson Bernardino Alves**: O STS, mas você não paga por, por tráfico? Tráfico de saída, tráfico de entrada, não é só o dado
+
+[34:05] **Gustavo Conti**: você vai pagar pelos dados que vão ser baixados né mas nesse caso aqui a gente não vai tá baixando dados então você não vai pagar dados de entrada não são cobrados
+
+[34:14] **Gladson Bernardino Alves**: só saída né
+
+[34:17] **Gustavo Conti**: só saída
+
+[34:18] **Gladson Bernardino Alves**: o Kaique quer falar alguma coisa
+
+[34:21] **Caio Sousa Caires**: é só uma dúvida hoje o As informações que vêm do TOTS, elas vêm no Postgres. Atualmente, ela está em Postgres, mas a gente pretende, seguindo com esse contato e tudo mais, a gente migrar exatamente para a AWS e sair do Postgres e entrar no SQL Server também. Por estar em Postgres, ela interfere alguma coisa no custo, tem alguma conversão ou ia tratar os dados em Postgres mesmo? Como é que voltou na área?
+
+[34:48] **Gustavo Conti**: Não, o custo para AWS não muda. Se vocês mudarem de Postgres para SQL também não muda. O que vai mudar é que como a origem dos dados está mudando, talvez a gente tenha que arrumar uma coisa ou outra ali no DMS, por exemplo. Porque o DMS vai ser todo configurado para puxar de um Postgres. Então se vocês forem mudar para um SQL a gente precisa saber.
+
+[35:08] **Caio Sousa Caires**: É, a ideia era a gente tirar o DW do Postgres que a gente tem atualmente e no futuro migrar para a AWS também, mantendo tudo na AWS, porque hoje atualmente ele está na Edge. O
+
+[35:19] **Gustavo Conti**: que vai ter de custo vai ser o banco de dados lá na AWS, mas o DMS e o restante do Lake assim não muda nada.
+
+[35:29] **Gladson Bernardino Alves**: Eu tenho que percifrar, ainda faz sentido manter o DW, que a gente pode colocar, como o Caio falou, que a ideia seria criar um outro DW dentro da AWS, só que aí com SQL, não com Postgres, porque a gente às vezes acessa via Excel e o Excel não consegue trabalhar com Postgres. Então, a gente já tinha essa ideia aí, e aí teria mais um custo de um SQL Server dentro da AWS, ou algum serviço de banco de dados relacional. E aí puxaria de AWS pra AWS, na verdade, né?
+
+[36:10] **Gladson Bernardino Alves**: Aí eu mataria o custo que eu tenho de Azure, que basicamente é só esse banco aí, não tem muita coisa. Mas tipo, eu tenho esse custo do banco, será que a gente consegue pegar o banco todo ou passar pra eles? Enquanto a gente para, né? Não, não, não. O que você mandou pra eles é o banco todo ou só a parte do TOTS?
+
+[36:32] **Gladson Bernardino Alves**: Não,
+
+[36:32] **Caio Sousa Caires**: só a parte do TOTS, mas dá pra pegar tudo se quiser.
+
+[36:35] **Gladson Bernardino Alves**: Depois a gente podia fazer essa estimativa de migrar indefinitivo, não ficar além do AWS. A gente mata lá e cria esse banco dentro da AWS
+
+[36:54] **kiulyn**: O Gustavo não vai me deixar mentir, ou vai me deixar, mas o bom dessa estratégia é que vocês não vão ter aquele custo com data transfer, né? Então, sair de Azure para AWS e AWS para Azure. Então, estando na mesma fica melhor dos casos e acaba se querendo ou não, acaba não. É uma consequência, a otimização desses custos, tá? Depois
+
+[37:18] **Gladson Bernardino Alves**: a gente manda para vocês o tamanho desse banco inteiro A grande parte é o DW do TOTS mesmo. É basicamente os números que você tem. Tem alguns outros bancos que estão lá, mas são bem menores. Só para ter uma noção de como seria de colocar na arquitetura esse DW dentro da estrutura AWS.
+
+[37:44] **kiulyn**: Não, beleza, a gente pode fazer isso sim. Até depois eu puxo contigo ali, se vocês conseguirem inclusive me passarem até um detalhamento do consumo, eu falo custos mesmo, de infraestrutura. Daí aqui em paralelo eu tento buscar outras frentes também, até mesmo de incentivo para vocês, tá? Mas isso aqui fica à parte. Hugo, mais algum ponto aqui pra gente detalhar essa calculadora pra eles?
+
+[38:09] **Gustavo Conti**: Não, é isso aí.
+
+[38:11] **kiulyn**: Beleza, alguma dúvida aqui time? Gladson, Caio, Bruno? Não,
+
+[38:14] **Gustavo Conti**: não, não. Não, tudo certo.
+
+[38:17] **kiulyn**: Beleza, vamos retornar aqui. Bom, do escopo, então, a gente vai fazer esse planejamento técnico deste MVP, já com o escopo definido. Então, a gente criar essas fontes, fazer esse critério de validação. A gente também vai fazer essa implementação da estrutura base do Lake, do Data Lake, já com camadas organizadas. A ideia aqui também desse escopo é implementar essa fase de ingestão e a orquestração desses dados a partir das fontes que são priorizadas. fazer a estruturação dessas camadas já tratadas e fazer o Analytics com a base já consolidada.
+
+[38:56] **kiulyn**: A gente vai disponibilizar também um catálogo de consulta e monitoramento básico dessa solução. E também é o mais importante de todos os projetos que a gente entrega aqui, fazer uma entrega de uma documentação consolidada, tanto do projeto quanto da arquitetura. Isso garante o quê? Não só a posterioridade do projeto com vocês, mas também, por acaso, Deus o Livre, o Gladson, o Caio e o Bruno não estejam mais na InfoBrasil e esse ambiente estiver rodando e ele estiver bem documentado. Vai ser o arcabouço de vocês. Beleza? Alguma dúvida aqui?
+
+[39:33] **Gladson Bernardino Alves**: Não?
+
+[39:34] **kiulyn**: Boa. Bom, dos requisitos funcionais que a gente está falando aqui, então a ideia é fazer, ingerir esses dados do POST lá do DW e do SQL Server, do SISMA, para uma camada uma camada raw centralizada no Data Lake. A ideia também desses requisitos é orquestrar o pipeline, ter uma garantia de execução sequencial entre tanto a ingestão e a fase de processamento. Ele vai depender entre essas etapas.
+
+[40:02] **kiulyn**: A ideia também de requisito é processar, padronizar, organizar esses dados das camadas curadas de Analytics, fazer a consolidação desses dados em diferentes fontes para uma única base unificado, a gente fazer a disponibilização desses dados para consulta VSQL, por meio de algum catálogo ou engine analytic, fazer a execução das cargas recorrentes automatizadas em modelo de lote, em batch, já com o agendamento definido. Alguma dúvida aqui dos requisitos?
+
+[40:34] **Gustavo Conti**: Não?
+
+[40:35] **kiulyn**: Beleza. Gustavo, você quer acrescentar mais algum ponto aqui?
+
+[40:38] **Gustavo Conti**: Não?
+
+[40:40] **kiulyn**: Perfeito. Bom, quais serão os benefícios da gente ir estudando aqui dentro da DAT e entendendo esse projeto? Então, não só o benefício de ter essa centralização e ter a padronização dos dados hoje, que estão diversos em múltiplas fontes, mas como vocês vão ter é isso. A ideia é que reduz esse esforço manual, ganhar mais tempo aí no time de vocês, baseado em eficiência operacional, ganhar mais confiabilidade quanto à consistência das informações e inclusive para ajudar na tomada de decisão, que é algo que você já nos expressou, né, Gladys? Só que hoje ele é muito...
+
+[41:18] **kiulyn**: ele não é tão assertivo como vocês gostariam,
+
+[41:21] **Gladson Bernardino Alves**: né?
+
+[41:22] **kiulyn**: Um ponto importante de benefícios, vocês vão ter uma visão integrada frente à manutenção, disponibilidade e custo dos ativos, que é algo que hoje ainda é um ponto de interrogação, uma nuvem cinzenta, mas que vocês ainda conseguem sair do outro lado, mas a ideia é que ele dá muito mais assertividade.
+
+[41:40] **kiulyn**: Aumentar a velocidade da geração dessas análises e os insights operacionais, porque vocês vão ter os dados unificados e na frente de vocês para vocês entenderem, estudarem, e ao mesmo tempo que o benefício ser essa base estruturada já escalável para a evolução dos novos cases analíticos ou outras fontes de dados, que foi o que a gente conversou lá no nosso primeiro bate-papo. Alguma dúvida quanto aos benefícios que a gente entendeu?
+
+[42:08] **Gladson Bernardino Alves**: Não, estou ok.
+
+[42:10] **kiulyn**: Maravilha. Dos entregáveis, então, É um planejamento técnico dessa fase 1 já com o escopo definido e já com as fontes de dados. Fazer a estrutura base desse data lake já implantada e organizada.
+
+[42:25] **kiulyn**: dentro desses integráveis vão ter inclusive os pipelines de ingestão, orquestração dessas fontes que foram priorizadas, vão ser trabalhadas as camadas de dados que vão ser tratadas de maneira analítica e disponibilizada para consumo, vai existir o catálogo de dados de mecanismo básico de consulta e monitoramento para serem entregues e, de novo, a documentação, consordada que ela vai vir com a arquitetura, as premissas e a visão da solução. Então, de novo, ele vai ser um arcabouço completo desse projeto. Das premissas, o que a gente espera do time de vocês?
+
+[43:01] **kiulyn**: um acesso à conta na AWS, concedido aqui para o nosso time. A gente vai precisar de uma role de acesso para poder fazer a visualização e implementação durante essa fase 1. Caso vocês não tenham essa conta, a gente pode criar elas juntas. Do lado de vocês, a gente vai precisar... de alguns endpoints de acesso, a gente vai precisar de algumas credenciais de leitura, o recorte dessas tabelas que foram aprovadas a partir do TOTUS e do CISMA, a gente vai precisar dos contatos técnicos aí do time de vocês.
+
+[43:30] **kiulyn**: Gladson, para que a gente, quando for executar o projeto, a gente precise que o time de vocês façam as validações e também estarem disponíveis para fazer os testes funcionais. Isso é muito importante porque ele exige um engajamento do time de vocês e isso impacta até mesmo no no tempo da entrega. As fontes do TOTUS e do CISMA devem estar acessíveis a partir da AWS durante a implantação, sem necessidade de alteração estrutural do sistema de origem.
+
+[44:00] **kiulyn**: O projeto vai ser executado em um único ambiente, com carga em batch nas janelas que já foram acordadas, sem requisito de tempo real nessa fase. Então aqui a gente vai fazer um modelo estático, mas com base que você já possui. E o aceite dessa fase 1, ela vai considerar o recorde que for aprovado das tabelas e regras mínimas de consolidação, tá? Ou seja, ampliação de escopo ou nova fonte de informação, elas vão ser tratadas em uma evolução posterior. Daí a gente vai estar falando da fase 2, efetivamente, né? Então, faz-se primeiro esse terreno.
+
+[44:38] **kiulyn**: Dúvidas aqui, Gladson?
+
+[44:40] **Gladson Bernardino Alves**: Não, tô certo.
+
+[44:41] **kiulyn**: forte escopo, que é onde não estão contemplados nesse projeto. Então a integração de LLM, agente, RAG ou caso de agenda ativa ou modelo preditivo nesta fase não entra de novo como o Gustavo trouxe.
+
+[44:55] **kiulyn**: Não faz sentido existir isso se o se a fase 1 não finalizou né então isso aqui ele vai vir na fase 2 com certeza é integração de fonte adicional além do recorte aprovado ali da totos e do sisma incluindo telemetria e rh pontos dias ou demais sistemas futuros isso ele não contempla nesse escopo ainda ele vai vir com uma fase 2 ou 3 como a gente já conversou desenvolvimento aplicação Desenvolvimento ou alteração da aplicação, seja de front-end, back-end, seja de regra de negócio, banco, origem, APIs ou rotina de terceiros, ele também não entra nesse escopo.
+
+[45:33] **kiulyn**: A criação ou migração de dashboard, relatório ou alguma outra camada de BI, ele também não entra aqui nesse escopo. Aí o ambiente adicional, além do que já foi aprovado, a operação 24x7, o ajuste de conectividade, dentre outros, ele também não entra nesse escopo. Principalmente que aqui a gente entende que sejam escopos distintos, então poderia ser projeto distinto. Quanto à operação assistida, de SLA 24x7, a gente está falando do nosso modelo de suporte, serviço de suporte. É um outro serviço à parte. Alguma dúvida aqui, Gladson? Alguma observação?
+
+[46:12] **Gladson Bernardino Alves**: Ok.
+
+[46:14] **kiulyn**: Beleza. Posso avançar?
+
+[46:16] **Gladson Bernardino Alves**: Pode, pode sim.
+
+[46:18] **kiulyn**: Beleza. A gente tá falando aí do investimento projeto, tá? Então todas essas atividades que foram realizadas dentro desse projeto, então a gente vai trabalhar com um time multidisciplinar focado 100% em especialistas em AI, dados e machine learning, tá? Nosso time é especializado pra isso. A gente tá falando do investimento pontual, aí de R$ 45.560, tá? A gente tá falando do faturamento e forma de pagamento aqui, eu não deixo escrito em pedra, porque nesse MVP ele faz total sentido ser um modelo mais flexível, tá?
+
+[46:51] **kiulyn**: Prazo de entrega, a gente tá falando de ter 33 dias úteis a partir do kick-off, o kick-off é a passagem de bastão, é o pontapé inicial para a execução do projeto, isso aqui é um trabalho onde a gente vai levar o nosso time de especialistas para conversar junto com o time de especialistas e definir quais são as sprints, quais são os contatos, quais são as fases entregáveis do projeto para vocês também estarem por dentro, tá? Desse investimento, existem incentivos da AWS, tá?
+
+[47:19] **kiulyn**: Que pode ser um compromisso nosso aqui da DAT em buscá-los para poder trazer viabilidade quanto ao projeto. Gladson, fez sentido o que a gente apresentou até agora? Alguma dúvida, alguma observação?
+
+[47:38] **Gladson Bernardino Alves**: Não, tudo que você falou fez sentido. Sem querer desmerecer alguma coisa, o investimento atual, desculpa, o investimento de projeto, esses 45 mil, vai ser o salgado, somente porque a gente vai pagar 18 mil por ano, então a gente vai demorar três anos em consumo de nuvem, para empatar com esse investimento, mas enfim, isso aí acho que pode ser visto e com certeza algum investimento acho que vai ter, ainda que tenha um incentivo, mas vai ter que ser também diluído ao longo do tempo. para poder viajar aqui internamente. Já te adiantando, né?
+
+[48:25] **Gladson Bernardino Alves**: Conversas que vão ter com o time suprimentos, tá? Enfim, mas aí tem que ser visto, tá? Enfim, acho que assim, é mais ou menos dentro do que eu esperava, tá? Principalmente a parte de consumo. A parte de consumo, eu acho que eu estava esperando algo desse... Eu até chutei um pouco mais, uns 350 dólares. Acho que numa outra conversa tinha mais coisas. de observabilidade, segurança, então acho que estava beirando os 400, se não me engano, na outra vez que a gente fez.
+
+[49:12] **kiulyn**: Daquela primeira?
+
+[49:13] **Gladson Bernardino Alves**: Daquela primeira, é.
+
+[49:15] **kiulyn**: Acho
+
+[49:15] **Gladson Bernardino Alves**: que foi. Tinha mais coisas, não só as mesmas coisas, mas... mas com um valor diferente. Tinha um pouco mais de serviços que vocês tinham colocado lá de segurança, de observabilidade. Eu lembro vagamente do desenho.
+
+[49:34] **kiulyn**: É porque acho que até a gente conversou, né, Gladson? Vocês tinham o desenho na cabeça desse movimento que vocês estão fazendo agora, só que não estava tão estruturado como está hoje. Isso, sem dúvida. Fiquei muito mais refinado depois que você nos trouxe.
+
+[49:52] **Gladson Bernardino Alves**: Não, sem dúvida, sem dúvida. Acho que tem uma evolução nesse sentido, né?
+
+[49:56] **kiulyn**: De
+
+[49:57] **Gladson Bernardino Alves**: ter um tiro mais certeiro, né? Não adianta a gente colocar um monte de serviço aí que não sabe se vai usar agora, eventualmente até seja necessário, né? A gente ter mais lá na frente, né? Ter outros serviços, né? E a AWS tem... Toda semana estou lançando alguma coisa, né? Então, é... E acho que tinha alguma coisa daquele parte de dados sobre... Como é que chama? De... Em tempo real, né? Porque aqui a gente não está pegando dados em tempo real, a gente está só consultando e extraindo de banco, né?
+
+[50:37] **Gladson Bernardino Alves**: Eu acho que devia ter alguma coisa pelo telemetria, talvez tenha colocado alguma coisa nesse sentido aí.
+
+[50:41] **Gustavo Conti**: O serviço de segurança dos outros projetos, eles estão incluídos aí também. A gente só não colocou no desenho para não confundir, para não ficar muita coisa ali para vocês. Mas se for olhar, por exemplo, o fluxo do DMS para conectar no TOTUS, ele tem o Secrets Manager, que já é um serviço de segurança. Dentro dos S3 eles tem chave de criptografia, então todos os serviços aqui estão sendo cotados. Isso não colocamos no desenho para não acabar ficando coisa demais, não confundir o visual.
+
+[51:13] **Gustavo Conti**: Quanto a gente fazer isso, a extração dos dados em tempo real, não é um problema, a gente consegue fazer, o DMS faz essa função também. A única coisa que a gente vai precisar fazer é tirar o scheduler do print e colocar o DMS pra fazer isso em CDC, que daí ele vai buscando ali conforme os logs do que é alterado no banco de origem. O que vai diferenciar pra ti no final das contas vai ser custo, tá? Provavelmente o DMS lá, o custo da calculadora DMS vai dobrar.
+
+[51:41] **Gladson Bernardino Alves**: Vai aumentar.
+
+[51:42] **Gustavo Conti**: Mas é isso, tá?
+
+[51:45] **Gladson Bernardino Alves**: Tá, entendi. Então, legal.
+
+[51:48] **kiulyn**: Paralelo, né? Só dando um overview, dá pra conseguir incentivo, isso é fato, tá, Gladson? Que a gente já, eu já posso falar de byte pronto, do que que é passível. Dá só um minutinho. Acabei me afogando. De baite pronto, dá pra gente conseguir incentivo em créditos, tá? A gente pegar pelo menos três meses em valor de calculadora em créditos. Então, de novo, quando a gente tá falando desse projeto, migrar, é pra não te gerar um custo desnecessário enquanto você não tem isso. Sem uso, né?
+
+[52:19] **Gladson Bernardino Alves**: Sem
+
+[52:19] **kiulyn**: uso, exatamente, sem uso. Até porque assim, quando a gente fala no momento de implementação, Eu brinco que é igual casa em construção. Pedreiro ele vai lá, vai construir, vai subir, vai ligar a lampadazinha lá pra ele trabalhar. Acabou o trabalho dele. Vai fazer,
+
+[52:35] **Gladson Bernardino Alves**: desfazer, construir a parede, derrubar a parede.
+
+[52:39] **kiulyn**: Não, não vamos pensar nesse tipo de pedreiro. Vamos pensar naquele que é bom, né? Ele vai lá, vai cumprir o horário dele, vai ligar a luz pra ele trabalhar. Acabou. Ele apaga. Vai ser a mesma coisa. Vai ser a mesma coisa aqui. Vai ser a mesma coisa aqui. Vamos lá. Vamos subir um recurso, implementou, configurou, apagou. E assim sucessivamente até finalizar. Para não gerar... Exato. Para não gerar gastos desnecessários. Então esses créditos eles ajudam nessa fase de construção, tá?
+
+[53:09] **kiulyn**: Isso de bate e pronto é o que eu já consigo te trazer, o que a gente consegue de incentivo. Mas antes de eu seguir aqui pra frente, eu só quero entender de você. Pra vocês aí, Gladson, o fator impeditivo é uma forma de vocês diluírem esse valor de execução. Eu quero entender bem o contexto.
+
+[53:28] **Gladson Bernardino Alves**: É, assim, o valor de execução é razoavelmente alto, tá? Vamos falar sinceramente. E assim, diluir é fundamental. Beleza. Ainda que você consiga, ó, em vez de 45 e 500, vou conseguir 40 ou 38, beleza. Mas se for 38, avisto então a... 30% no início, 70% no final, um mês e meio do final, basicamente, ou dois meses de projeto, fica praticamente inviável. Tem que conseguir uma forma de fazer isso mais diluído ao longo do tempo.
+
+[54:07] **Gladson Bernardino Alves**: Ainda que você necessite de um pagamento de maior monta no início, porque é quando você está efetivamente tendo o custo dos profissionais, dos especialistas trabalhando. Então, alguma engenharia em cima disso aí, de diluir um pouco esse serviço ao longo do tempo, é meio que fundamental para a decisão de seguir um projeto.
+
+[54:34] **kiulyn**: Sim. E até deixa eu te perguntar, existe algum modelo que já é praticado aí na infra? Porque eu tô te perguntando, a gente tem casos que fala, não, pra nós fica melhor até pro fluxo a gente conseguir dar 10, 20% e depois diluir o resto. Tô dando um exemplo, né. Tem algo nesse sentido?
+
+[54:51] **Gladson Bernardino Alves**: É que assim, quando é de menor valor, a gente... Diluindo... Ao longo da execução do projeto, deixando uma parcela pequena no final, costuma ser ok, né? Mas se um valor desse tamanho... Já falando, por exemplo, tem projetos, por exemplo, com serviços profissionais Atotus, por exemplo.
+
+[55:10] **kiulyn**: E
+
+[55:11] **Gladson Bernardino Alves**: Atotus pega esse valor de implementação, nesta ordem aí de 30, 40 mil, e divide em 10 vezes pra gente.
+
+[55:16] **kiulyn**: Entendeu?
+
+[55:17] **Gladson Bernardino Alves**: Então, em vez de eu pagar X, eu tô pagando X mais R$4.000 por mês. Entendeu? Então, com outras empresas também, a gente fez um projeto grande, a implementação de um RT privado, que o investimento, né, com roteira de RT, RT é celular, né? Uma rede celular privada, né? Numa obra. E também o custo de implementação era maior do que mais de um ano de mensalidade.
+
+[55:42] **Gladson Bernardino Alves**: Então, foi feito, foi dividido acho que em 12 vezes ou 18 vezes, E aí durante esse ano, um ano e meio, a gente pagou quase que o dobro de mensalidade e depois reduziu, entendeu?
+
+[55:52] **kiulyn**: Então
+
+[55:52] **Gladson Bernardino Alves**: aí ficaria melhor, é claro, que a gente entende que às vezes são empresas que têm portes distintos que não têm... Às vezes umas têm mais condições de fazer esse tipo de condições para o cliente do que outras, né? Mas certamente isso pode ser uma situação de decisão de ir ou não ir, tá? De ir ou não ir, esse tipo de acordo com o pagamento de serviço, tá? Sim, sim, não.
+
+[56:19] **Gladson Bernardino Alves**: E claro, a parte dos créditos, de a gente consegue crédito, então durante o projeto a gente não vai pagar ou pagar uma mixaria porque ainda não tá em uso e tal, e depois quando ligar tudo vai ser o pagamento full, né? Isso daí é legal ter, né? Ter essa vantagem. Essa é uma outra briga, porque muitos fornecedores a gente contrata, sei lá, 100 licenças, só que eu vou conseguir atingir 100 usuários daqui a seis meses. Então alguns conseguem. Então você paga... Durante a implementação, você paga 10.
+
+[56:53] **Gladson Bernardino Alves**: Aí depois você paga mais, nos meses seguintes, você vai pagar 50. Depois, lá, daqui a seis meses, você paga 100. Então, esse tipo de flexibilidade, sendo que é o tipo de um projeto que você entra e não sai mais, né? É daí pra crescer pra sempre, né? Não tem que tirar isso, né? Você começa e continua com esse... com toda essa plataforma e o serviço da DAT, sendo um bom serviço, certamente a gente continuaria executando todas as outras fases como a gente disse, né?
+
+[57:31] **Gladson Bernardino Alves**: A gente tem um grupo técnico aqui assim, bem competente naquilo que fazem, mas não tem ainda expertise nessa parte de dados. A gente tem que trazer uma pessoa, mas a gente ainda não tem essa possibilidade de trazer nesse momento. Então, possivelmente, fase 1, fase 2, a gente vai ter que usar muito o apoio de vocês.
+
+[57:56] **kiulyn**: Não, legal. E é importante ter essa visão até para uma definição de expectativas, né? E claro, a gente quer realmente ser esse braço de apoio e fazer com que isso não fique só no papel, né? Como é o interesse da... da Alta Cúpula e da Infra Brasil, então esse pode ser o momento ideal. Legal. Então assim, Gladson, de novo, pra gente deixar na mesma página, se hoje dependesse exclusivamente de você, Gladson, a gente só precisaria fazer um... fazer esse valor de investimento bem mais diluído.
+
+[58:30] **Gladson Bernardino Alves**: Isso.
+
+[58:31] **kiulyn**: Se hoje você fosse da Alta Cúpula, não, cara, me joga em 10 vezes que... Isso,
+
+[58:36] **Gladson Bernardino Alves**: isso.
+
+[58:37] **kiulyn**: Perfeito.
+
+[58:37] **Gladson Bernardino Alves**: Por aí,
+
+[58:38] **kiulyn**: por
+
+[58:38] **Gladson Bernardino Alves**: aí.
+
+[58:39] **kiulyn**: Não, perfeito. Isso eu posso obrigar. Dada essa condição, Gladson, eu posso considerar isso como um projeto que a gente tem um goal parcial, só que eu preciso trazer pra dentro de casa as condições de pagamento, se a gente consegue diluir isso em 10, 12 vezes, em paralelo a isso, independente se a gente vai conseguir incentivo ou não da AWS pra conseguir abater desse valor, mas eu posso considerar essas condições, Gladson?
+
+[59:09] **Gladson Bernardino Alves**: Eu falei pra você algumas semanas atrás A Infra está iniciando várias obras ao mesmo tempo, agora E isso gera um custo muito grande.
+
+[59:26] **kiulyn**: E
+
+[59:27] **Gladson Bernardino Alves**: até essas obras começarem a dar retorno, a gente fica numa situação de caixa apertada. Então, como eu falei pra vocês, todos os projetos que não são essenciais, que a gente tá ganhando dinheiro amanhã, coloca hoje pra ganhar dinheiro amanhã, e esse não é um projeto que a gente vai fazer, esse é um projeto estruturante. É um projeto pra estruturar nossa... Nossa base aqui, nossa visão sobre dados vai extraindo valor ao longo do tempo Se eu compro um caminhão, amanhã ele tá produzindo e tá dando dinheiro, né? Então, tem essa situação.
+
+[1:00:03] **Gladson Bernardino Alves**: Então, esses projetos, eles foram meio que... Falei pra você, assim, até metade do ano, possivelmente, não vai ser feito nenhum investimento nesse sentido, tá? Eu vou levar, se você puder até compartilhar comigo a apresentação, ficaria mais fácil eu apresentar pra minha chefe, que é a VP, tá? Para ela ter uma noção, o custo do investimento de serviços profissionais, como eu falei, é um pouco elevado, mas o custo permanente não é um custo elevado, é um custo bastante razoável.
+
+[1:00:38] **Gladson Bernardino Alves**: E ele vai crescendo organicamente, conforme vai crescendo o volume, vai crescendo meio que organicamente Talvez nem tanto, porque o banco de dados talvez nem cresça tanto porque já está em uma quantidade considerável. Então, aí dá pra... Acho que é importante passar essa visão pra ela de quanto o data lake vai custar em regime, tirando a fase de projeto. Por isso que eu falei, se a gente conseguir diluir o máximo possível, melhor. Porque aí a gente consegue valorizar.
+
+[1:01:07] **Gladson Bernardino Alves**: Mas eu já tinha comentado com você, assim, a gente tá num momento de tudo que não é projeto, que dá um retorno imediato, tá segurando, tá? Então eu acredito que até a metade do ano a gente vai ter essa restrição, tá? A gente conversou e optou, não, vamos continuar as conversas pra ter o desenho, pelo menos, né?
+
+[1:01:28] **Gladson Bernardino Alves**: Eventualmente, assim, ó, beleza, eu já vou conversando com a Silvana, assim, ó, E sempre contando, vamos começar, não vamos começar, se demorar muito é claro que eu vou ter que voltar com você, refaça o valor, porque claro, imagino que o valor pode ser, pode mudar ao longo do tempo,
+
+[1:01:46] **kiulyn**: se
+
+[1:01:46] **Gladson Bernardino Alves**: demorar muito eu vou ter que pedir uma nova proposta para você. Mas o que eu ia te pedir são duas coisas, então essa apresentação se puder compartilhar comigo, aí fica mais fácil a gente falar com ela. E eu acredito que seja melhor a gente falar aqui, TI, falar com ela, que eu tenho bastante a proximidade com ela, mas eventualmente, se ela quiser uma conversa com vocês, eu chamo vocês e vocês apresentam, vamos falar tudo da empresa e tudo, não tem como falar do projeto, vamos falar da empresa, né? Mas só essa questão.
+
+[1:02:18] **kiulyn**: Não,
+
+[1:02:18] **Gladson Bernardino Alves**: perfeito, perfeito. E outra coisa, eu acho que seria interessante pra gente, você colocar no valor o DW sendo a AWS. Entendeu? A gente migrar porque eu vou deixar de pagar da Airbnb, então minha conta vai ser eu tô pagando isso daqui, mas eu tô deixando de gastar, não sei quanto a gente paga deles lá. Quanto que é uns, não sei, R$ 800, acho que menos né.
+
+[1:02:45] **Caio Sousa Caires**: Acho que R$ 950.
+
+[1:02:46] **Gladson Bernardino Alves**: Não chega em
+
+[1:02:47] **Caio Sousa Caires**: R$
+
+[1:02:47] **Gladson Bernardino Alves**: 1.000. É bastante, bastante. Então, puxar esse... eu peço para o Caio, já está... determinação aí, cara. Pega o tamanho desse banco e, como eu falei, a gente não precisa nem criar com o Postgre, a gente pode criar com o SQL Server, com algum outro serviço de relacional, que a gente fique mais fácil de extrair dados do CDW de outras aplicações, não só para o Data Lake.
+
+[1:03:18] **kiulyn**: Não, sim, sim, dá. Eu
+
+[1:03:19] **Gladson Bernardino Alves**: posso... Eu deixo de gastar o valor lá na AWS e eu tô adicionando um pouco do valor, é claro, né? Desculpa, da Azure, né? E adicionando o valor na AWS.
+
+[1:03:29] **kiulyn**: Sim, sim. Não, dá pra gente fazer... Como que eu posso tratar aqui? Como se fossem dois projetos distintos. Por que que isso é importante? Pra AWS, entende-se que são duas frentes e são dois incentivos distintos. Então, vou dar exemplo. Tem incentivo para esse projeto e tem incentivo para o outro. Eventualmente dá para juntar os dois. É a forma como a gente pode trabalhar com a regra da AWS embaixo do braço. Você
+
+[1:03:51] **Gladson Bernardino Alves**: que tem essas informações sabe qual é a condição que fica melhor para a gente. Se é incluindo o projeto ou ter um projeto separado.
+
+[1:04:01] **kiulyn**: Não, bem tranquilo, dá para trabalhar. Então assim, Gladyson, o que eu vou fazer a partir de agora? Então eu só vou ficar no aguardo de vocês me encaminharem o que vocês possuem lá na Azure de maneira bem detalhada, se é família de instância que está lá provisionada, se está em algum serviço, o RDS de lá, por exemplo, especificação de máquina, se pudermos passar até um overview da fatura da Azure para a gente tentar fazer um depara aqui na AWS e a gente vai estruturando. Segundo passo. Eu vou te encaminhar a proposta como está, tá?
+
+[1:04:33] **kiulyn**: Eu vou deixar bem frisado ali que existem incentivos, em paralelo a isso, enquanto você conversa com a sua superiora, eu vou indo atrás de incentivos. Quais incentivos que a gente pode conseguir? De novo, a AWS tem vários, então pode acontecer, Gladson, isso não é infatível desse projeto entrar sem custo.
+
+[1:04:57] **kiulyn**: Então, aí claro, deu uma decisão, ó, a gente tá dando total condição, vamos fazer a execução, já que vocês estão nessa fase de captar recursos ainda, né, então antecipa se é um gasto que vocês não vão ter nesse tempo e a AWS ela vai estar investindo, né, pra daí a partir de junho vocês entenderem se pode surgir investimento pra fase 2 ou não. Faz sentido?
+
+[1:05:22] **kiulyn**: Ok,
+
+[1:05:22] **Gladson Bernardino Alves**: maravilha, claro, total.
+
+[1:05:24] **kiulyn**: Para ver então. Pessoal, para mim está bem definido. Então, o que a gente vai ter definido como os próximos passos? Gladys, eu vou te encaminhar até o final da tarde essa apresentação. Durante a semana eu vou validando com a AWS o que a gente consegue de incentivos. Paralelo a isso, eu fico no aguarde de vocês me encaminharem a informação do banco. E eu vou te mantendo atualizado, tá Gladson? O que a gente consegue com a AWS e algo do gênero. E aí a gente pode marcar um próximo acompanhamento, só pra gente acompanhando esse status.
+
+[1:05:56] **kiulyn**: Ali pro dia... Não, primeiro é feriado, né? Então, ali pra semana do dia 4, a gente ir fazendo esse follow-up. Então, eventualmente eu posso ter mais incentivos e assim sucessivamente, tá? Eu vou mantendo vocês informados. Beleza?
+
+[1:06:12] **Gladson Bernardino Alves**: Ok.
+
+[1:06:13] **kiulyn**: Fechado então. Gladson, Bruno, Caio, obrigado pela disponibilidade mais uma vez de vocês. Muito bom revê-los. Excelente feriado. E qualquer um de vocês que estiverem fica à disposição, tá bom?
+
+[1:06:24] **Gladson Bernardino Alves**: Obrigado, obrigado, Cauninho.
+
+[1:06:25] **kiulyn**: Tchau, tchau.

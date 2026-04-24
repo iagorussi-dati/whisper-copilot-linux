@@ -1,0 +1,158 @@
+# [Datafrete & DATI] - Aprofundamento técnico - modernização AWS
+**Date**: Thursday, April 23, 2026 at 11:00 AM  
+**Duration**: 17:38  
+**People**: Gustavo Conti, Thiago Pereira Saraiva, and André Vieira
+
+[0:01] **Thiago Pereira Saraiva**: Beleza, queria usar. Os robôs estão chegando. E aí, correria, Conti?
+
+[0:38] **Gustavo Conti**: Bastante, mano.
+
+[0:41] **Thiago Pereira Saraiva**: Bastante, né? Ah, cara, cada vez que eu vou pedir um funding aqui na AWS, entra um negócio novo, cara. Agora tô aqui esperando umas validações aqui pra não fazer merda, né? Dá um toque lá no nosso amigo. Tá entrando aí. E aí Bora! Será que é o nosso amigo André? Bom dia, André!
+
+[3:33] **André Vieira**: Opa! Bom dia,
+
+[3:35] **Thiago Pereira Saraiva**: amor! Tudo certo?
+
+[3:37] **André Vieira**: Beleza!
+
+[3:38] **Thiago Pereira Saraiva**: Beleza! E por aí, tudo bem, cara?
+
+[3:41] **André Vieira**: Tá! Tudo bem! Vai ver, né? Tá certo aqui!
+
+[3:44] **Thiago Pereira Saraiva**: Tão saudável né? Tudo
+
+[3:48] **André Vieira**: certo.
+
+[3:49] **Thiago Pereira Saraiva**: Respirando.
+
+[3:49] **André Vieira**: A gente tinha tentado marcar uma agenda antes de se apresentar, se furou, não deu certo lá, mas...
+
+[3:56] **Thiago Pereira Saraiva**: Exato.
+
+[3:56] **André Vieira**: Desculpa cara, eu lembro que você tinha mandado, eu acho que algumas datas eu acabei não conseguindo...
+
+[4:01] **Thiago Pereira Saraiva**: Não,
+
+[4:02] **André Vieira**: tranquilo. Mas tá bom. Assim, eu vou tentar ser bem objetivo né, porque o tempo é curto. Obrigado pela pauta. E aí assim ó, o que que acontece aqui? Ali na nossa infra, ô Gustavo, a gente tem um serviço que foi construído por um outro parceiro, que foi a Lazarus, e ele basicamente é um ETL, entendeu? É um ETL, só que ele tá rodando dentro de uma EC2, tá? E aí, enfim, eu tô tendo algum, qual que é a situação, qual que é o BO total, né?
+
+[4:44] **André Vieira**: Eu tô sem métricas, porque ele tá lá dentro da EC2, todo o serviço, né, o iBite, o Kafka, enfim. Tem o Postgres também, que é uma outra máquina. Então, eu tô sem medições. E esse serviço, cara, por algum motivo... Por algum motivo não, né? Não sei qual que é o motivo. Mas esse serviço, ele não tá entregando a estabilidade e a velocidade que a gente precisa pros clientes, entendeu? Então, ora ele dá algum down ali, entendeu? Algum dos sistemas ele acaba caindo e quando ele cai eu nem sei que ele ficou fora, entendeu?
+
+[5:28] **André Vieira**: Hoje o cliente vem entrando em contato no suporte aqui pra poder falar, ô, a API não tá funcionando, entendeu? E aí a gente tinha feito um mapeamento o que seria a nossa necessidade aqui. Fazer a separação do iByte, do Kafka, do Spark e do PostgreSQL a instâncias dedicadas. Fazer a migração do PostgreSQL, talvez colocar ele em um serviço de banco da Amazon. Colocar uma estratégia de réplica. Revisar a configuração ali do Postgre para ver se ela está adequada. Tentar fazer uma otimização do cluster Spark e uma adequação ali do Kafka. Entendeu?
+
+[6:26] **André Vieira**: Então eu preciso basicamente pegar esse serviço e colocar ele numa arquitetura mais robusta. Porque a gente começou com poucos clientes, a ideia era lançar o produto logo e fizemos o mínimo necessário. E agora eu tô com todas essas necessidades ali, entendeu?
+
+[6:47] **Gustavo Conti**: Mas qual que é o maior gargalo que gera esse problema? Ou não tem um componente específico, é sempre uma coisa diferente?
+
+[6:57] **André Vieira**: É, Gustavo, esse é o meu problema, entende? Eu não consigo rastrear nada, saca? Não consigo rastrear nada. Às vezes o serviço simplesmente reinicia, entendeu? Aí pode ser... Eu não lembro se era o Kafka ou o Rbyte ali que tava dando ruim E o sistema fica fora do ar, entendeu? Aí as mensagens se perdem Não deveria, mas alguma coisa acontece ali que as mensagens deveriam ser transmitidas E se algum serviço caísse ela deveria manter as mensagens ali para quando retornar ela conseguir replicar E por algum motivo não replica, né?
+
+[7:36] **André Vieira**: E eu sei disso porque Quando o cliente aciona o nosso post técnico ali, a gente vai analisar a falta de dado. Dentro do PostgreSQL. Porque esse serviço, Gustavo, ele trabalha para ser um BI. Entendeu?
+
+[7:48] **Gustavo Conti**: Então
+
+[7:49] **André Vieira**: ele é um banco ali que replica do MySQL. A gente faz esse tratamento, manda para o PostgreSQL e a partir do PostgreSQL tem um outro serviço que publica isso em APIs. Entendeu? Então tem várias APIs ali para o cliente poder conectar e consumir os seus dados.
+
+[8:07] **Gustavo Conti**: Entendi. E vocês não tem nenhum tipo de Nerelic ou X-Ray? Nenhum serviço de observabilidade nesse sentido?
+
+[8:17] **André Vieira**: Não, não tem.
+
+[8:18] **Gustavo Conti**: Seria interessante para vocês terem? Ou vocês pensam em talvez não fazer investimento num serviço desse agora e sim trocar isso por uma modernização só?
+
+[8:30] **André Vieira**: É, só modernização, Gustavo. Até tem um projeto de observabilidade aqui, mas A gente tá focando em outras coisas agora.
+
+[8:41] **Gustavo Conti**: Entendi. Tá bem. Você tem algum desenho de arquitetura? Algum esquema que você consiga compartilhar comigo pra eu poder entender um pouco mais a fundo ali sobre esse serviço? Sobre como que eles se integram? Como que eles se chamam e tal?
+
+[9:00] **André Vieira**: Documentação? Deixa eu ver se eu encontro a documentação da época, cara. Vai
+
+[9:12] **Gustavo Conti**: ser dois, pelo que eu entendi ele é na verdade a principal fonte dos dados, ele não é só uma camada intermediária
+
+[9:18] **André Vieira**: E
+
+[9:21] **Gustavo Conti**: vocês começaram a ter esse problema faz muito tempo?
+
+[9:30] **André Vieira**: Cara, eu vou te falar que do final do ano passado para agora com a entrada de mais clientes
+
+[9:39] **Gustavo Conti**: Entrada de mais clientes, o que é? Um aumento de quantos porcento assim, você sabe dizer?
+
+[9:44] **André Vieira**: Ah, claro. A gente quase, mais que dobrou de clientes.
+
+[9:50] **Gustavo Conti**: No ano passado pra cá?
+
+[9:52] **André Vieira**: É, tinha poucos.
+
+[9:53] **Gustavo Conti**: Caramba.
+
+[9:54] **André Vieira**: É porque a gente iniciou uma estratégia de vendas, mas... mais robusta e agressiva, e isso é um produto que chama muito a atenção porque ele é um produto de gestão estratégica, entende? gestor e tal, que é isso.
+
+[10:19] **Gustavo Conti**: E a ideia é continuar com essa estratégia, por exemplo, até ano que vem talvez dobrar ou ganhar mais um terço de clientes? Vamos lá.
+
+[10:28] **André Vieira**: Deixa eu pensar aqui. Possivelmente vai dobrar ano que vem de novo porque assim, hoje o que o que acontece para cada 10 vendas 7 eu tenho esse produto sendo vendido.
+
+[10:42] **Thiago Pereira Saraiva**: Então
+
+[10:42] **André Vieira**: colocasse um aumento de 70 por cento do que eu tenho no mínimo. Então eu vou ir para o próximo ano. Mais uns. Vou chutar baixo aqui. Uns 80 clientes.
+
+[11:01] **Gustavo Conti**: E. Eles planejam fazer esse aumento ali. Vocês tem ambientes adicionais onde vocês fazem teste, homologação, desenvolvimento ou só tem ambiente de produção?
+
+[11:18] **André Vieira**: Pra esse cara somente produção. Se
+
+[11:33] **Gustavo Conti**: você quiser mandar depois a documentação, não tem problema, tá? Se quiser um tempo para pesquisar aí.
+
+[11:39] **André Vieira**: Tá, não, beleza. Eu te mando no e-mail ali. Mas basicamente é isso, Gustavo. É fazer uma modernização dessa infraestrutura para suportar esses clientes. E aí quando os sistemas vão estar segregados, a gente consegue colocar as mesmas, pelo menos lá no CloudWatch.
+
+[11:59] **Gustavo Conti**: Ah, legal. A gente pode pensar talvez em até começar a usar um X-Ray, por exemplo, porque o X-Ray é muito caro e ele é legal já para serviço de observabilidade. Ele não chega num detalhamento, obviamente, pelo preço dele, né, do nível de Datadog, New Relic, nem nada assim, mas ele já traz uma observabilidade bem legal. Pensar em configurar alguns alarmes, pensar em configurar métodos de vocês receberem esses alertas antes de ter que o cliente entrar em contato com vocês, né, porque isso perde bastante confiança do cliente.
+
+[12:29] **Gustavo Conti**: Uma coisa que eu estava pensando aqui é porque quando a gente monta um projeto, já sabe bem, mas a gente precisa submeter ele para a AWS também. E a AWS ela pede uma calculadora. Para montar essa calculadora eu preciso me basear na volumetria. Tu tens noção de, por exemplo, quantos clientes vocês têm, quantos dados são trafegados ali por dia ou algo assim que me ajude a entender o volume de acessos?
+
+[12:56] **André Vieira**: Esse foi o ponto que eu te falei, né? Eu não tenho métrica nenhuma, eu consegui te falar quantos clientes tem ali, mas... Métricas eu não tenho, mas deve estar com uns 25 clientes agora, cara.
+
+[13:09] **Gustavo Conti**: Cinco clientes. E esse BI, por exemplo, ele vai atualizando de quanto a quanto tempo?
+
+[13:14] **André Vieira**: 15 minutos.
+
+[13:16] **Gustavo Conti**: Então a cada 15 minutos ele tem um processamento de todos os clientes. e são muitos dados por exemplo são gigas de dados que são atualizados a cada 15 minutos ou é algo mais leve assim pode ser um chute tá não precisa ser nada preciso não
+
+[13:34] **André Vieira**: é não vai ser gigas não tá o Gustavo não vai ser gigas pela quantidade de clientes que tem né tem 25 clientes então deve tá na casa dos mega ainda tá se tiver na casa dos mega porque ele atualiza Tabela de Tracking, Tabela de Auditoria, Tabela de Ocorrências. Às vezes eu já vi um log ali do... das mensagens, cara. Às vezes atualiza 20 registros, 30 registros, entendeu?
+
+[14:07] **Gustavo Conti**: Então
+
+[14:09] **André Vieira**: não é tão agressivo. O maior consumo é quando vai dar a carga inicial mesmo, entendeu?
+
+[14:24] **Gustavo Conti**: acho que assim, é um problema que a gente pode explorar bem ali depende um pouco da documentação que você vai conseguir trazer ali pra mim porque eu analiso aqui certinho como é que a gente pode fazer essa transição eu penso em não fazer uma transição muito agressiva porque vocês ainda estão escalando bastante mas que vai comportar esse crescimento que vocês tiveram e que vão ter Precisa de uma escalabilidade bem rápida. Com todas essas vendas novas. Mas beleza, eu vou pensar em um projeto aqui. Acho que vai ser o Walter, né?
+
+[15:08] **Gustavo Conti**: Vou trazer nossos especialistas em dados aqui pra conversar também. Eu vou planejar uma arquitetura ali. Só daí essa documentação conseguir trazer pra mim? Que daí eu consigo trazer ela pra conversa também?
+
+[15:22] **André Vieira**: Eu vou ver se eu conecto ali na central e mando pela central pra você. Pra deixar a Erika também junto. Porque assim, a ideia era ter ela tá aqui, Tatiana. A Erika que é a gestora da área de desenvolvimento. Só que eu falei que ela tá com bastante demanda. Eu falei, cara, deixa eu adiantar esse tema aqui com a Dath Cara, dá o pontapé inicial, vocês poderiam analisar, mas essas tentativas vão seguir com ela depois, tá bom?
+
+[15:48] **Gustavo Conti**: Beleza,
+
+[15:49] **Thiago Pereira Saraiva**: beleza.
+
+[15:50] **Gustavo Conti**: Se tu conseguir trazer nessa documentação, inclusive, qual que é a versão dos que vocês estão usando? Qual é a versão do Capita? Qual é a versão do Postgres?
+
+[15:59] **André Vieira**: Tá,
+
+[16:00] **Gustavo Conti**: eu peço.
+
+[16:02] **André Vieira**: Beleza.
+
+[16:04] **Gustavo Conti**: Do meu lado é isso, não sei se tem mais alguma coisa, André?
+
+[16:10] **André Vieira**: Não, é só fazer essa abertura mesmo e ali eu te mando então essa documentação que você precisa, te mando a versão. Depois que eu te mandar, você acha que em quanto tempo você me retorna?
+
+[16:20] **Gustavo Conti**: Normalmente para a gente montar aqui todo o fluxo do pré-vendas, que daí a gente monta a estimativa de tempo, o desenho de arquitetura, a calculadora e tudo mais, a gente leva normalmente uns três, quatro dias úteis. Daí normalmente mais um dia útil para o técnico já, para o time de especialistas nossos fazerem a validação, porque eu monto e aí um outro time valida para garantir que está bem aderente. E daí nesse dia já a gente envia para o Thiago, ele monta a apresentação e já Então a semana que vem você vai ter ela na mão.
+
+[16:54] **André Vieira**: Dependendo
+
+[16:56] **Thiago Pereira Saraiva**: ali, assim que tu enviar, André, as informações também, qualquer dúvida que a gente tiver aqui, junto com os especialistas aqui também, com o Gustavo, a gente puxa uma call rápida pra matar também, ou até mesmo por mensagem, tá?
+
+[17:08] **André Vieira**: Isso.
+
+[17:09] **Thiago Pereira Saraiva**: E aí a gente traciona do lado de cá pra gente poder ter esse retorno o mais rápido possível pra agendar a apresentação, tá?
+
+[17:17] **André Vieira**: Tá bom, fechado.
+
+[17:18] **Thiago Pereira Saraiva**: Se tu quiser pode me mandar ali no Whatsapp mesmo as informações ou pegar o nosso e-mail aqui no convite e mandar por e-mail também. E aí a gente vai fazendo essa troca aí pra chegar no cenário final, tá?
+
+[17:32] **André Vieira**: Tá bom. Combinado. Obrigado, Thiago. Obrigado, Gustavo.
+
+[17:35] **Thiago Pereira Saraiva**: Beleza. Valeu, galera. Tchau, tchau.

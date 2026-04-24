@@ -1,0 +1,510 @@
+# [MUB & Dati] 1h de Consultoria
+**Date**: Friday, April 17, 2026 at 10:00 AM  
+**Duration**: 46:56  
+**People**: Gustavo Conti, Kiulyn Fernandes, Leonardo Libardi, and Kevin Vergara de Farias
+
+[0:00] **kiulyn**: O Gugan, ficou claro? Pra essa? Beleza. Tu acha que tem condição de dar aqui? Que que eu quero aqui? Cara, a gente não fazer só uma conversa assim, né? Mas a gente sair daqui com um projeto.
+
+[0:19] **Gustavo Conti**: Eu
+
+[0:21] **kiulyn**: lembro que ficou congelado lá atrás um de Fargate. Eu acho que você mesmo fez esses pré-vendas. Acho que com a tua amiga Marinette. A loura.
+
+[0:35] **Gustavo Conti**: Trutada na época que ela estava indo.
+
+[0:40] **kiulyn**: Inclusive me deram para seguir com. Mas beleza o cara você está o Kevin aqui trocando uma ideia fazendo sala. Onde é Kevin tudo certo.
+
+[0:57] **Kevin Vergara de Farias**: E o pessoal tudo certo com você
+
+[0:58] **Gustavo Conti**: já.
+
+[1:00] **kiulyn**: E tudo certo.
+
+[1:04] **Kevin Vergara de Farias**: A gente acha que o Lennon vai conseguir participar pelo menos não inteiro da reunião então ele vai acabar entrando talvez na metade mas a gente consegue tocar. da minha parte, do meu lado aqui é basicamente eu mesmo, então...
+
+[1:17] **kiulyn**: Boa, não, show de bola. Kevin, obrigado pela janela, pra gente bater esse papo. Acho que você já deve conhecer, mas eu faço apresentação mais uma vez, se for o caso, Gustavo é o nosso arquiteto aqui na DAT, então a ideia dessa conversa é a gente descer o nível, tá? E a gente entender como que a gente consegue te apoiar ou consegue gerar algum insight, beleza?
+
+[1:41] **Kevin Vergara de Farias**: Beleza!
+
+[1:42] **kiulyn**: Maravilha!
+
+[1:48] **Gustavo Conti**: Kevin, o que a gente tinha passado um briefing, o que vocês tinham conversado ali, basicamente, o ponto focal aqui da conversa vai ser mais sobre backup, a gente conseguir definir melhor ali o RTO e o RPO de vocês. Basicamente, aqui, para a gente iniciar a conversa, o que eu preciso ter é a topologia do workload de vocês. Você consegue me dar uma descrição ali do que vocês estão usando hoje, como é que está hoje em dia, para conseguir me basear melhor aqui na conversa?
+
+[2:18] **Kevin Vergara de Farias**: Jesus, como é que tá essa arquitetura ali? Então, a gente tem o Elastic Beanstalk fazendo a orquestração do back-end. Nós usamos o Aurora como serviço do banco. A gente tem um outro banco rodando no OpenSearch. que é pra, basicamente, a gente usa pra pesquisa, só algumas coisas, alguns detalhes, mas basicamente tá tudo no 99%, os dados estão dentro do Aurora mesmo. A gente até tem, a gente usa o DynamoDB em alguns casos, mas muito poucos também.
+
+[2:58] **Kevin Vergara de Farias**: Mas basicamente a arquitetura tá mais voltada, tá mais focada no, acho que no install, ali com a arquitetura do backend, que talvez seja também um ponto de melhoria pra gente no futuro. de trocar ele e o Aurora com o banco principal.
+
+[3:15] **Gustavo Conti**: E hoje vocês tinham um comentário ali que os clientes de vocês estavam exigindo uma TRPA maior, melhor e tal. E você tem alguma métrica, algum objetivo claro assim de onde vocês querem chegar, algo do gênero?
+
+[3:32] **Kevin Vergara de Farias**: A gente gostaria de ver a possibilidade qual o melhor, qual seria o melhor que a gente poderia chegar. É, porque na verdade a gente não tem exatamente formalizado isso, acho que é uma coisa também que o meu chefe pediu para visitar vocês, que a gente tivesse documentado ali o RTO, RPO, enfim, para a gente poder apresentar, porque os clientes acabam pedindo sempre.
+
+[3:54] **Kevin Vergara de Farias**: E também gostaria de ver o que realmente dá para a gente evoluir, se dá para ficar melhor do que está hoje, enfim, dá para ter um um tempo melhor porque com certeza os clientes cada vez mais estão cobrando mais e isso nos exigindo então acho que
+
+[4:11] **Gustavo Conti**: é... Quando a gente está falando de RTO-RPO, a gente fala de vários cenários possíveis e eu quero saber qual que se enquadra melhor no caso de vocês. Por exemplo, a gente pode pensar em um ambiente duplicado. Obviamente, esse ambiente duplicado em outra região, por exemplo, geraria para vocês uma RTO-RPO muito melhor. Só que isso também dobraria o custo. Isso faz sentido hoje para a realidade de vocês? deixar de ter muitos clientes por conta de não ter um RPO muito comprovado ou muito bom?
+
+[4:51] **Kevin Vergara de Farias**: Não sei se a gente chegou a perder algum cliente por esse ponto, mas eu acredito que duplicar a infra seria um passo mais ousado para a situação atual nossa. Não faria sentido, seria um multi-AZ no caso. Em
+
+[5:07] **Gustavo Conti**: alguns casos nem multi-AZ, tem empresas que usam até multi-região. Então, por exemplo, você tem um ambiente em Virginia e tem outro ambiente igual em Oregon. E se a região de Virginia caiu, vocês tem outro ambiente pra já recuperar.
+
+[5:19] **Kevin Vergara de Farias**: Só de curioso mesmo, como é que funciona na prática ali? Porque vai ser dois load balancers em locais separados, mas quem que faz esse meio do caminho entre os dois?
+
+[5:30] **Gustavo Conti**: Vocês usam route, por exemplo?
+
+[5:35] **Kevin Vergara de Farias**: O route escolher 3?
+
+[5:37] **Gustavo Conti**: Isso, aham.
+
+[5:42] **Kevin Vergara de Farias**: Sim, acredito que sim.
+
+[5:43] **Gustavo Conti**: Lá tem uma opção de usar ele como failover também. Então, por exemplo, se ele detectar que o load balancer de uma região não tá funcionando, ele já joga pra outra.
+
+[5:52] **Kevin Vergara de Farias**: Ah tá. Não tem um load balancer no caminho, né? Não,
+
+[5:58] **Gustavo Conti**: não. Ele não balanceia a carga, né? Ele só joga pra
+
+[6:03] **Kevin Vergara de Farias**: uma e se
+
+[6:03] **Gustavo Conti**: cair, ele joga pra outra.
+
+[6:06] **Kevin Vergara de Farias**: tá indisponível, né? Até tem um outro ponto que foi aquisito de cliente também, que eu queria tratar com vocês, não sei se eu posso falar, se eu vou acabar desvirtuando a reunião, mas tem um ponto como projeto de arquitetura e algo que é bem novidade pra gente, assim, a gente sempre vendeu, a gente tem nossa infraestrutura toda, a gente atendeu diversos clientes nela, aí teve um cliente que levantou a mão dizendo que queria uma infraestrutura pra ele, basicamente, não sei nem se isso é viável, mas o que eles querem é o quê?
+
+[6:34] **Kevin Vergara de Farias**: Claro que a gente tem que cobrar todos os custos desse cliente, mas eles queriam uma infra exclusiva deles, o banco deles, o back-end deles. Tudo que a gente tem hoje vai ser duplicado para atender somente um cliente. E eles queriam que fosse acessível somente da rede deles. E aí eu não sei como se tivesse a bizarria disso. Tem uma coisa... Como é que a gente faz um file, ou só aceita uma origem? Não sei como funcionaria tecnicamente, não sei nem se é viável.
+
+[7:06] **Kevin Vergara de Farias**: A gente tá negociando com esse cliente e vendo se é possível fazer isso. Como é que tu resolveria esse problema?
+
+[7:14] **Gustavo Conti**: Vocês teriam que ter uma infra pronta. Talvez eu usaria até uma conta separada só pra esse cliente. Vocês tem estrutura de contas hoje, né?
+
+[7:24] **Kevin Vergara de Farias**: Tem
+
+[7:24] **Gustavo Conti**: mais de uma conta da Brest, né?
+
+[7:26] **Kevin Vergara de Farias**: Não, não. Hoje é uma só.
+
+[7:28] **Gustavo Conti**: Tipo,
+
+[7:29] **Kevin Vergara de Farias**: tem as contas, claro, tem os users, né, tem mais do que um usuário, mas todos conectados.
+
+[7:37] **Gustavo Conti**: É porque vocês conseguem, por exemplo, ter uma estrutura de contas, que é isso que muitas empresas fazem. Então, por exemplo, vocês têm uma conta AWS de produção, uma conta separada de homologação, uma conta separada de desenvolvimento. São três contas AWS. O login entre elas, a gente pode fazer um login único. Então, por exemplo, o usuário que acessa a produção também vai acessar a homologação, também vai acessar a dev. Da mesma forma, a diferença é que os recursos, a conta em si vai estar totalmente isolada uma da outra.
+
+[8:05] **Gustavo Conti**: Então não corre risco de um acabar mexendo no outro. O billing deles pode vir pela mesma conta, pode ser tudo unificado. E aí o que algumas empresas que a gente atende fazem elas quando elas têm esse tipo de demanda elas têm uma conta separada só para aquele cliente. Então ele fica totalmente isolado. Claro que isso gera um custo de infraestrutura maior porque vai ter que ter um load balancer separado vai ter que ter um NATGator separado vai ter que ter as aplicações separadas um banco de dados separado.
+
+[8:34] **Gustavo Conti**: Normalmente quando os clientes tem essa exigência, a negociação com eles é uma negociação mais complicada, porque justamente vai ter que cobrar um valor maior para repassar esses custos de infraestrutura.
+
+[8:45] **Kevin Vergara de Farias**: Até porque aumenta também, provavelmente, também deve aumentar o custo que a gente tem com vocês, né? Porque a gente agora, mais uma infra a ser cuidada, não sei exatamente, mas...
+
+[8:56] **Gustavo Conti**: É, o custo... Vocês tem o MSP aqui com a DAT?
+
+[9:00] **Kevin Vergara de Farias**: não sei. Não, não.
+
+[9:04] **Gustavo Conti**: Tem suporte, nada assim? Deixa
+
+[9:07] **kiulyn**: eu validar, mas eu acho que é só o billing, tá? Faturamento via boleto, deixa eu só confirmar aqui no histórico.
+
+[9:17] **Gustavo Conti**: Porque se fosse só o billing que vocês tem com a gente, pra gente não muda nada. Mesmo se fosse um contrato de suporte como um MSP, por exemplo, ele é cobrado em cima do valor das contas. Então vamos dizer assim, vocês estão pagando 10 mil em 5 contas ou 10 mil em uma conta só, o valor de suporte é o mesmo.
+
+[9:40] **Kevin Vergara de Farias**: Só
+
+[9:43] **kiulyn**: para deixar o Kevin na mesma página, MSP é um dos serviços de suporte premium aqui da DAT, então a gente consegue assumir também a gestão do seu ambiente. De maneira resumida, a gente coloca a DAT como sendo o teu braço de apoio, tá? Não só reativo, mas para poder atuar, né? Então ele vai ter algumas frentes aí, por exemplo, que o Gustavo está recomendando que a Datile pode atuar dentro dessa modalidade, entendeu? Mas isso é algo que eu posso trazer na íntegra numa conversa em separado, tá?
+
+[10:18] **Kevin Vergara de Farias**: Perfeito. Acho que a gente pode abordar esse assunto em outro momento, mas realmente a nossa preocupação mesmo é a criação, né, do Claro, tem o custo de projeto pra vocês, né? Porque vocês vão ter que criar do zero. Eu não sei se o que a gente tem hoje tá em terraform, como é que tá nesse assunto. Tá fácil de recriar essa infraestrutura novamente. Mas imagino que vai ter o... A mensalidade não vai alterar, mas vai ter o custo do projeto em si.
+
+[10:56] **Gustavo Conti**: Custo do projeto, sim. Porque daí você precisa de um projeto para criar os recursos. Se tiver em terraforma facilita, mas eu realmente não sei se está em terraforma. Eu precisaria checar aqui se o pessoal tem alguma coisa.
+
+[11:11] **Kevin Vergara de Farias**: A gente vai precisar, inclusive, dessa estimativa, já adiantando, porque Não é uma certeza que a gente vai tentar convencer eles ao máximo por não seguir esse caminho. Mas é uma empresa bem grande. Então é possível que eles acabem. barrando o projeto, se a gente não tiver isso. Então, se a gente conseguir também, é claro, não é assuntosamente pra agora, mas é interessante a gente ter uma estimativa de custo de projeto pra já orçar do nosso lado, pensando nisso, que a gente vai ter esse custo também, né?
+
+[11:44] **Kevin Vergara de Farias**: Enfim, mas basicamente o que a gente teria que replicar era replicar...
+
+[11:47] **Kevin Vergara de Farias**: A gente tem hoje homologação em produção na nossa instância, na nossa conta principal, e a gente não precisaria duplicar a homologação, e sim somente o ambiente produtivo,
+
+[11:58] **Gustavo Conti**: mas
+
+[11:59] **Kevin Vergara de Farias**: a gente vai ter que fazer esse trabalho.
+
+[12:03] **Gustavo Conti**: Mas aí uma coisa que vocês têm que pensar também é que, por exemplo, vocês têm duas contas da AWS com uma conta sendo só para esse cliente de vocês. Se vocês lançarem uma atualização para a aplicação principal, vocês vão ter que lançar ela para o cliente de vocês também. Aí daqui a pouco vocês vão ter, por exemplo, 15 clientes que, espero, que estão aí solicitando esse tipo de demanda e que estão pagando por ela. E aí vocês vão ter que replicar a mesma atualização nesses mesmos 15 clientes.
+
+[12:33] **Gustavo Conti**: Isso é uma dificuldade que é bem comum, mas é normal.
+
+[12:36] **Kevin Vergara de Farias**: E como a gente conseguiria, porque hoje a gente usa o CodePipeline para fazer esse deploy, né? A gente conseguiria, do mesmo modo, plugar ali a branch master e a gente plugar as duas infraestruturas e fazer funcionar ou não?
+
+[12:52] **Gustavo Conti**: Contas diferentes é uma excelente pergunta. Tenho certeza, eu vou checar isso pra ti. Acho que sim. Acredito que sim, realmente, mas não lembro. Vou fechar aqui o nosso time de dev, pra dar uma olhada com eles, tá? Mas realmente, não tenho essa certeza pra te dar agora.
+
+[13:15] **Kevin Vergara de Farias**: Pessoal, deu uma cortada, mas acho que eu entendi. Vai brigar internamente.
+
+[13:20] **Gustavo Conti**: Isso, né? Beleza.
+
+[13:22] **Kevin Vergara de Farias**: Beleza. Perfeito. Então tem esses pontos aí pra gente conversar. Esse negócio da intro que já tá... O engraçado é que o cliente representou isso agora. A gente já fez proposta, aprovaram, aí começamos a apresentar o projeto e aí do nada veio esse requisito. Então é uma coisa que tem uma certa alguma urgência do nosso lado também para resolver. Porque senão a gente precisa ter certeza também que ou fecham ou aprovam aí o valor ou a gente para de uma vez que senão tudo que a gente começar a fazer agora é perda de tempo.
+
+[13:56] **Kevin Vergara de Farias**: A gente vinha a cancelar, né? Então a gente tinha que ter uma...
+
+[13:59] **Gustavo Conti**: E aí, por exemplo, se essa infra do cliente não fosse... Não fosse viável, vocês não fariam nem o backup ou o backup é um projeto à parte, por exemplo?
+
+[14:10] **Kevin Vergara de Farias**: Não, o backup é um projeto à parte. Isso é pra atender, né?
+
+[14:13] **Gustavo Conti**: Ah, beleza.
+
+[14:13] **Kevin Vergara de Farias**: O RTO, né? A gente...
+
+[14:15] **Gustavo Conti**: Entendi.
+
+[14:15] **Kevin Vergara de Farias**: É, o assunto do RTO. Eu trouxe esse assunto porque é um assunto que veio essa semana também, a gente tem... Já aproveitando aqui o momento... Vocês aqui. Mas o RTO é um... tem nada a ver com esses projetos, sabe? É diferente, é o que a gente tá tratando pra todos os clientes e se a gente puder melhorar, a gente vai melhorar, então... é diferente, né? Tem... isso é uma frente paralela.
+
+[14:37] **Gustavo Conti**: Show. É... Deixa eu ver... vocês não têm nada formal, né? Então a gente poderia buscar ali o que vocês já têm hoje pra poder fazer esse tipo de recomendação. É... Tá bom. A gente deve ter acesso ali na conta de vocês né?
+
+[15:02] **Kevin Vergara de Farias**: Sim.
+
+[15:03] **Gustavo Conti**: Sabe se tem?
+
+[15:04] **Kevin Vergara de Farias**: Tem, tem. Eu não lembro o nome do rapaz que estava me atendendo ultimamente, deixa eu pesquisar. Acho que era o Jorge, não era?
+
+[15:13] **Gustavo Conti**: O Jorge, o Matheus. Obrigado por acertar
+
+[15:16] **Kevin Vergara de Farias**: nele. Não, não. O Jorge tá muito grandão, cara. A gente não pode deixar
+
+[15:22] **Gustavo Conti**: ele ficar subindicado. Subiu a cabeça né.
+
+[15:25] **Kevin Vergara de Farias**: Nem morava não
+
+[15:26] **Gustavo Conti**: fala mais.
+
+[15:26] **Kevin Vergara de Farias**: Eu falava que subiu a cabeça. Eu
+
+[15:30] **Gustavo Conti**: estava achando
+
+[15:31] **kiulyn**: que era grandão
+
+[15:32] **Kevin Vergara de Farias**: de grande. Quem tem atendido ultimamente é o Jefferson Queiroz.
+
+[15:41] **Gustavo Conti**: Jefferson. Boa. Tá bom eu vou. Pelo menos ele
+
+[15:46] **Kevin Vergara de Farias**: e o Jorge tem acesso também.
+
+[15:49] **Gustavo Conti**: Eu vou ver ali com eles o acesso, porque daí, assim, pra não ficar até alongando muito a conta, umas perguntas que a gente consegue checar na conta, já que a gente tem esse acesso, eu vou dar uma olhada ali na conta do que que vocês têm e já faço uma recomendação do que que a gente pode pensar, tá? Claro que não vou extrapolar muito pra não ser esse negócio que eu te falei antes, né, de duplicar o custo, né? Mas fazer algo ali que talvez traga um custo benefício legal para vocês.
+
+[16:15] **Gustavo Conti**: Vou trazer uma ideia com uma ideia para vocês ali de RTO e RPO e vocês podem levar internamente por exemplo discutir e ver se faz sentido. Vou trazer o quanto que isso vai aumentar de custo para vocês ou enfim isso vai aumentar ou não. E aí eu quero que isso que vocês levem isso como uma discussão. Ah, não achei legal. Acho que o custo vai aumentar muito o nosso custo. Queria ainda assim melhorar nosso RTO e RPO, mas... Mas sem aumentar tanto o custo, o que a gente pode fazer?
+
+[16:45] **Gustavo Conti**: A gente vai trabalhando ali num projeto, mas...
+
+[16:48] **Kevin Vergara de Farias**: Tu consegue talvez fazer dois cenários, um cenário mais conservador onde não vou aumentar muito o custo e já vou ter um ganho, talvez um cenário um pouco mais arrojado que aumenta mais o custo. Tendo duas opções pelo menos eu consigo debater com o meu CEO, mas com certeza é uma discussão. a gente conversa mais eu tenho outra dúvida também aproveitando Gustavo tá aí não sei se posso também é
+
+[17:15] **Gustavo Conti**: uma hora de
+
+[17:16] **Kevin Vergara de Farias**: consultoria para
+
+[17:17] **Gustavo Conti**: você
+
+[17:18] **Kevin Vergara de Farias**: a gente tá pensando isso é uma coisa que já veio bem de sugestão aí também internamente de vocês né a gente tem uma dor hoje né que é o a demora do auto scaling né mas que a gente tem o auto scaling com elastic install que é cerca de meia hora até uma máquina subir e começar a rodar o que acaba às vezes acaba caindo fora do ar do sistema, porque o autoscaling é bastante lento.
+
+[17:44] **Kevin Vergara de Farias**: A sugestão que vocês deram já há algum tempo era a gente migrar para o Fargate, porque, teoricamente, eu não sei o quanto a gente vai ganhar de tempo para subir uma máquina, mas eu acredito que fique muito mais rápido. Não sei se está certo esse pensamento, mas eu acredito que a gente vai ter um bom ganho no autoscaling. O build ali para subir a produção deve ser um tempo similar, né? Hoje demora meia hora o pipeline para subir uma versão nova do sistema.
+
+[18:14] **Kevin Vergara de Farias**: Não sei se a gente vai ter algum ganho no build, mas acredito que no autoscale sim, né?
+
+[18:18] **Gustavo Conti**: Normalmente sim, porque o que acontece, quando você leva para Fargate, você está separando uma EC2 com vários componentes dentro em micro componentes, né? Então você não vai subir uma EC2 com muitas coisas, você vai subir essas pequenas coisas sozinhas. Então, por exemplo, um S.E.S. é um S.E.S. Então vamos dar um exemplo assim que é o que o S.E.S. ele tem o S.E.S. com o S.E.2 ainda. Então você ainda pode ter S.E.2 dentro do S.E.S. que aí você sobe a máquina inteira.
+
+[18:52] **Gustavo Conti**: Vou dar um exemplo assim, exemplo bem nada a ver tá, mas só pra você entender. Eu tenho um módulo ali, um container que ele é só pra minha camada de login. A única coisa que tem ali dentro. Ele é minúsculo e não precisa de quase nada de memória. Precisa de 0,25 GB de memória.
+
+[19:10] **Gustavo Conti**: Precisa de
+
+[19:10] **Kevin Vergara de Farias**: microserviços.
+
+[19:12] **Gustavo Conti**: Isso. Então ao invés de eu subir uma EC2 com todos os microserviços que tem lá dentro, E daí a EC2 tem 4GB de memória e eu não preciso escalar tudo, eu preciso escalar só o módulo de login. Numa EC2 demora porque eu escalo tudo. Numa ECS com Fargate eu vou escalar só o módulo de login. Então sim, vai ser muito mais rápido porque o pedaço da minha aplicação que eu estou subindo é menor. Mas isso, claro, depende
+
+[19:36] **Kevin Vergara de Farias**: do cenário. Mas não tem também esse time, porque eu entendo, me parece que o EC2 ele estarta, pega uma máquina, instala todos os pacotes, instala tudo que tem que instalar. E acho que é aí que demora realmente toda essa instalação, configuração. Acho que o ECS não, como é uma imagem, ele deve só subir a imagem. O que dá pra imaginar de tempo pra subir uma máquina? Dois minutos? Cinco?
+
+[20:02] **Gustavo Conti**: depende muito de cada aplicação do quão grande elas tem ali de biblioteca tá assim tem aplicação que por exemplo nem leva muita vantagem e pro fargate tá porque às vezes a aplicação ela não é tão bem dividido em micro serviços então não leva tanta vantagem assim
+
+[20:19] **Kevin Vergara de Farias**: é o nosso caso a gente tem um grande monolito não é não tem isso
+
+[20:24] **Gustavo Conti**: é daí assim normalmente quando tem um grande monolito não tem dentro da EC2, não tem muitos microserviços, traz tanta vantagem, o custo-benefício acaba não mudando tanto.
+
+[20:40] **Kevin Vergara de Farias**: Mas tu diz, mas mesmo assim, indiferente de a gente ter uma aplicação grande, o auto-scaling não seria mais rápido por ser uma imagem já pronta, já buildada?
+
+[20:49] **Gustavo Conti**: Não, ele seria, ele seria, só que eu acho que o custo que vocês teriam para mudar, custo operacional mesmo, sabe? para mudar de EC2 para ECS. Talvez tenham coisas mais interessantes para a gente fazer na conta de vocês do que isso sabe.
+
+[21:06] **Kevin Vergara de Farias**: O que tu acha que a dor de fato é o tempo do scan hoje. Demora
+
+[21:12] **Gustavo Conti**: muito para subir.
+
+[21:14] **Kevin Vergara de Farias**: Eu nunca parei para cronometrar mas me aparenta que é pelo menos acima de 20 minutos para subir uma nova máquina. É, tem que ser parte da criação e tal. O nosso build demora 30.
+
+[21:34] **Leonardo Libardi**: Bom dia, só para adicionar. A percepção do cliente, cara, é que a plataforma deu downtime lá. E é isso que a gente busca resolver no final das contas, sabe? O cara lá, quando a gente percebe que tá subindo outra máquina ali, porque a máquina atual ela lotou, cara, tu começa a pipocar um monte de reclamação de cliente, entendeu? Ah, não tá, tá fora, tá fora. Então, acho que são mais do que segundos, tá?
+
+[22:22] **Kevin Vergara de Farias**: Eu acredito que seria um tempo bem razoável para subir uma...
+
+[22:25] **Gustavo Conti**: É, considerando esse tempo... Considerando esse tempo, a gente pode pensar nisso sim. Eu teria que talvez dar uma olhada na conta do que é exatamente que está gerando esse tempo. É porque, assim, às vezes o tempo não é nem... A instalação dos pacotes, sabe? Precisa ter alguma outra coisa, mas... Eu não quero dar pra vocês uma esperança de que, tipo assim, não, a gente vai mudar pra ECS com Fargate e agora vai cair de minutos pra microsegundos, sabe? Milissegundos, né? Então... Não quero dar uma falsa esperança,
+
+[23:03] **Kevin Vergara de Farias**: né? Tipo assim, se caísse pra dois minutos, ou cinco minutos, já seria muito bom, né? Já é melhor do que a gente tem, não é perfeito. Mas legal, acho que se tu quiser fazer uma análise realmente pra gente trazer esse cenário, se vale a pena, não precisa ter resposta agora, mas é alguma coisa que a gente está estudando também junto com essas frentes.
+
+[23:24] **Gustavo Conti**: Eu vou puxar com o time de suporte, principalmente com o Jefferson, pra ver o que ele já analisou na conta, até pra não ser... Não ficar batendo em nenhum lugar que talvez eles já até bateram, né? Ver ali o que que a gente consegue. Daí eu te trago esse relatório, te trago ele descrito ali por que que está acontecendo e o que que a gente pode fazer pra melhorar e o quanto que a gente espera que melhore.
+
+[23:45] **Kevin Vergara de Farias**: Eu tenho uma dúvida que é bem operacional de quem nunca usou o Fargate, nunca trabalhei com ele exatamente. Hoje a gente tem uma... Hoje às vezes... É muito raro, isso é uma situação muito atípica, às vezes acontece algum erro, isso deve acontecer uma vez por mês ou a cada três meses, mas é um caso muito raro que dê algum erro e eu preciso urgentemente resolver, o build demora 30 minutos, eu vou lá, conecto na máquina e ajusto manual o código pra gente não ter uma gritaria, gambiarra do caramba.
+
+[24:14] **Kevin Vergara de Farias**: A minha dúvida é, ao momento que a gente virar pra Fargate, é possível fazer uma conexão com uma máquina para as máquinas que estão rodando ou o Fargate é você contém ou não tem esse acesso que você tem com o EC-12?
+
+[24:28] **Gustavo Conti**: Você continua tendo esse acesso, mas eu duvido que você vai passar por esse problema de novo, tá? Isso é algo que vai te ajudar muito, porque o Beanstalk é muito chato com isso.
+
+[24:40] **Kevin Vergara de Farias**: Mas o Build seria mais rápido? Para resolver esse problema, só se o Build fosse mais rápido?
+
+[24:46] **Gustavo Conti**: Provavelmente o Build seria mais rápido, sim. A gente tem bastante casos de migração de Beanstalk para Fargate e todos eles geraram Build mais rápido, normalmente mais da metade do tempo.
+
+[25:03] **Kevin Vergara de Farias**: E
+
+[25:06] **Gustavo Conti**: o Beanstalk te bloqueia em muitas coisas, às vezes o problema não é nem só o Build, às vezes ele está fazendo alguma coisa ali no Beanstalk, arrumando alguma configuração do próprio ambiente do Beanstalk e ele não deixa tu mudar. Isso é uma coisa que incomoda muito no uso do Beanstalk.
+
+[25:21] **Gustavo Conti**: porque tu não pode mexer nele enquanto ele tá atualizando e aí às vezes ele trava numa atualização e ele não te avisa ou por exemplo, que eu já vi muito acontecer né, às vezes ele tenta deletar um security group ele não consegue, daí ele trava naquilo ali e tu não consegue mexer nele aí até tu descobrir que é isso, tu vai ter que ir lá e deletar o security group sozinho na mão Isso nos builds, tá? Isso inclusive acontece no build. Mas assim...
+
+[25:45] **Kevin Vergara de Farias**: É, tem umas coisas, tipo, trocar a versão do PHP, tem que trocar a engine, ligar todo mundo. Eu acho que ficaria um pouco mais fácil com o Firegate, se quisesse trocar a versão do PHP. Eu só precisaria mexer na imagem, acredito. Mas, beleza. E como é que eu acesso esse acesso? É via SSH mesmo ou eu tenho um...
+
+[26:07] **Gustavo Conti**: Via SSH.
+
+[26:09] **Kevin Vergara de Farias**: Eu não consigo um acesso direto que nem a UEC2 me entrega ali. Eu não vou entrar na máquina ver esse CH. A gente tem o port forward, a gente tem o Bastion com o jump through ali pra chegar na rede quando a gente tá usando o Bastion. Mas beleza.
+
+[26:30] **Gustavo Conti**: É, tem que ser esse CH mesmo, tá?
+
+[26:32] **Kevin Vergara de Farias**: Tem
+
+[26:33] **Gustavo Conti**: como usar o System Manager, mas não vale a pena ali pra ele não.
+
+[26:38] **Kevin Vergara de Farias**: é basicamente ter que acessar o painel da AWS e pegar o endereço que cada máquina tem o seu, né? ou até
+
+[26:48] **Gustavo Conti**: uma ideia, assim, é usar o Kiro. Vocês estão usando o Kiro já pra alguma coisa ou não?
+
+[26:53] **Kevin Vergara de Farias**: Não. Vocês
+
+[26:54] **Gustavo Conti**: conhecem ele?
+
+[26:56] **Kevin Vergara de Farias**: Não.
+
+[26:57] **Gustavo Conti**: Deixa eu mostrar aqui pra vocês, peraí. Vou mandar aqui pra vocês no chat. O Kiro ele é um serviço da Amazon que ele é basicamente uma IA para ajudar vocês com qualquer operação ali dentro da conta. Então por trás vocês podem usar os modelos ali por exemplo o Sony 4.6, 4.7 agora que lançou né inclusive. Lançou ontem. E aí ele tem acesso na conta de vocês e aí por exemplo eu peço ali para ele ah eu preciso conectar no container X e executar tal ação lá no ECS.
+
+[27:38] **Gustavo Conti**: Ele conecta pra ti, porque ele tem acesso a tua conta, ele conecta lá e executa a ação. Então, por exemplo...
+
+[27:45] **Kevin Vergara de Farias**: Ah, tipo, a pessoa ficar catando lá, catando milho lá, tentando achar o lugar... Vou lá e mando pra ele conectar na máquina.
+
+[27:52] **Gustavo Conti**: Conecta lá e faz isso também. E aí tem várias operações que você consegue fazer com ele. Por exemplo, a minha aplicação tá travando. O que que tá acontecendo? Posso pedir pra ele olhar os logs, por exemplo, pra mim. Ele conecta lá no CloudWatch, olha todos os logs e te passa um relatório do que que ele acha que tá acontecendo e como resolver. Daí tu pode selecionar se tu quer resolver por si mesmo ou tu quer deixar ele resolver, né? Tanto que tem até...
+
+[28:17] **Gustavo Conti**: lá dentro do painel, não sei se vocês já viram, mas agora tem até o... como o Amazon Kio, né? É que o Amazon Kio Developer virou o Kiro, né? Eles ficam mudando esses nomes aí, mas é a mesma coisa, tá?
+
+[28:28] **Gustavo Conti**: Lá no
+
+[28:29] **Kevin Vergara de Farias**: painel... O Kiro aqui é um app desktop? Como é que é?
+
+[28:32] **Gustavo Conti**: O Kiro, vocês podem baixar ele como um app mesmo, ou vocês podem usar ele dentro de um VS Code da vida, ou vocês podem usar ele lá dentro do painel, tem várias formas diferentes de usar ele. Eu prefiro usar o app ou via WSL se vocês usam Windows, por exemplo.
+
+[28:47] **Kevin Vergara de Farias**: Perfeito. Interessante. Vou dar uma olhada melhor. Acho que já dá um ganho pra gente, com certeza.
+
+[28:56] **Gustavo Conti**: É, ele traz bastante facilidade e ele é gratuito até certo nível de uso. Então, você tem um uso bem legal por mês gratuito.
+
+[29:04] **Kevin Vergara de Farias**: Eu pago só a IA mesmo que eu vou plugar nele. Na
+
+[29:08] **Gustavo Conti**: verdade não. Ele tem um plano gratuito mesmo. Você tem uma quantidade de interações. É uma quantidade de interações que não é muito alta. Eu acho que são 20 interações por dia. Não me lembro agora realmente quanto é que é. Mas vocês tem um número de interações gratuitas por mês. E daí se você quiser acima disso, você vai ter que pagar um plano. Como se fosse o próprio chat IPT. Não é via quantidade de tokens, ele é um plano mesmo.
+
+[29:37] **Kevin Vergara de Farias**: Mas eu posso usar a minha... Se eu tenho a assinatura do Cloud, por exemplo, eu poderia usar a assinatura do
+
+[29:42] **Gustavo Conti**: Cloud
+
+[29:42] **Kevin Vergara de Farias**: nele ou não?
+
+[29:44] **Gustavo Conti**: Não, não, ainda
+
+[29:44] **Kevin Vergara de Farias**: não. Vamos pagar uma assinatura separada, se for o caso.
+
+[29:47] **Gustavo Conti**: Mas deve
+
+[29:48] **Kevin Vergara de Farias**: ter um free tier interessante, né? Não deve ser tão baixo o limite.
+
+[29:52] **Gustavo Conti**: Mas aí, uma coisa que vocês também podem fazer, se você tem a assinatura do Cloud, é usar o... ele aliena o CLI e, por exemplo, dá acesso pra ele na conta AWS. O Kiro tem as suas vantagens porque ele tem acesso às documentações, porque ele tem mais contexto a AWS. Mas dá pra usar também.
+
+[30:12] **Kevin Vergara de Farias**: Entendido. Ótimo. Até... eu tenho outro ponto agora. Eu tenho conversas reprimidas de meses.
+
+[30:24] **Gustavo Conti**: Vamos lá.
+
+[30:26] **Kevin Vergara de Farias**: Cara, eu tô usando... a gente tem o nosso build do front lá, tem o build do backend que demora meia hora, eu acho que isso a gente só resolve com o Fargate, então beleza, a gente já tá ciente que isso é o caminho. A gente tem o build do front, o build do front também demora meia hora. A gente tá com uma aplicação Angular muito grande, cheio de coisa, e o build realmente é demorado.
+
+[30:47] **Kevin Vergara de Farias**: Mas daí eu fiz um teste, Eu passei a usar o Cloudflare Pages para gerar um preview para cada PR que eu subo. Então, quando eu subo uma PR, eu buildo de novo o front, dou um host no Cloudflare para a gente conseguir testar aquela PR em específico. O que me surpreendeu nesses testes é que eu estou usando o plano 3 do GitHub Workflows e o A máquina que eles me entregam, builda em 10 minutos o meu front-end inteiro. E deixa pronto.
+
+[31:18] **Kevin Vergara de Farias**: E a máquina que eu tô usando a AWS, que inclusive eu tô pagando por ela, demora 30. Eu não sei se tem alguma forma que a gente pode melhorar esse building do front-end. Porque eu acho que isso também que um oracle demora em 10 e o outro demora em 30.
+
+[31:32] **Gustavo Conti**: É, vocês já fizeram a comparação de CPU, memórias, coisas assim? Na mesma quantidade?
+
+[31:37] **Kevin Vergara de Farias**: Não. Não, não cheguei a fazer.
+
+[31:40] **Gustavo Conti**: É, isso é uma coisa interessante. Às vezes demora por causa da máquina que vocês estão usando para fazer o build, tá? Pode acontecer. Porque às vezes, por exemplo, vocês pegaram uma máquina lá de 8GB de memória e estão usando na WS1 e WS2, daí dá bastante diferença. Principalmente memória, tá?
+
+[31:56] **Kevin Vergara de Farias**: É, o GitHub lá não chega a me dar os specs da máquina, sabe? Eu não sei se a memória não deve estar faltando porque quando falta a memória ele estoura porque ele no mínimo usa 8 gigas. Eu não sei se é a CPU. Eu acredito que a CPU deve estar considerada. Eu acho que isso é legal se talvez a gente também dá uma avaliada se a gente consegue melhorar esse pipeline do front-end.
+
+[32:24] **Gustavo Conti**: No front-end você já pensaria em usar o Amplify?
+
+[32:29] **Kevin Vergara de Farias**: O
+
+[32:30] **Gustavo Conti**: Amplify é um serviço que vocês conseguem, ele é especificamente para front, ele suporta o Angular também, então vocês podem, por exemplo, conectar ele com o GitHub e a partir de onde você fizer uma mudança lá no GitHub ele já assume essa mudança e faz todo o processo sozinho. Não precisam acionar nenhuma pipeline, nem nada assim, e ele não te dá uma máquina, ele te dá o front como um domínio mesmo pra você acessar e você nem vê a máquina que tá rodando por trás.
+
+[33:03] **Gustavo Conti**: Ele é escalável conforme a demanda e tal, ele cobra conforme a quantidade de acessos. Ele não cobra por uma máquina com CPU, memória, disco, né? A AWS basicamente absorve toda essa parte do sistema operacional pra vocês.
+
+[33:18] **Kevin Vergara de Farias**: Mas considerando que o front em si é estático, né? Precisa exatamente de uma máquina, Não, é que...
+
+[33:27] **Gustavo Conti**: É, ele pode... O front hoje, você está onde? Na S3?
+
+[33:31] **Kevin Vergara de Farias**: Tá na S3, meu.
+
+[33:33] **Gustavo Conti**: A gente tem
+
+[33:33] **Kevin Vergara de Farias**: um call de front na frente.
+
+[33:35] **Gustavo Conti**: Ah tá, não, eu pensei que ele estava no MEC-2, não, desculpa. Assim,
+
+[33:39] **Kevin Vergara de Farias**: dá pra testar um... Acho
+
+[33:39] **Gustavo Conti**: que esse faz
+
+[33:40] **Kevin Vergara de Farias**: mais sentido pro next da vida, né, talvez, né, que tem o background...
+
+[33:44] **Gustavo Conti**: É, daí sim. O S3 também é muito bom, talvez testaria a diferença ali, o Amplify e o S3, tem alguns pontos que sempre tem diferença entre usar os dois, mas no final das contas os dois tem a mesma infraestrutura, tá? Porque o S3 também tá usando uma máquina por trás, né, por trás das bandas, né. Mas os dois tem a mesma infraestrutura. A diferença é que o Amplify absorve para ti o CloudFront e absorve o S3. Tu não vê eles existindo, né?
+
+[34:12] **Kevin Vergara de Farias**: A gente teria algum ganho no nível de build, talvez?
+
+[34:17] **Gustavo Conti**: Teria que testar, mas normalmente sim. Mas teria que realmente testar, não consigo te prometer isso. Eu faria esse teste. A gente já viu alguns cenários que diminuem 40% do tempo do build, mas realmente depende de aplicação para aplicação.
+
+[34:34] **Kevin Vergara de Farias**: Eu tentaria, acho que num modo mais conservador, tentar ver se a gente melhora a máquina inicialmente.
+
+[34:42] **Gustavo Conti**: É que daí na S3 não tem como, né?
+
+[34:45] **Kevin Vergara de Farias**: É que, não, a máquina é do pipeline, né? A máquina que eu...
+
+[34:48] **Gustavo Conti**: Ah, sim, sim.
+
+[34:49] **Kevin Vergara de Farias**: ...buildo a aplicação.
+
+[34:51] **Gustavo Conti**: Eu
+
+[34:51] **Kevin Vergara de Farias**: tenho que passar pela etapa de buildar, né?
+
+[34:53] **Gustavo Conti**: O Amplify, ele é bem fácil de criar. Você conecta ele basicamente com o teu repositório, ele já cria toda a infraestrutura pra ti. Ele tem lá no painel mesmo uma forma de você conectar. E... Ele já vai te mostrar. E como a cobrança dele é conforme o uso, vocês vão pagar, sei lá, 2, 3 dólares pra só fazer o teste. E esses 2, 3 dólares seria o custo de armazenamento. Só isso.
+
+[35:21] **Kevin Vergara de Farias**: Então,
+
+[35:23] **Gustavo Conti**: pegaria em homologação, por exemplo, e só lançaria ali pra ver como é que funciona, se vai fazer muita diferença ou não. Se não gostarem, dá pra deletar. É um teste que vocês conseguem fazer em um dia, por exemplo.
+
+[35:35] **Kevin Vergara de Farias**: Tu disse que a gente consegue fazer por aqui, não é algo que desenvolveu vocês?
+
+[35:41] **Gustavo Conti**: Não precisaria, mas se vocês quiserem, a gente pode fazer com vocês também. Não é um problema.
+
+[35:46] **Kevin Vergara de Farias**: É o nosso plano cobre?
+
+[35:50] **Gustavo Conti**: Então eu vi ali vocês tem um plano que é um plano que a gente não tem mais muito tempo que é o plano bronze do MSP. Eu não sei se cobre porque realmente como é um plano um pouco mais antigo a gente saiu dessas modalidades. Daí eu tenho que dar uma olhada ali contigo. Consegue checar para a gente que eu
+
+[36:11] **kiulyn**: consigo
+
+[36:11] **Gustavo Conti**: sim. Porque realmente não me recordo. Até eu estava falando com o Linkerd que vocês já são clientes de muito tempo. Então vocês pegaram essa época que a gente tinha esses planos.
+
+[36:24] **kiulyn**: É que eu acho que ele foi descontinuado já já tem dois anos. Foi logo que eu entrei na date então. Então vamos consultar aqui dentro de casa ver o que o seu plano ele cobre.
+
+[36:38] **Gustavo Conti**: Kevin tem história com a gente.
+
+[36:42] **Kevin Vergara de Farias**: Já olha desde que eu cheguei aqui isso já estava pelo menos quatro anos. Fazia
+
+[36:51] **Gustavo Conti**: oito anos agora de idade. Quando chegou quando a mãe chegou aqui vocês estavam com. Era na época que a gente tinha ido os padrinhos das contas e os padrinhos formais de padrinho da conta de vocês e o Jorge inclusive.
+
+[37:06] **Kevin Vergara de Farias**: O Jorge atendia no começo quando antes da soberba chegada. velhos tempos, velhos tempos. 8 anos é uma história, né? É,
+
+[37:23] **Gustavo Conti**: a gente estava com acho que com 15 pessoas na época. Eu falei para o Alan, inclusive. Você lembra do Alan, né? O
+
+[37:31] **Kevin Vergara de Farias**: Alan,
+
+[37:34] **Gustavo Conti**: ele hoje é o nosso líder da área de IA e dados, né? E na época eu estava brincando com ele que na época que a gente atendia a vocês a gente tinha umas 14 pessoas. Nessa época ali se comparar com hoje em dia hoje em dia ele lidera uma equipe de 14 pessoas.
+
+[37:52] **Kevin Vergara de Farias**: Sozinho.
+
+[37:54] **Gustavo Conti**: Aham.
+
+[37:55] **Kevin Vergara de Farias**: Elas cresceram muito né.
+
+[37:56] **Gustavo Conti**: Aham.
+
+[37:57] **Kevin Vergara de Farias**: Que bom né. Deve estar com uns 80 100 pessoas.
+
+[38:00] **Gustavo Conti**: Com 90 e poucas. Não lembro agora quantas são. Ah 90 não, uns 80 assim porque o resto tem uns estagiários daí conta com meia né.
+
+[38:10] **Kevin Vergara de Farias**: O estagiário nem é gente, cara. O estagiário nem é gente, pô.
+
+[38:19] **Leonardo Libardi**: Ele
+
+[38:20] **kiulyn**: desconta, né? Desconta o colaborador.
+
+[38:24] **Leonardo Libardi**: Ô Bissabô, deixa eu te perguntar uma outra coisa, cara, antes que eu me esqueça.
+
+[38:28] **Gustavo Conti**: A
+
+[38:29] **Leonardo Libardi**: gente tem um assunto endereçado com a ISO, com a implementação da ISO 27001, que é controle de acessos privilegiados. E aí, cara, o famoso PAN, né, P-A-N. Cara, a gente tem, a gente usa já uma ferramenta hoje para segredo, o cofre de senhas, né,
+
+[38:58] **Gustavo Conti**: que
+
+[38:59] **Leonardo Libardi**: é o Keeper. Eles têm uma ferramenta de PAN. Sabe me dizer se a AWS tem algo deles? Se isso, enfim, é uma ferramenta? Como que a gente consegue se existir? Como que a gente consegue entender o custo disso? E a gente precisa também entender um pouco Mas aí é mais, acho que é, por exemplo, com o Keeper. O Keeper, segundo o que eu tenho de informação, ele integra com a AWS.
+
+[39:35] **Gustavo Conti**: Mas,
+
+[39:35] **Leonardo Libardi**: enfim, seria interessante entender se a AWS tem uma ferramenta disso e qual que é o custo, como é cobrado.
+
+[39:43] **Gustavo Conti**: Uma ferramenta como o Keeper não. A AWS tem, por exemplo, serviços de gerenciamento de segredos, por exemplo. Usuário e senha do banco de dados. Ao invés do usuário e senha do banco de dados, eles põem, por exemplo, num Secrets Manager. Daí ele gerencia esse segredo. Mas ele não é de senhas como, por exemplo, senhas do Google, de sites externos, nem nada assim. Isso a AWS não tem, realmente.
+
+[40:11] **Leonardo Libardi**: Tá. E esse, o PAN, ele não tem o outro, não tem conhecimento.
+
+[40:19] **Gustavo Conti**: O que? O
+
+[40:19] **Leonardo Libardi**: que é? Esse sistema de controle de acesso privilegiados, que é o que, por exemplo, o Keeper, o que que acontece? Quando eu tenho que acessar o banco de dados para fazer alguma, algum ajuste, né? Ele cria um túnel. Tu pode ter um processo de for para autorizar. Então, vamos imaginar o Kevin. Ele precisa fazer um ajuste no banco de dados de produção. Ele vai iniciar pelo PAN, por esse software. No caso, o Keeper. Ele pede para alguém aprovar. Alguém aprova. Ele começa a logar e a gravar a sessão dele. O que ele está fazendo.
+
+[41:04] **Leonardo Libardi**: Exatamente para ter auditoria do que foi feito lá no banco de dados. Eu não sei se existe isso ou algo, tem conhecimento disso na AWS? Só pra gente explorar, sabe? Como eu te falei, a gente usa o Keeper e a gente viu essa ferramenta, eu vi particularmente a ferramenta daqui do Keeper, mas queria entender se tem algo na AWS.
+
+[41:33] **Gustavo Conti**: Eu estou dando uma lida aqui no site, não conhecia realmente essa ferramenta, mas não tem um serviço que ele seja tão... moldado dessa forma assim a gente consegue por exemplo ter que nem eu comentei antes o Secret Manager para gerenciar os segredos a gente tem o IAM para gerenciar aparições, rotacionar
+
+[41:59] **Leonardo Libardi**: senhas, essas
+
+[42:00] **Gustavo Conti**: coisas. Isso sim só que ele é feito para você por exemplo colocar isso em uma aplicação não para você fazer um uso pessoal dele sabe
+
+[42:11] **Leonardo Libardi**: Acho
+
+[42:11] **Gustavo Conti**: que essa é a maior diferença entre os dois. Um deles é para a gente usar a aplicação, acessar o meu banco, e outra coisa é para você como usuário acessar o banco. Como administrador, como enfim, behind the scenes. Daí isso realmente não tem algo assim na AWS.
+
+[42:26] **Leonardo Libardi**: Votado
+
+[42:28] **Gustavo Conti**: para o usuário.
+
+[42:30] **Leonardo Libardi**: Beleza. Não só para entender se a gente teria alguma coisa assim, porque isso aí nós vamos ter que adotar em breve.
+
+[42:42] **Gustavo Conti**: Aqui na Dart, por exemplo, a gente usa o 1Password, né?
+
+[42:45] **Leonardo Libardi**: É, a gente usa o Keeper, que é o concorrente direto ali do 1Password. Até a gente usava o 1Password antigamente.
+
+[42:57] **Gustavo Conti**: Não,
+
+[42:59] **Leonardo Libardi**: mas beleza. Beleza? Bom, Gustavo, o que a gente sai daqui com algumas coisas por fazer, enfim... estudar, pra gente tentar melhorar essas questões que a gente explorou hoje.
+
+[43:20] **Gustavo Conti**: Boa, tem duas coisas que eu tô devendo pra vocês. Uma delas é em relação à estimativa ali, é estudar a conta de vocês e ver sobre RTO e RPO, e aí trazer duas estimativas de comparação dos dois projetos pra vocês compararem. E o outro era em relação à migração, à duplicação do ambiente, né, que vocês têm ali aquele cliente que quer uma infraestrutura isolada, então fazer essa estimativa também para vocês terem uma infraestrutura só para esse cliente. O que ficou ali para vocês, basicamente?
+
+[43:57] **Gustavo Conti**: Dá uma olhada no Kiro, que eu mandei aqui no chat, se vai fazer sentido para vocês ou não, e o Amplify.
+
+[44:03] **Gustavo Conti**: Não é algo que vocês precisam retornar para a gente, mas se vocês quiserem dar uma olhada na documentação, testar o Amplify, dêem uma olhada, vejam o que vocês acham, e se tiverem alguma dúvida, podem nos chamar, ou podem, enfim, pedir, por exemplo, gostamos do Amplify e queremos fazer um projeto com ele, ou não queremos testar o Amplify, queremos que você se adapte, ajude a gente, entra em contato ali que a gente vê a melhor forma de fazer isso. Mas basicamente é isso. Não sei se ficou alguma coisa que eu esqueci. Kevin, pode corrigir.
+
+[44:35] **Gustavo Conti**: Só
+
+[44:36] **Leonardo Libardi**: esse caso ali da infraestrutura apartada ali para o cliente, Tem um prazo mais ou menos de quando que consegue essa estimativa porque o cliente vai me cobrar isso também.
+
+[44:51] **Gustavo Conti**: Na semana que vem eu já consigo trazer isso para vocês. Eu só não consigo realmente precisar que dia porque vai ter um feriado ali na terça feira. E o que ele está ocupando minha agenda. Ele é complicado.
+
+[45:08] **kiulyn**: Mas
+
+[45:10] **Gustavo Conti**: isso
+
+[45:10] **kiulyn**: incomoda.
+
+[45:12] **Gustavo Conti**: Essa investigação que eu vou fazer na conta de vocês, ela vai demorar pelo menos um dia, porque daí eu vou precisar entrar em contato com o time de suporte, ver o que eles já investigaram, olhar as documentações que eles têm sobre vocês. Então isso pelo menos um dia. E aí para eu fazer levantamentos estimativas, além de eu fazer a arquitetura, calculadora e tudo mais, isso leva normalmente até dois dias.
+
+[45:33] **Gustavo Conti**: E daí tem um processo de validação que depende do time Um time que a gente tem aqui, que normalmente é da liderança, que faz uma validação técnica do que a gente executou, do que a gente pensou ali para apoiar vocês. Então, provavelmente, assim, até ali na sexta-feira, no máximo, a gente consegue entregar para vocês já todas essas estimativas. Isso é ok para vocês?
+
+[45:59] **Leonardo Libardi**: Sim, tranquilo, até se quiser passar, se tu tiver informação, por exemplo, da infraestrutura ali antes, quiser passar para nós, enquanto antes melhor. E daí, cara, só o... assim, te dando um contexto, eu acho que o Kevin já te comentou um pouquinho, mas cara, não precisa ser nada tão preciso, tá? Assim, cara, é uma estimativa mesmo, mas a grosso modo, tá?
+
+[46:28] **Gustavo Conti**: Tá bom, sem problema. Beleza. Pessoal, tem algo mais que a gente consiga ajudar vocês?
+
+[46:37] **Leonardo Libardi**: Eu também não. Muito obrigado pessoal!
+
+[46:51] **kiulyn**: Um grande abraço, vou mantendo vocês informados, tá bom?
+
+[46:56] **Leonardo Libardi**: Valeu!

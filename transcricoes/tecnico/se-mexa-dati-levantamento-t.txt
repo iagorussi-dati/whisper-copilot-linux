@@ -1,0 +1,272 @@
+# [Se Mexa & Dati] - Levantamento Técnico
+**Date**: Monday, April 20, 2026 at 11:00 AM  
+**Duration**: 28:57  
+**People**: Gustavo Conti, Camilla Maia, Cristopher David de Lima, Luiz Rampanelli, Lucas Falconde, and igor
+
+[0:00] **Cristopher David de Lima**: Saúde o nosso pré vendas técnico e daí a gente felizmente não conseguiu fazer.
+
+[0:07] **Lucas Falconde**: Sem problema.
+
+[0:08] **Cristopher David de Lima**: Deixa eu chamar aqui o Gustavo com um segundo. Ele é o nosso pré vendas ele vai entrar também nessa. Mas boa gente vocês falam de onde.
+
+[0:23] **Lucas Falconde**: Eu sou de Pinhais o Igor é
+
+[0:25] **Cristopher David de Lima**: de Curitiba a Curitiba legal.
+
+[0:29] **Lucas Falconde**: Pinhais fica em região metropolitana de Curitiba fica perto de Curitiba entra em Curitiba e Piraquara.
+
+[0:36] **Cristopher David de Lima**: Não estamos relativamente perto então a gente está falando aqui de Blumenau.
+
+[0:41] **Lucas Falconde**: Ah pertinho.
+
+[0:44] **Cristopher David de Lima**: Mais ou menos vai suas três horas e poucas. Mas quando tiverem por aqui avisem que a gente toma um cafezinho junto aí se tiver em outubro daí é até melhor. Fala Conti tudo bem? Você tá multado meu cara.
+
+[1:05] **Gustavo Conti**: Alô.
+
+[1:06] **Cristopher David de Lima**: Agora sim.
+
+[1:07] **Gustavo Conti**: Agora sim.
+
+[1:08] **Cristopher David de Lima**: Beleza.
+
+[1:08] **Gustavo Conti**: Bom dia pessoal tudo bem?
+
+[1:10] **Lucas Falconde**: Bom dia.
+
+[1:11] **Cristopher David de Lima**: Bom dia. Gente deixa eu me apresentar então e daqui a pouco já passo bastante para o conte também. Mas Lucas e Igor super prazer conhecer vocês. Podem me chamar de Cris. Eu sou a account manager aqui na Dati Então Camila me comentou que conversou com vocês sobre uma migração. E tá aí condicionada por um contrato que vocês estão aí para fechar com a Unimed, né? Então tem um censo de briefing do que foi essa última conversa e a minha função aqui é junto com o Conti.
+
+[1:43] **Cristopher David de Lima**: ajudar a precificar o quanto que vocês vão gastar para fazer essa migração para a AWS, bem como também explicar todos os serviços, montar um censo de arquitetura para vocês, para viabilizar essa tomada de decisão, pelo que eu entendi que parece ser um pouco mais urgente do que o padrão que a gente acostuma atuar. Então eu vou estar próximo de vocês, tanto aqui disponível para fazer reuniões, quanto no WhatsApp para ter ali, né, tratativas mais rápidas com vocês, tá? Conte, se você quiser se apresentar, fica à vontade, meu caro.
+
+[2:18] **Gustavo Conti**: Pessoal, eu sou aqui do time de pré-vendas técnico, tá? Então, basicamente eu entrei nas reuniões junto com o Cris, justamente para tentar entender ali o que vocês estão usando tecnicamente, o que está acontecendo, para poder sair aqui da reunião um escopo, uma estimativa de custo, exatamente o que a gente vai montar ali para vocês. A ideia é que os projetos de data são bem personalizados para a demanda de cada cliente, então apoio na construção desse projeto.
+
+[2:49] **Cristopher David de Lima**: Perfeito. Eu já passo o bastão para vocês se apresentarem também, pessoal, mas só para a gente poder estar alinhado, eu marquei aqui um espaço de uma hora. Eu imagino que a gente não vai tomar tudo isso, provavelmente em meia hora a gente consegue sair do outro lado. Mas partir dessa conversa, a ideia é a gente descer um pouco nível técnico, entender a necessidade de vocês um pouco mais a fundo.
+
+[3:13] **Cristopher David de Lima**: A próxima conversa a gente já vai para um censo de apresentação de arquitetura, o que a gente desenha e estima que é o melhor cenário para vocês pensando em AWS. Qualquer dúvida, O Conte vai guiar um pouco mais esse papo de hoje mas qualquer dúvida levante a mão aqui podem podem falar para a gente que se tiver algum detalhamento aqui que faz sentido a gente aprofundar já agora de que confortáveis de trazer.
+
+[3:40] **Cristopher David de Lima**: Se puderem se apresentar então pessoal rapidinho assim e eu já tenho um briefing da solução de vocês mas se quiserem compartilhar um pouco dela ou até a tela lhe mostrar para a gente vai ser 10 barra 10.
+
+[3:55] **Lucas Falconde**: Fechou, então. Vou começar falando. Prazer, pessoal. Eu sou o Lucas. Tanto eu, quanto o Igor, quanto o Sandro, que ele não está aqui agora. Nós somos co-founders de uma startup. O nome dessa startup é Simesh. É uma startup de saúde preventiva. A gente está ali atuando... No modelo B2B, a intenção é pegar essa solução e colocar para o mercado. Então, nossos clientes seriam, tipo, clínicas, academias, personal trainers. Então, tudo o que envolve o meio fitness, o meio wellness, a gente tem a intenção de entrar nesse mercado e que eles sejam nossos clientes.
+
+[4:40] **Lucas Falconde**: Eu consigo até mostrar aqui para vocês como que está a parte Deixa eu pegar aqui rapidinho. Como que tá a parte da... da staff, né? Que seria o B2B. Deixa eu compartilhar a tela aqui pra vocês.
+
+[4:59] **Cristopher David de Lima**: Beleza.
+
+[5:01] **Lucas Falconde**: Tá aparecendo?
+
+[5:05] **Gustavo Conti**: Aparecendo sim.
+
+[5:07] **Lucas Falconde**: Fechou. Deixa eu entrar aqui. Vamos supor que essa aqui seria uma visão de academia. Então, na visão da academia, quando a academia entrar, ela vai ter essa visão, que é uma visão bem de relatório mesmo, o que está acontecendo, qual foi a evolução dela nos últimos meses, uma parte bem mais voltada para a gerencial, a parte de cadastro de alunos e profissionais, onde a gente entende que ele já vai ter esse sistema, então a ideia disso aqui é portar para um sistema que ele já tenha para cá, ou vice-versa.
+
+[5:47] **Lucas Falconde**: Aqui é questão de relatórios, então, tipo, se... Aqui, no caso, é uma base de teste. Então, como todos esses alunos não tiveram um acompanhamento legal, um acompanhamento, não, desculpa, uma atividade legal dentro do aplicativo durante um tempo, ele já avisa que esses alunos estão com risco de churn. Então, inativa 23 dias, nenhum treino na semana. Tudo isso vai gerando um dado para ele e isso começa a... dá sinais para ele conseguir agir antes daquilo realmente acontecer.
+
+[6:18] **Lucas Falconde**: Então, vamos supor que esse usuário, às vezes, não foi atendido muito bem, aconteceu alguma coisa, então a academia vai ser notificada antes do churn acontecer. Aqui é mais uma parte de relatório para saber como está o dia a dia, está com risco de evasão, está tudo em dia, está sendo desengajado, A questão da atenção ao aluno, então, você já consegue ver aqui uma forma mais dentro da visão do aluno, como que tá, né?
+
+[6:51] **Lucas Falconde**: Pô, esse cara é um cara com obesidade, tá com MNC alto, tem uma condição de saúde, isso aqui ele precisa de um foco maior. Então, tipo, você consegue...
+
+[6:58] **Cristopher David de Lima**: Esses dados, desculpa te interromper, mas esses dados daí é o profissional, por exemplo, o personal ele vai abastecer num formulário no início, tipo, da experiência, no onboarding, e aí você armazena no banco, é isso?
+
+[7:10] **Lucas Falconde**: Não, todos esses dados eles vêm do aplicativo, porque o que acontece, isso aqui é o que a gente vai oferecer para as academias, e o que a gente vai oferecer para os usuários dela é o aplicativo. Então, dentro do aplicativo, a pessoa vai ali, ela vai usar, vai ter toda a questão ali do dia a dia dela mesmo. Vamos supor que, sei lá, ela foi para o médico e o médico receitou para ela tomar um remédio. Dentro do aplicativo, ele já vai espelhar esse remédio ali que ela tem que tomar.
+
+[7:42] **Lucas Falconde**: Se ela não colocar que ela está tomando, isso vai gerar um alerta para o médico. O médico vai poder entrar em contato com ela e falar, olha, por que você não está tomando remédio? O que está acontecendo? E na próxima vez que ela voltar lá, já vai saber o que que aconteceu, porque que não melhorou, o que que tá acontecendo, entendeu? Então, a intenção é o aplicativo na mão do usuário, do nosso parceiro, e o parceiro vai ter essa tela, onde aqui ele vai saber tudo que tá acontecendo dentro daquele aplicativo.
+
+[8:08] **Cristopher David de Lima**: Legal. Basicamente o médico profissional no caso ele consegue ter uma visão de timeline da vida desse paciente além do que ele mapeia na clínica ou na consulta. Eu só não entendi uma coisa Lucas beleza eu entendi que você está dentro do ramo de saúde mas o produto ele também é posicionado para academia.
+
+[8:30] **Lucas Falconde**: Isso, é que ali no caso eu mostrei a visão da academia, como seria algo voltado para a academia, mas dentro do sistema ele se molda de três formas diferentes que a gente tem hoje. Tem como você usar ele voltado para a academia, então ele seria basicamente um aplicativo de academia, que já tem, né?
+
+[8:50] **Lucas Falconde**: Tem como você aplicar isso para uma visão clínica, então ele vai mudar completamente ali, vai ter dados voltados mais para coisas clínicas, então parte de saúde, histórico de saúde do usuário, medicamentos, toda essa parte ele vai portar para essa visão e tem a visão de um personal ou um profissional, como pode autônomo, né? Então, ele não vai precisar ter duas visões separadas, que ali ele tem duas visões. Tem a visão macro, que é a clínica, e tem uma visão abaixo, que seria o profissional, utilizando mais voltado ali pro usuário, né?
+
+[9:30] **Lucas Falconde**: O cara que ele é autônomo, ele vai ter as duas visões em uma só. Entendeu? Mas aí ele tá mais voltado também pra academia, esse cara. A intenção é isso ser aplicado para algum médico também no futuro, mas por enquanto a gente está focando só em personagens.
+
+[9:53] **Cristopher David de Lima**: Conte, eu já vou passar bastante para você só para entender um pouco de volumetria aqui, tá? Hoje vocês estão com quantos usuários ativos? Já tem usuários ativos na plataforma?
+
+[10:09] **Lucas Falconde**: Ainda não. A gente está ainda na fase de validação, de teste, tudo isso. Quinta-feira a gente vai ter uma conversa legal ali com um profissional que ele já tem alguns alunos interessados também. Então, provavelmente a gente vai conseguir já rodar com eles um começo de teste ali para essa parte da academia. E tem a questão da Unimed ali que a gente está com uma conversa mais avançada com eles também para rodar isso. É uma visão de clínica, né? Tá.
+
+[10:37] **Cristopher David de Lima**: Pensando que você fecha esses dois contratos, qual que é a sua expectativa de usuários rodando ativo?
+
+[10:45] **Lucas Falconde**: Não tem uma média, mas assim, eu acho que em volta de uns 100 a 200 usuários ali.
+
+[10:51] **Cristopher David de Lima**: Legal. Bacana, gente. Obrigado por abrir esses detalhes e parabéns pelo projeto. Estou acompanhando esse mercado de saúde vendo algumas empresas fazendo soluções inclusive embutido. Imagino que seja o próximo passo de vocês também e eu confio bastante que é um baita mercado. Conte se você quiser fazer alguma pergunta ficar confortável.
+
+[11:21] **Gustavo Conti**: Acho que assim, dentro da questão mais de negócio, deu pra entender muito bem ali o que vocês estão usando. É um projeto realmente bem interessante, como o Chris trouxe aqui pra gente. Basicamente, agora o que eu preciso entender de vocês é o que vocês exatamente estão usando no âmbito mais técnico mesmo. Eu vi ali como o Sistema Trago ali, por exemplo, soluções como Giminar e tal, mas o que vocês estão usando hoje dentro da Railway, né?
+
+[11:54] **Cristopher David de Lima**: Isso.
+
+[11:55] **Lucas Falconde**: É, basicamente a gente tem um serviço dentro da Railway ali, onde a gente hospeda a parte do back-end, né? Que seria o nosso back-end, ele tá rodando em Node hoje. A parte do front-end a gente usa o ExpoGo ali para... ExpoGo não, desculpa, o SBuild para subir para a Apple, né? Então, seria o nosso front-end, de certa forma. Aí tem aquela parte web também, que ela também é um serviço separado dentro da Railway mas ele está todo feito em HTML, CSS, que a gente já fez isso para facilitar a vida mesmo.
+
+[12:30] **Lucas Falconde**: Os dois bancos que tem lá, tanto ali da parte do... do web contra a parte do aplicativo estão em Postgre.
+
+[12:42] **Cristopher David de Lima**: Legal.
+
+[12:43] **Gustavo Conti**: Tudo isso dentro de uma máquina mesmo.
+
+[12:46] **Lucas Falconde**: É, é dentro de um serviço da railway, só que são dois serviços diferentes. Deixa eu mostrar aqui que fica mais fácil. aqui. Dá pra ver?
+
+[13:05] **Gustavo Conti**: Dá pra ver sim.
+
+[13:07] **Lucas Falconde**: Então, basicamente, são esses dois serviços aqui. Esses dois aqui são outras coisas. Esse aqui é o nosso serviço. Então, é basicamente o serviço onde roda o B2B, então que seria o aplicativo mesmo. o back-end do aplicativo e mais o back-end do site, que a gente faz tudo por API, né? Então é a comunicação toda feita entre esses dois. E o banco de dados onde hospeda tudo isso, que é um banco de dados postgre.
+
+[13:38] **Gustavo Conti**: Qual que é a versão do Postgre que vocês estão usando?
+
+[13:41] **Lucas Falconde**: Cara, não sei te dizer. Deixa eu dar uma olhada.
+
+[13:50] **Gustavo Conti**: É, tá na 18, né? Eu acho que é.
+
+[13:52] **Lucas Falconde**: Eu acho que é 18, aham. Tá aqui.
+
+[13:54] **Gustavo Conti**: É, 18.3 é pra vocês fazerem o update, né?
+
+[13:57] **Cristopher David de Lima**: Isso.
+
+[13:57] **Gustavo Conti**: Então deve tá na 18.2, vamos ver assim.
+
+[14:00] **Cristopher David de Lima**: Perfeito.
+
+[14:01] **Gustavo Conti**: Tá bom, tranquilo. Esse ambiente tá todo no GitHub e o Railway sobe ele baseado no que tem no GitHub, né? Que tá direto ali, pelo que eu entendi.
+
+[14:12] **Lucas Falconde**: Isso, aham. A gente sobe uma aplicação lá pro GitHub, ele tem um arquivozinho, um Dockerfile que a gente roda ali para ele iniciar o serviço.
+
+[14:23] **Gustavo Conti**: Tá bem. Assim, dentro desse ambiente ali, não seria muito complexo de a gente migrar, a gente conseguiria fazer uma estimativa até bem precisa ali com vocês. O que eu preciso entender agora é se vocês conseguiriam, por exemplo, exportar talvez aquele próprio repositório ali para a gente transformar o que vocês estão usando hoje na Huey em serviços AWS para a gente ver como é que fica.
+
+[14:49] **Lucas Falconde**: É, assim, isso não é problema. A gente tem toda aquela questão ali das bases de dados, a gente tem tudo em Migration dentro do sistema. Então, justamente, já feito pensando nisso, nessa casa da migração. Quando ele rodar numa próxima, ele já vai fazer tudo ali.
+
+[15:05] **Gustavo Conti**: Não, ficou bem legal. Ficou bem prático, na verdade, pra gente fazer essa migração. Bem interessante mesmo. Consegue daí exportar então ele ali pra mim?
+
+[15:14] **Lucas Falconde**: Sim, sim.
+
+[15:15] **Gustavo Conti**: Pode mandar para o Cris ali com um zip ou alguma coisa assim que eu já pego e já inicio aqui.
+
+[15:21] **Cristopher David de Lima**: Fechado.
+
+[15:21] **Gustavo Conti**: Então basicamente o que eu vou fazer, tá? Quando você me mandar esse zip ali, eu vou converter esse serviço que hoje vocês estão usando na Railway em serviço da AWS, né? O que a gente vai usar lá dentro com o melhor ali para vocês nesse momento.
+
+[15:34] **Gustavo Conti**: trazer um desenho de arquitetura, até mostrar visualmente quais são os serviços que vocês vão usar, como é que vai funcionar o fluxo, desde o momento que, por exemplo, um professor acessa ali a plataforma de vocês, até o momento que uma informação é gravada no banco de dados, toda a parte de observabilidade, né. e monto também uma estimativa de tempo, que daí é quanto tempo, por exemplo, a Dash levaria para implementar essa arquitetura ali para vocês, ou quanto que a gente estima que isso seja feito, e uma estimativa de custo.
+
+[16:04] **Gustavo Conti**: Então, baseado nessa volumetria que o Chris pediu para vocês lá no início, porque a WSL é toda cobrada em cima de quanto que está sendo usado, né? Então, quantas requisições vão ser feitas para a aplicação de vocês, isso tudo. Então, baseado nisso, aí eu faço uma estimativa de custo também, pra vocês terem uma noção de quanto que esse ambiente custaria rodando em AWS.
+
+[16:24] **Cristopher David de Lima**: Fechado.
+
+[16:26] **Gustavo Conti**: Beleza?
+
+[16:27] **Lucas Falconde**: Beleza.
+
+[16:28] **Cristopher David de Lima**: Pessoal, uma última dúvida. Vocês têm um domínio já?
+
+[16:33] **Lucas Falconde**: Já sim. Simeixa.app.
+
+[16:37] **Gustavo Conti**: Esse domínio tá sendo gerenciado aonde?
+
+[16:40] **Lucas Falconde**: Pela Hostinger.
+
+[16:42] **Gustavo Conti**: Vocês pensam em mudar ele? Também não.
+
+[16:47] **Lucas Falconde**: Cara, por enquanto não. Por enquanto a ideia é manter esse mesmo.
+
+[16:52] **Gustavo Conti**: Não, é porque a AWS tem um serviço de gerenciamento de domínio também. Queria saber se vocês, por exemplo, usariam ele ou tem algum contrato com a Hostinger pra ficar lá?
+
+[17:00] **Lucas Falconde**: Ah não, legal.
+
+[17:00] **Gustavo Conti**: Talvez vocês estejam usando outra coisa também lá, né?
+
+[17:03] **Lucas Falconde**: Não, é só a Rochinger mesmo. A gente não tem nada.
+
+[17:09] **Gustavo Conti**: Tá, beleza.
+
+[17:12] **Cristopher David de Lima**: Pessoal, aproveitando aqui, tá, que a gente ainda tem um tempinho. É só para entender, tá? Vocês têm algum budget já definido para essa migração? Tem alguma coisa de orçamentária pensada aqui?
+
+[17:27] **Lucas Falconde**: Assim, a gente tem um gasto básico que a gente tem ali mensalmente com a railway, que é em volta de uns 10 dólares. A gente sabe que isso vai acabar aumentando, né? Mas é algo voltado em volta disso, assim, porque justamente a gente está em fase de teste, né? Então a ideia é realmente não elevar muito o custo dentro da onde a gente pode chegar.
+
+[17:50] **Cristopher David de Lima**: Até você ter receita com esses clientes entrantes, perfeito. O bom da AWS é que você paga sob demanda, então justamente você vai ter um custo absurdo. Não garanto que vai ficar em 10 dólares, talvez um pouco mais, mas você não vai ter um custo absurdo de início. O que eu vou fazer é basicamente tentar submeter essa migração em uma espécie de funding da AWS. A Camila chegou a comentar com vocês sobre os créditos sobre os recursos e os fundings que a AWS oferta.
+
+[18:25] **Lucas Falconde**: Sim sim.
+
+[18:26] **Cristopher David de Lima**: Maravilha. Então vou submeter a vocês a tentativa de um cash aqui para também financiar a parte da nossa mão de obra para poder auxiliar nesse projeto. Conte, agora contigo, meu caro. Quando você estima ter essa calculadora e esse censo de arquitetura em mãos? Pensando nesse prazo de mais urgente do Lucas e do Igor aqui.
+
+[18:52] **Gustavo Conti**: Acho que os dois meses tá bom, né?
+
+[18:58] **Cristopher David de Lima**: Não sei quando sair.
+
+[19:00] **Gustavo Conti**: Acho que tá na quarta-feira e eu já consigo para ti, bem tranquilo. Conseguirei mandar o zip ainda hoje.
+
+[19:08] **Cristopher David de Lima**: Você consegue Lucas passar o zip hoje.
+
+[19:11] **Lucas Falconde**: Sim sim pode deixar.
+
+[19:13] **Cristopher David de Lima**: Maravilha. Vamos deixar marcada então gente para. Deixa eu só ver como é que está me agindo aqui. Nossa pior que quarta feira eu já estou. Vocês conseguem na quinta feira.
+
+[19:30] **Lucas Falconde**: Na quinta para a gente fica complicado porque a gente tem a reunião com o seu parceiro para a gente.
+
+[19:36] **Cristopher David de Lima**: Deixa eu ver aqui. Muito ruim a gente deixar para sexta ou qualquer coisa consigo flexibilizar uma agenda a gente faz na quarta.
+
+[19:53] **Lucas Falconde**: Pode ser na sexta pode ser na
+
+[19:55] **Cristopher David de Lima**: sexta deixa eu ver. Conte como é que está a tua agenda na sexta-feira meu cara. Se estiver falando você está multado.
+
+[20:15] **Gustavo Conti**: As nove e as três horas.
+
+[20:18] **Cristopher David de Lima**: As três funcionam para vocês.
+
+[20:25] **Lucas Falconde**: Pode ser fechado.
+
+[20:27] **Cristopher David de Lima**: Já vou passar o invite daqui a pouco. É uma reserva aqui.
+
+[20:38] **Lucas Falconde**: Tem uma outra demanda que a Unimed fez pra gente, que é o serviço ser hospedado dentro do território nacional. Eu tinha até comentado isso com a Camila ali. Ela falou que não seria tão... O custo poderia aumentar e tudo mais, né? Só que eu não entendi direito como que isso funciona. A gente tem essa opção, né? hospedar totalmente o serviço dentro do território nacional.
+
+[21:08] **Cristopher David de Lima**: Conte, você quer explicar isso?
+
+[21:14] **Gustavo Conti**: Ah, é porque... Bom, com dados médicos é realmente mais sensível, né? Então, normalmente, eles têm realmente essa demanda. Não é um problema para a AWS, tá? A gente tem aqui um datacenter da AWS que tem em São Paulo. Então, a gente consegue fazer. O que é o problema? Problema entre aspas, né? É porque São Paulo é 30, 40% mais caro do que pensar nos Estados Unidos, para todos os serviços.
+
+[21:39] **Gustavo Conti**: Então, o ideal seria, por exemplo, se a gente conseguisse armazenar arquivos em São Paulo e todo o restante da aplicação, o back-end, ficar lá em Norte da Virgínia. Normalmente eles aceitam esses termos. Ou até um mais favorável ainda, que seria a gente ter o ambiente todo lá em Norte da Virgínia mas um backup dos arquivos aqui em São Paulo que daí a gente só faz uma cópia dos arquivos né.
+
+[22:05] **Gustavo Conti**: Não tem como é que eles aceitam se tiver que manter a estrutura toda em São Paulo de novo não é um problema mas assim vai ser mais caro para vocês também.
+
+[22:12] **Lucas Falconde**: Entendi.
+
+[22:14] **Cristopher David de Lima**: Não seria viável de repente pensar em manter a operação deles em São Paulo e os outros clientes de vocês para fora.
+
+[22:25] **Gustavo Conti**: que deve ter que pagar dois ambientes.
+
+[22:28] **Cristopher David de Lima**: No começo é ruim. Pensando em disaster recover, enfim, um cenário mais resiliente de ambiente em nuvem seria legal mas tem um custo. Gente, eu passei o invite já para vocês. Apresentação de desculpa de migração. Eu só não tenho o teu e-mail Igor. Você consegue me passar aqui no chat.
+
+[23:02] **igor**: Sim eu já só um minutinho eu já passo aqui.
+
+[23:05] **Lucas Falconde**: Lucas
+
+[23:11] **Cristopher David de Lima**: eu vou te mandar uma mensagem no WhatsApp. Só para te lembrar durante o dia qualquer coisa no finalzinho do dia eu te faço um follow up também.
+
+[23:34] **Lucas Falconde**: Beleza fechou.
+
+[23:37] **Cristopher David de Lima**: Vou pegar aqui. Gente no demais tem mais alguma dúvida algum ponto que a gente já possa esclarecer antecipar agora.
+
+[23:50] **Lucas Falconde**: Eu acho que é mais foi foram mais essas essas coisas assim.
+
+[23:56] **Cristopher David de Lima**: Beleza tranquilo. Então acho que a gente já está bem resolvido aqui pelo menos a nível de dados. Agora a bola está com a gente assim que você passar o repositório Lucas e aí a ideia é que na sexta-feira a gente te apresente um pouco mais sobre os nossos serviços como a DAT pode te ajudar e depois um senso mesmo de valor que você vai pagar na AWS e o que custa também a nível de serviço DAT para te apoiar nessa migração.
+
+[24:24] **Cristopher David de Lima**: Uma dúvida que afinal eu deveria ter perguntado isso antes mas o apoio que vocês esperam da DAT é na construção só dessa arquitetura e apresentar para vocês no senso de consultoria ou vocês querem uma mão na massa mesmo a gente migrando isso para vocês?
+
+[24:44] **Lucas Falconde**: Assim, a princípio seria mais voltado para consultoria que a gente conseguiu o contato com vocês a partir do Arthur que ele é do Cebrae a gente estar junto com ele nessa questão, ele tá ajudando bastante a gente, a gente tá dentro do Sebrae, né? Então, ele até indicou essa conversa com a Dati pra justamente a gente entender como vai funcionar essa questão da migração, o que a gente pode fazer e tudo mais. Beleza.
+
+[25:12] **Cristopher David de Lima**: O que a gente tem algumas formas... Desculpa, Igor. Fica à vontade.
+
+[25:17] **igor**: Então, mas a gente possivelmente vai precisar também de um auxílio se a gente fechar um acordo. para efetivar essa migração, porque a gente não tem na equipe um membro de infra, de nuvem. Então a gente está vendo com possíveis investidores, o próprio Sebrae, para ver o que consegue ajudar com relação a... Melhor, porque daí vai estar mais detalhado.
+
+[25:59] **Lucas Falconde**: Acho que está montado a Cris.
+
+[26:02] **Cristopher David de Lima**: Eu falei que eu perdi uns 5 centavos aqui eu não sei se foi minha internet me deu uma travadinha mas eu consegui entender. A gente tem algumas formas de trabalhar, tá pessoal? Uma seria um escopo fechado, então imagine que nessa última call a gente apresente, ó, isso aqui é o censo de calculadora, essa aqui é a arquitetura que a gente sugere, isso daqui é o que vai custar para vocês a nível de serviço, mão de obra DAT, para a gente fazer essa migração para você. E é que envolve tudo, tá?
+
+[26:31] **Cristopher David de Lima**: Desde a gente criar o ambiente para vocês, fazer essa migração de fato, garantir que a regra de negócio de vocês esteja coerente com essa arquitetura, até a entrega final, pronto, acabou, um projetinho fechado aqui para esse fim, tá? Eu também tenho um projeto por hora, então eu posso cobrar, por exemplo, uma consultoria por hora de execução, de planejamento nosso para montar essa arquitetura. Também é uma forma de trabalhar.
+
+[27:01] **Cristopher David de Lima**: Eu entendo que essa primeira forma, eu consigo muitas vezes bastante subsídio da própria AWS, E como vocês não têm essa pessoa de infra, acho que pode fazer um pouco mais de sentido. Trabalhar por hora, por exemplo, eu já não vou conseguir buscar esses subsídios na AWS, tá? Faz sentido, então, a gente seguir com o projeto de escopo fechado, na visão de vocês?
+
+[27:28] **Lucas Falconde**: O que você acha, Igor?
+
+[27:31] **igor**: Eu acho que sim, mas assim a gente precisa daí de mais detalhes, né? Pra ver essa questão de... Porque a gente não tem ainda em mente, por exemplo, valores e também a gente não está ainda, vamos dizer assim, com uma previsão de entrada, de recurso. Mas conforme for o valor, a gente tem outro, tem plano A, plano B aqui para poder assumir isso. Então, mas acho que sexta-feira fica com mais detalhe ali e a gente já tem os valores. Fica mais fácil a gente ter uma... projeção de como que a gente vai implementar.
+
+[28:10] **Cristopher David de Lima**: Perfeito pessoal não legal. Sexta-feira o detalhe então essas duas formas de a gente trabalhar uma mais consultoria outra mais proativa mesmo a gente botando a mão na massa. Fiquem tranquilos que aí fica bem transparente e acho que fica mais fácil para tomada de decisão.
+
+[28:27] **Cristopher David de Lima**: Gente no demais fiquem confortáveis de me chamar ali no WhatsApp tanto o Lucas quanto Igor qualquer coisa e até lá alguma novidade que a gente deixou passar aqui na qual me avisem e obrigado de novo pela disponibilidade por chamar lembrar da Dati com certeza acho que a gente tem bastante potencial para ver esse projeto crescer. Boa.
+
+[28:50] **igor**: Valeu obrigado.
+
+[28:53] **Cristopher David de Lima**: Valeu pessoal valeu um abraço aí boa
+
+[28:55] **Lucas Falconde**: semana tchau tchau mais vocês também.

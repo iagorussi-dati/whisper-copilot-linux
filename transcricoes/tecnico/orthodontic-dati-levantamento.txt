@@ -1,0 +1,378 @@
+# [Orthodontic & Dati] Levantamento Técnico
+**Date**: Thursday, April 16, 2026 at 8:59 AM  
+**Duration**: 36:02  
+**People**: Gustavo Conti, Kiulyn Fernandes, Andre Campana, and Fernando Genta dos Santos
+
+[0:00] **kiulyn**: O briefing ali pra ti não era tão complexo ali, foi o que eu peguei da Calcom CS ontem.
+
+[0:11] **Gustavo Conti**: Cara, ficou legal assim. Nossa, a demanda é meio estranha, mas ficou legal.
+
+[0:16] **kiulyn**: Beleza, beleza. Outra coisa... Consegue me dar um feedback daquele áudio que eu te mandei no Slack?
+
+[0:25] **Gustavo Conti**: Eu ouvi, cara.
+
+[0:28] **kiulyn**: É, me... Quanto antes tu conseguir me responder daquele cara... É do teu amigo Fernando. Que... Deixando tudo isso bem às claras, né, Guga? A gente já tem assinatura hoje. Eu já volto, um minuto. Oi Guga, eu vou aceitar o Fernando, eu vou ficar um paralelo aqui, só vou pegar uma água ali, aí você vai tocando, beleza? Mas eu vou estar aqui de ouvinte.
+
+[2:16] **Gustavo Conti**: Tá bom.
+
+[2:17] **kiulyn**: Beleza? Bom dia Fernando, tudo certo?
+
+[2:26] **Fernando Genta dos Santos**: Bom dia.
+
+[2:28] **kiulyn**: Bom dia, como é que você tá aí?
+
+[2:32] **Fernando Genta dos Santos**: Tudo certo, tudo certo.
+
+[2:35] **kiulyn**: Pela pela vossa. Está corrido aí já.
+
+[2:40] **Fernando Genta dos Santos**: A sete e meia já começa.
+
+[2:44] **kiulyn**: É, labuta, labuta. Mas legal. Fernando, que bom que a gente tá conseguindo encaixar essas agendas. Como o próprio Andele já havia trazido pra nós, a ideia é a gente cada vez mais ficar próximo daqui pra frente. Então, a gente quer ter esse teu braço de apoio direto mesmo, tá? Eu quero te apresentar o Gustavo, ele é um dos nossos arquitetos e especialistas aqui na DATI Então hoje a conversa, imagino que ela vai ser uma conversa tranquila, mas a gente vai descer o nível.
+
+[3:17] **kiulyn**: A gente vai estar falando sobre a frente do cognito, que é o que foi tratado ontem. Então, qualquer dúvida que você tiver, o Gustavo vai fazer algumas perguntas, a gente vai entendendo um pouquinho mais do cenário técnico para ser implementado. Então, essa hora que a gente tem travada é toda nossa. A ideia aqui é gastar saliva, gastar neurônio mesmo para a gente conseguir, aqui dentro da DATI a gente ter uma maior assertividade. para logo depois, Fernando, a gente fazer um...
+
+[3:49] **kiulyn**: aí da minha parte, né, trazer uma proposta, fazer uma estimativa de esforço, custo, prazos de entrega, né.
+
+[3:57] **Fernando Genta dos Santos**: Beleza, vamos embora.
+
+[3:59] **kiulyn**: Beleza.
+
+[4:01] **Gustavo Conti**: Fernando, me escuta bem?
+
+[4:06] **Fernando Genta dos Santos**: Sim, estou escutado.
+
+[4:07] **Gustavo Conti**: Legal. Fernando, o que eu nem já tinha me trago, tá? Algumas informações que você tinha trago para a Dat, então eu tenho me estudado ali do caso antes da gente entrar aqui na reunião. Ficaram ali algumas dúvidas muito referentes a como vocês pensam que essa operação poderia ser conduzida. A ideia de vocês hoje é trazer para o Cognito e já aproveitar essa mudança de tecnologia para fazer algum tipo de alteração sobre como funciona o login do usuário.
+
+[4:43] **Gustavo Conti**: Por exemplo, eu imagino que hoje o login do usuário de vocês é baseado em e-mail, CPF, username, matrícula, algum outro identificador? Teria alguma coisa diferente? O que seria aplicado ali?
+
+[4:58] **Fernando Genta dos Santos**: Não, a ideia... Qual que é o objetivo inicial? É aumentar a segurança. Hoje é usar esse name. E aí isso fica cadastrado de lado. A gente nem tem criptografia, inclusive,
+
+[5:19] **Gustavo Conti**: Fernando, teu áudio sumiu. Oi, agora sim. Você estava falando que ainda nem tem criptografia.
+
+[5:39] **Fernando Genta dos Santos**: Então hoje como é que tá? Usuários sempre. Qual que é o primeiro objetivo nosso? Melhorar isso, colocar um MFA, que é algo que a gente tinha no passado, mas a gente fez umas mudanças de plataforma e tal, e atualizamos a nossa estrutura, e aí nessa atualização, A gente tentou criar uma nova setoria de NCIA, mas não deu certo, teve uns problemas, e a gente falou, não, a gente precisa de pré-demanda para a gente implantar isso. Primeiro nível de melhora na segurança. E aí, pesquisando, eu encontrei essa solução Cognito da AWS.
+
+[6:32] **Fernando Genta dos Santos**: Bom, já que a gente já está na AWS, Toda a nossa hospedagem nesse tema que a gente quer implementar, tá, no AWS, vamos entender melhor como que funciona e qual que é a viabilidade de implementar ele e aí como implementar. Então, é desse que surgiu essa conversa com vocês. Agora, o que a gente precisa? Entender o projeto, entender que ele funciona, como ele se encaixa nesse primeiro momento para a gente fazer essa ligação.
+
+[7:08] **Fernando Genta dos Santos**: Os usuários, assim, eles são do nosso sistema, o sistema é nosso, é uma tabela única, um banco único que as várias comunidades espalhadas pelo Brasil utilizam. mas elas são franqueadas, então são meio que independentes. Então quem faz toda a gestão do usuário é cada unidade. A unidade que cadastra, a unidade que bloqueia, a unidade que encerra o usuário, tudo isso numa tela do sistema.
+
+[7:51] **Gustavo Conti**: Então, os identificadores, a ideia é que eles sejam mantidos mesmo, né?
+
+[7:56] **Fernando Genta dos Santos**: A ideia é que sejam mantidos. Se a gente for mudar isso aí, aí vai dar uma dor de cabeça.
+
+[8:00] **Gustavo Conti**: Beleza. Senha, vocês pretendem manter também ou mandar uma redefinição de senha para cada usuário? O usuário deveria perceber que houve essa mudança?
+
+[8:14] **Fernando Genta dos Santos**: Cara, você fala por quê? Para a gente passar a criptografar, jogar isso na tela? para entender
+
+[8:24] **Gustavo Conti**: como que a operação, vocês estão idealizando que essa operação funcione né, porque existem várias formas da gente migrar e várias formas da gente usar o Cognito né, o Cognito por exemplo se vocês quiserem sim sair do Cognito não daria para exportar Como vocês têm hoje em banco, dá para a gente fazer e não é um problema. Mas a recomendação ideal é que as senhas não venham, ou sejam alteradas, ou pelo menos criptografadas antes de enviar para a gente. Eu quero entender realmente o nível de compliance que vocês estão seguindo para essa... Mas
+
+[9:00] **Fernando Genta dos Santos**: deixa eu entender. É porque eu não tenho a noção da arquitetura. Você está fazendo as perguntas que eu não tenho a visão do geral de como funciona, o que trafega de um lado para o outro, o que vem e o que vai. Então, talvez, entendendo como funciona, a gente possa, e depois, sim, falar, vamos tratar dessa forma.
+
+[9:22] **Gustavo Conti**: O Cognito é basicamente um serviço para fazer autenticação, então ele só serve para isso. Não tem uma máquina, não tem nada assim, ele é um serviço
+
+[9:30] **Fernando Genta dos Santos**: mesmo. Só desculpa, ele faz toda a jornada de autenticação. Ele não entra só no segundo passo da MFA é isso?
+
+[9:39] **Gustavo Conti**: Isso, exatamente. Você consegue colocar lá dentro usuários, senhas, grupos, permissões, consegue fazer um monte de coisa lá dentro. O cadastro inteiro de um usuário pode ser lá dentro do Cognito, inclusive. Você pode ter SSO, por exemplo. Eu quero fazer autenticação também via Google, Facebook. Qualquer dispositivo eu consigo fazer.
+
+[10:04] **Fernando Genta dos Santos**: É que eu preciso... Eu preciso associar esse... Vou falar as permissões, porque eu preciso associar esse usuário à sua clínica. Então, hoje, quando... eu tenho lá todo o cadastro do meu usuário, ele fala de que unidade que é. Então, ele se logra, aí lá na tabela eu sei qual que é a unidade, aí ele vai ter acesso só aos dados que estão associados àquela unidade. Então, eu preciso do cadastro desse usuário aqui para vincular em qual clínica ele está tomando.
+
+[10:50] **Fernando Genta dos Santos**: E às vezes, tem um multi-usuário lá, mas ele pode chapear e tal, aí muda o usuário dele mesmo. E tem isso aqui, isso aqui.
+
+[11:05] **Andre Campana**: Bom dia,
+
+[11:06] **Gustavo Conti**: gente. Bom dia.
+
+[11:07] **Fernando Genta dos Santos**: Bom dia, André. Bom dia.
+
+[11:08] **Gustavo Conti**: Bom dia, André. Isso a gente conseguiria ter, mas então, pelo que eu estou entendendo, a tua ideia inicial não era nem migrar os usuários, era deixar os usuários ali e usar o Cognito só como uma MFA.
+
+[11:21] **Fernando Genta dos Santos**: Então, cara... Tá
+
+[11:23] **Gustavo Conti**: explorando as
+
+[11:24] **Fernando Genta dos Santos**: ambições. A minha eu vou falar pra você.
+
+[11:26] **Gustavo Conti**: A
+
+[11:26] **Fernando Genta dos Santos**: nossa ideia aqui é MFA, melhorar a segurança. Como que o Cognito trabalha? É isso que a gente tá discutindo. Aos poucos, conforme você vai falando, eu vou entendendo a arquitetura, o que dá, o que não dá, como ele funciona, como funciona. Porque você me faz umas perguntas. Se eu entender direito como funciona, eu não sei te responder. Você fala assim, não, cara, você não vai ter mais nenhum cadastro de usuário. Ele só vai fazer usuário e senha, eu vou bater e vou te responder. Beleza, ele está autenticado. Não funciona.
+
+[11:56] **Fernando Genta dos Santos**: Eu preciso ter esse cadastro desse cara, pelo menos de alguma forma, associado. Eu não posso deixar essa gestão toda no Cognito, porque eu preciso ter alguns cadastros dele aqui para fazer essas associações.
+
+[12:07] **Fernando Genta dos Santos**: Vai
+
+[12:07] **Andre Campana**: ficar misto, com certeza. A gente precisa ter, porque tem um monte de outros relatórios, coisas que precisa ter o dado do funcionário da unidade, até para a gente. Agora eu acho tanto assim na estrutura do nosso banco até a tabela de login já era uma tabela separada. Assim da tabela de cadastro tudo já era uma coisa à parte. Tanto que quando eu desligo um usuário hoje assim foi mandado embora o funcionário vou desligar. A gente até exclui esse registro do login para garantir que ele não vai ter como logar mais.
+
+[12:41] **Andre Campana**: Então que na minha cabeça vendo as opções eu pensei e essa parte de login virar tudo isso, porque daí a gente não tira muita informação do login, não precisa. Lógico, agora é que eu perdi o começo da reunião, então vocês me desculpem que eu dei uma atrasada, mas se tiver mais coisas de segurança que a gente já consegue fazer de uma maneira rápida junto, a gente já vamos pensar.
+
+[13:12] **Gustavo Conti**: O Cognito, como eu comentei, é um serviço realmente de login. Então, vocês podem ter toda a gestão de usuários lá dentro. Quando você já tem a tabela parada, por exemplo, funciona da mesma forma. Vocês fazem uma chamada, no final do dia para a autenticação, vocês fazem uma chamada de API SDK para poder fazer essa autenticação.
+
+[13:33] **Gustavo Conti**: Vocês podem ter uma página, por exemplo, de login, que é uma página gerenciada pelo Cognito, Ou vocês têm uma página própria que, quando o usuário digital usar a senha lá, ele vai chamar a API Cognito e fazer a validação e vai retornar se o usuário pode ou não fazer login. Ele vai servir a chave de autenticação lá para o resto da aplicação de vocês usarem.
+
+[13:54] **Gustavo Conti**: Se vocês quiserem, por exemplo, manter a mesma base de usuário e senha, o mesmo login numa página separada de vocês, manter tudo como está e só usar o Cognito para MFA, dá para fazer também. Só usar o Cognito para SSO, dá para fazer também. Então, assim, tudo depende realmente de como vocês querem usar o Cognito. Mas ele pode servir todo o fluxo de autenticação e cadastro de usuários. O que ele não vai ter, realmente, ele não é um banco de dados.
+
+[14:23] **Gustavo Conti**: Por trás dos bancos óbvio que ele usa um banco de dados, mas o que eu quero dizer é que ele não tem, por exemplo, você não vai conseguir correlacionar informações de login do usuário com informações de, sei lá, relatório de uso de sistema, porque não é essa a função do Cognito. O Cognito é só para autenticação mesmo.
+
+[14:41] **Fernando Genta dos Santos**: Ah, beleza. Mas assim, se a gente fizer toda essa parte de autenticação no cognito, eu tenho essa tela aí de gestão dos sitios usuários e tal, mas isso eu consigo fazer via API? Porque quem faz a gestão é a unidade. Dentro do sistema ela vai lá, ela altera a senha, ela bloqueia o cara, tal. Eu não teria acesso a essa tela, a gente teria que fazer, implementar internamente uma tela de gestão de usuário para cada gestor das unidades. É possível fazer isso?
+
+[15:18] **Gustavo Conti**: É possível. É possível, sem problema. O Cognito inclusive, tem telas praticamente prontas para isso, né?
+
+[15:29] **Andre Campana**: É... pensando assim, sei lá, deixar mais seguro. Eu imagino que até usar uma tela deles talvez seja até melhor. A gente já, né? Alguma coisa assim... Pensa, é alguma coisa de segurança. Se passar mais segurança para os meus franqueados, melhor, né? Então, tipo...
+
+[15:50] **Fernando Genta dos Santos**: Você fala criar um usuário para cada franqueado? Para poder acessar? E lá no Cognito talvez eu não consiga diferenciar por unidade, né?
+
+[16:00] **Gustavo Conti**: É que você não consegue diferenciar.
+
+[16:03] **Andre Campana**: É, mas a gente faz o nosso controle interno aqui. Eu acho que a gente usa a nossa tabela de login pra ter alguma referência do que tem lá, talvez. A gente para de usar o login e senha que a gente tem, que nem criptografado não tá no banco, né? Isso eu acho.
+
+[16:17] **Andre Campana**: E a gente, como hoje eles estão abertos no banco, facilita até pra gente já criar todo esse usuário de uma vez lá quando a gente for dar o tombo, ou seja, vai ser o mesmo usuário senha do cara, ele só vai ter que fazer a validação da MFA, né? A gente vai ter que achar esse caminho como que ele vai fazer isso. Se nesse momento ele tiver que criar uma senha paciência, ele vai criar. Aí...
+
+[16:41] **Gustavo Conti**: Vocês estão vendo aqui a minha tela?
+
+[16:45] **Andre Campana**: Deixa eu aumentar um pouquinho. Sim. Beleza.
+
+[16:48] **Gustavo Conti**: Isso, por exemplo, que eu vou mostrar para vocês, ela é uma tela do Cognito. Foi feito inteiramente com o que o Cognito tem lá de... de telas praticamente prontas, né? Claro que uma coisa ou outra a gente foi personalizando ali, porque eu tô criando aqui uma plataforma de pré-vendas para a Dat, tá? Então a gente, por exemplo... Nossas emails
+
+[17:08] **Andre Campana**: é tudo do Google Workspace, ó, já dá
+
+[17:10] **Gustavo Conti**: para
+
+[17:10] **Andre Campana**: fazer um esquema até parecido.
+
+[17:12] **Gustavo Conti**: Então aqui tu clica pra entrar com o Google Workspace, ele vai abrir ali a tua lista de e-mails e autentica com o Workspace mesmo, que é o caminho que a gente mais usa, mas tem cadastro de usuários 100, eu consigo receber links de redefinição de 100, eu consigo criar uma conta, então clicando aqui ele vai. para criação de conto. E aí, por exemplo, aqui tem perfis de uso.
+
+[17:34] **Gustavo Conti**: Então, por exemplo, aqui dentro do pré-vendas, a gente tem pessoas que são administradoras, pessoas que são arquitetos, que nem eu, pessoas que são do time de entrega, que daí é o time de projetos. Então, por exemplo, aqui eu vou montar o projeto como um arquiteto. Depois, o time de entrega vai acessar a plataforma para ver o que a gente pensou para montar o projeto.
+
+[17:55] **Gustavo Conti**: Aí eles vão ter acessos que eu, como um arquiteto, que eu, como arquiteto, tenho mais acessos do que o time de entrega, porque eu tenho permissões, por exemplo, para modificar o projeto, eles não têm. A EPM, vendas, que nem ali o perfil que eu limparia, e aí tem todo um fluxo até de aprovação. Então, por exemplo, eu vou entrar como um arquiteto, eu preciso pedir autorização para ser um arquiteto para um outro arquiteto ou para uma pessoa que é admin. Só esses dois perfis podem me autorizar.
+
+[18:25] **Gustavo Conti**: Isso tudo feito por dentro do Cognito, A gente precisa usar algo externo a ele.
+
+[18:30] **Andre Campana**: O que a gente vai ter que achar um caminho? Isso a gente não teria, tá? A parte de cadastro, porque é um login mais simplificado mesmo e já tem tudo dentro do nosso tempo por causa dos outros dados todos que a gente tem, né? Mas hoje, por exemplo, a gente fez uma mecânica aqui Porque a gente nunca quis deixar para o franqueado falar assim, eu sou o André da unidade de Londrina e ele escolher essa unidade.
+
+[18:59] **Andre Campana**: Porque daí todo mundo teria acesso a todas as unidades que existem, porque ele vai escolher num combo lá, alguma coisa assim. Então a gente fez uma mecânica como? Que os logins são únicos.
+
+[19:10] **Gustavo Conti**: Então
+
+[19:10] **Andre Campana**: se eu tenho um login André, não existe outro André na rede inteira. Por quê? Porque a gente fez esse vínculo que o André é da unidade Londrina. Porque eu tenho que direcionar ele para a unidade dele, quando ele autentica. Então é esse controle que a gente vai ter que fazer só. Eu tenho que saber lá que o usuário André, o usuário Gustavo, o usuário Fernando, que cada usuário desse é de que unidade.
+
+[19:33] **Andre Campana**: De alguma forma eu tenho que manter isso lá, porque quando ele autenticar, Eu tenho que fazer o sistema entrar com essa sessão dessa unidade dele para vir com tudo o resto das coisas. Mas é só isso assim. É mais essa parte do logar e manter esse usuário. Acho que se tem as duas opções a gente conseguir fazer o vínculo por exemplo. Como eu faria isso. Eu vou logar com a minha conta do workspace mas como que eu sei que esse login esse e-mail do workspace é de que unidade.
+
+[20:06] **Andre Campana**: Sendo que não vai ter um cadastro, entendeu? E eu nem tenho, né? Essa é a minha dúvida já. E aí vem outro problema. Nem todos os funcionários têm... Na verdade, acho que eu não vou conseguir usar isso, pensando aqui. Os usuários, a maioria, nem tem e-mail. Não usa. É só o franqueado que tem o nosso e-mail do Workspace, né? Acho que vai acabar sendo login e senha mesmo. Eles vão ter que fazer. E ele vai logar, daí vai pedir o MFA na sequência pra fazer um cadastro. É isso? A primeira vez.
+
+[20:35] **Gustavo Conti**: Isso.
+
+[20:36] **Andre Campana**: Aí ele faz o cadastro, telefone, e a partir daí ele segue, né?
+
+[20:40] **Gustavo Conti**: Não
+
+[20:40] **Andre Campana**: sei se nessa hora quisessem informar um e-mail para ser o e-mail dele, para poder validar.
+
+[20:48] **Gustavo Conti**: E-mail, usuário e senha,
+
+[20:50] **Andre Campana**: não precisa ser um e-mail
+
+[20:51] **Gustavo Conti**: necessariamente.
+
+[20:52] **Andre Campana**: O nosso é o
+
+[20:53] **Gustavo Conti**: usuário e senha
+
+[20:54] **Andre Campana**: que a gente usa.
+
+[20:56] **Gustavo Conti**: A gente usa o Workspace como uma das formas, porque o Workspace da Datto, por exemplo, obriga a usar MFA, então a gente garante que todo mundo está usando MFA, né? Ali na plataforma, por exemplo, usuário e senha, a gente recomenda que use NFA, mas não é obrigatório.
+
+[21:12] **Andre Campana**: Mas eu posso fazer obrigatório?
+
+[21:14] **Gustavo Conti**: Pode fazer obrigatório. Mesmo
+
+[21:14] **Andre Campana**: com usuário e senha?
+
+[21:15] **Gustavo Conti**: Sim.
+
+[21:16] **Andre Campana**: Eu acho que esse é o caminho, resolve para a gente.
+
+[21:20] **Gustavo Conti**: Porque ali a gente tem bastante usuário que às vezes vai acessar só uma vez, daí a gente permite um login único, tem esses esquemas de vencer o usuário também, tem bastante coisa
+
+[21:29] **Andre Campana**: ali. A gente tem. E o máximo que eu gostaria que tivesse é, por exemplo, a cada... X meses, 3 meses, ter que trocar a senha, alguma coisa assim. Esperar a senha, entendeu? Porque hoje eu não tenho, e já pensamos em fazer isso várias vezes, nunca entrou numa lista de prioridade, mas acaba que às vezes, meu, é franqueada... É um bichinho complicado, cara, a gente tem de todo tipo. E aí tem aquele que, por exemplo, a pessoa sai da... Para de trabalhar lá com ele, o funcionário, e nem desativa o usuário do carro.
+
+[22:03] **Andre Campana**: Aí como não tem nada disso que inspira, não tem nada, esse cara fica com esse acesso pra sempre. Depois de meses ele lembra que tinha que desativar e nem sabe que o funcionário trabalhava com os leads e tá entrando lá roubando os leads dele, essas coisas assim, sabe?
+
+[22:17] **Gustavo Conti**: Mas
+
+[22:17] **Andre Campana**: isso eu faço com
+
+[22:18] **Gustavo Conti**: conta AWS, imagina com
+
+[22:20] **Andre Campana**: login de plataforma. Imagina, muito mais simples e trabalhando com gente do Brasil inteiro e vai. Não é desmerecer nada, mas funcionário mais raso, assim, tipo... De entrada, funcionário de entrada, sabe?
+
+[22:37] **Gustavo Conti**: Quando a gente fala de AWS, a gente já fala de um pessoal mais técnico e tal, normalmente desenvolvedor, pessoal de infra, e ainda assim isso acontece. Então, isso que
+
+[22:45] **Andre Campana**: é
+
+[22:46] **Gustavo Conti**: o ponto. Por isso que é importante ter uma política de centro.
+
+[22:49] **Andre Campana**: Mas eu acho que é isso, Gustavo. Vai ser o login e senha, tem que ter MFA, vai ser obrigado, vai expirar a senha. Eu acho que via API a gente consegue fazer todos esses cadastros lá e depois segue só com API pra lá e pra cá. Eu tenho dúvida, sem ver a documentação ou nada, como que a gente mantém essa sessão do cara dentro do meu software validado pelo Cognito. Tipo, essa é a parte que senão ele só logue e depois ele continua, sei lá, com o botezinho dele plugado lá, roubando de algum jeito.
+
+[23:22] **Andre Campana**: entender como que precisa manter essa sessão de maneira bem segura. E é isso. Acho que depois é a vida do sistema que normal.
+
+[23:34] **Gustavo Conti**: A
+
+[23:34] **Andre Campana**: gente fez aquele levantamento é umas seis mil contas que a gente tem hoje. A gente Tem um negócio aqui que a gente troca, é login multi-usuário, que a gente chama. A gente vai ter que pensar como que a gente resolve isso, porque quando o cara loga, aparece uma lista das unidades dele. E ele clica e ele troca de unidade, ou seja, eu tenho que levar essa sessão dele, que ele está autenticado, mas trocar a unidade dele. Tem que entender como que eu vou fazer isso.
+
+[24:08] **Andre Campana**: se eu vi a API eu vou relogar o cara no Cognito, alguma coisa assim, ou se eu consigo pela mesma sessão a gente só troca a unidade, eu vou ter que pensar como a gente faz isso,
+
+[24:19] **Gustavo Conti**: e
+
+[24:20] **Andre Campana**: o resto é... eu acho que nem, ó, não precisa ter nenhum, tipo, resetar senha, é só se a gente quiser melhorar isso daí, Fernando. Mas nem precisaria, porque como tem o nosso... Se senha. É, isso aí nem precisaria. Porque o administrador entra lá e reseta a senha do cara. Eu nem dou muito caminho para ele fazer isso de forma automática mesmo. Hoje nem tem aqui, né? Hoje é só logar e acabou.
+
+[24:47] **Gustavo Conti**: Então
+
+[24:49] **Andre Campana**: é isso.
+
+[24:50] **Gustavo Conti**: Entendi.
+
+[24:51] **Andre Campana**: Tem um processo. Então assim, eu vou criar um funcionário dentro dos meus temas, o gestor faz isso. Ele vai criar aquele funcionário e a gente tem uma abinha lá que é login. Então, o cara coloca o seu login e senha, a gente já força ter...
+
+[25:04] **Andre Campana**: Hoje são seis caracteres, letra, caractere especial, número, a gente obriga isso, letra maiúscula, tem essa parte dentro do sistema, que eu imagino que a gente vai chamar o Cognito para criar esse login lá daí, e daí, nessa hora, eu faço o vínculo desse usuário com a unidade, que é a única coisa que a gente precisa ter. Eu não sei, a gente lá tem alguma coisinha que eu salvo algumas informações lá, tipo...
+
+[25:31] **Andre Campana**: desse login é assim tipo eu quero salvar o que a única coisa que eu preciso saber hoje é a unidade do cara qual é a unidade que ele fez o cadastro é para fazer esse vinculo para fazer
+
+[25:43] **Gustavo Conti**: eu
+
+[25:44] **Andre Campana**: acho que é só isso e e aí a partir daí ele vai conseguir logar e dentro do nosso sistema de acordo com esse login a gente sabe que permissão que ele tem aí é no meu sistema mas é só isso daí mesmo
+
+[26:00] **Gustavo Conti**: Eu acho que sim, o projeto, para mim, de dúvida, está bem ok. O que eu vou fazer agora, basicamente, é fazer esses levantamentos para vocês de como a gente pode fazer o processo da migração em si, o projeto, e tentar trazer essas dúvidas para vocês de uma forma um pouco mais visual e mais clara, para vocês terem uma ideia de como funciona lá dentro. Maravilha.
+
+[26:27] **Fernando Genta dos Santos**: Beleza. Ótimo.
+
+[26:30] **Gustavo Conti**: Beleza, fechou. Beleza,
+
+[26:33] **kiulyn**: até pra gente alinhar bem as expectativas aí, time. Eu sei que é pra ontem isso, né, Fernando e André, como a gente conversou ontem.
+
+[26:41] **Fernando Genta dos Santos**: Antes de ontem.
+
+[26:43] **kiulyn**: É, acho que, né... Mas pra gente deixar bem alinhado isso aqui, até quero combinar junto com o Conti. Conti, a gente partindo dessa conversa, a gente já consegue deixar uma data pré-agendada pra gente fazer uma apresentação?
+
+[27:02] **Gustavo Conti**: Deixa eu ver aqui.
+
+[27:05] **kiulyn**: Terça-feira não dá porque é feriado, tá, pessoal? Se vocês inventarem... Não, eu trabalho no
+
+[27:10] **Andre Campana**: feriado. Se você for me entregar na terça...
+
+[27:13] **kiulyn**: Não, não, daí tu for só comigo.
+
+[27:18] **Andre Campana**: A gente desce. Vocês ficam em tudo Floripa ou não?
+
+[27:23] **kiulyn**: Blumenau. Eu fico em Lages.
+
+[27:25] **Andre Campana**: A gente tem francado Lages, Blumenau, tudo essa região. A gente tem bastante francado em Santa Catarina.
+
+[27:32] **kiulyn**: É que o André, Orthodontic, ela tem Oral-Syn e tem mais alguma outra abaixo dela. Odonto Company esquece.
+
+[27:41] **Andre Campana**: Era Odonto Company, Oral-Syn e Orthodontic. Agora é Orthodontic e Oral-Syn dentro desse grupo que era o mesmo. É só separar um pouco esse negócio de Odonto Company.
+
+[27:52] **kiulyn**: E
+
+[27:53] **Andre Campana**: essa é uma coincidência, de verdade. A Oral-Syn também é daqui de Londrina.
+
+[27:59] **kiulyn**: Ah, legal.
+
+[28:00] **Andre Campana**: Acabou que as duas empresas eram daqui, nasceram aqui em Londrina, você vê? E a gente fala que a Oralcim, ela até passou a gente número de unidade, mas ela se espelhou muito na ortodôntica, assim, quando ela virou. Era gente conhecida lá atrás, assim.
+
+[28:16] **kiulyn**: E
+
+[28:16] **Andre Campana**: aí as duas eram daqui, vieram aqui pra Londrina, compraram as duas.
+
+[28:22] **kiulyn**: Legal, legal. E você tinha comentado, até vou aproveitar esse momento, que a AuralSyn lá, elas não evoluíram como a Orthodontic hoje, né? A nível de tecnologia.
+
+[28:33] **Andre Campana**: Eles foram, acho que um pouco por causa disso, acho que... Mas é porque eu que vim com esse negócio de Amazon, essas coisas tudo, eles foram mais bairristas assim. Eles arrumaram uma empresa daqui que tinha um, que loca um data center, que tem um espaço num data center e é bom, é um dos maiores que tem aqui. Se bobear tem coisa da Amazon lá dentro. mas eles colocam o servidor deles e é uma administração mais assim, não chega perto da Amazon.
+
+[29:02] **Andre Campana**: Atende eles, atende, mas exige mais do time para ficar cuidando do servidor essas coisas, porque é diferente, eles não consomem serviço igual a gente, e por conta disso eles tem uma operação bem mais... É coloqueixo quase lá, um não é? É, coloqueixo total, só que assim... É duro porque eles olham assim, pensam desses caras de grupo olhando. Aí a Orocin é maior que a gente e gasta muito menos do que a gente. Então é difícil ficar dobrando porque ele tem uma operação muito mais enxuto, ele não consome nenhum serviço, é tudo lá, o banco lá.
+
+[29:37] **Andre Campana**: Mas não tem o nível de segurança e entrega que a gente tem. Mas funciona super bem, eu tenho contato direto com os caras da TI lá. não tem nenhum problema. Então é difícil a briga aqui porque eles falam não estou agora estou renovando o e-mail e eles têm um coloqueixo de um servidor de e-mail.
+
+[29:57] **kiulyn**: Um
+
+[29:58] **Andre Campana**: CPN eu
+
+[29:58] **kiulyn**: imagino.
+
+[30:00] **Andre Campana**: Tipo um e-mail daqueles aquela solução que você pega meio prontão com aqueles web mail. E aí cara pensa a diferença para pagar um Google Workspace. Quando a gente fala de 800 contas. Então assim, é duro o brigo com um orçamento lá que tá 40 mil, 30 mil, pra um cara que tá pagando 5 mil. E fala assim, funciona perfeito. Não tem meet, não tem nada na agenda, não tem nada que tenha de servir, mas...
+
+[30:29] **Andre Campana**: Então assim, é duro, sabe, porque quando o diretor olha e pega dois caras de TI e o outro fala assim, não, funciona perfeito, a gente não tem problema nenhum. Agora, né, por enquanto, mas... Mas a gente sabe assim, isso é porque daí cada marca, mesmo com o Don't Compete, cada uma toca do seu jeito. E a gente aqui, o discurso é assim, nós estamos anos luz na frente. E isso a gente não vai perder. Sem isso aí, a gente é muito diferente do jeito de levar as coisas. Eles enxergam isso, as diretoria.
+
+[31:08] **Andre Campana**: Ainda tem os sócios, não foi comprada a empresa inteira.
+
+[31:11] **kiulyn**: Então
+
+[31:12] **Andre Campana**: é... Mas é isso.
+
+[31:15] **kiulyn**: Entendi. Você acha que depois desse movimento grandão que tá que tá pra acontecer, né? Pelo que você já falou, acho que a gente consiga uma abertura pra te apoiar lá?
+
+[31:27] **Andre Campana**: A gente pode por uma conversa. Bate muito esse negócio do orçamento, eu te falo, porque quando chega pro cara da TI lá e ele fala não, funciona tudo perfeito, É que sabe quando eles não experimentaram o que é melhor? É esse que é o problema. Então o franqueado fala não tenho problema nenhum. Só que ele lida com aquele monte de spam, aquela coisa vírus, aquela encheção de saco que a gente não tem e não usa o serviço. Então para ele funciona porque ele sempre só teve aquilo.
+
+[32:00] **Andre Campana**: Não é diferente da gente que a gente deu drive, deu não sei o que, deu meet, eles fazem reunião com consultor funcionário, não sei o que, sabe? Então eles não experimentaram o que poderia ser melhor, né? Eles estão acostumados. E faz muitos anos que eles levam desse jeito. Acho que por isso que não...
+
+[32:23] **kiulyn**: Não, tranquilo. É o que dá pra fazer daí de novo. Daí é botar a regra da AWS embaixo do jogo, a gente fazer esse apoio. Se eles nunca experimentaram, a gente tentar levar uma POC. Aí tenta buscar recursos com a AWS pra subsidiar isso, entende ali o que dá pra se trabalhar e assim, existe, tá? Existe a possibilidade, eu já passei por isso. E a cloud privada, via de regra, ela tende a ser mais barata, né? Mas aí vai ser uma questão de entender. Cara, hoje eu tenho um Uno 95, queixo duro, talvez com ar.
+
+[33:01] **kiulyn**: Talvez um 1.8 R, que ele anda, né? Será que eu não... Será que eu não posso, talvez, botar um... Não vou falar um up, tá?
+
+[33:11] **kiulyn**: Nem um mob, que eu vou estar
+
+[33:13] **Andre Campana**: trocando
+
+[33:14] **kiulyn**: seis por meia dúzia, só que com ar-condicionado e direção, talvez, elétrica, né? Mas será que pra operação não faz sentido, eventualmente, colocar um carro de médio porte?
+
+[33:26] **Andre Campana**: É, eu posso tentar fazer uma ponte pra você, pra gente marcar uma reunião com ele e tudo. Mas assim, como a gente toca bem dependente as coisas, né? Fica essa decisão toda por lá. E eles passaram recentemente, agora, por uma troca de CEO. Em fevereiro, em fevereiro. Muito recente, né? Então tem uma pessoa nova lá que é muito boa, mas não sei como é que tá, né? Tem todo esse cenário.
+
+[33:53] **Andre Campana**: Mas o .com por mais que eles tinham clientes servidor nas clínicas, eles já também usavam a AWS, já sabia que tinha os benefícios, faz backup lá. Estão querendo começar a migrar as coisas, mas tá começando. Mas a Udacity anda tudo separado. Os e-mails não tem nada disso, eles não tem nada.
+
+[34:17] **kiulyn**: É, fica um pouco atrasado, né? Mas enfim, são regras de negócio, né?
+
+[34:23] **Andre Campana**: Mas
+
+[34:24] **kiulyn**: beleza. André, Fernando, quarta-feira que vem, 9 horas, tem janela pra vocês?
+
+[34:31] **Andre Campana**: Tem, deixa eu ver.
+
+[34:33] **Fernando Genta dos Santos**: Pode ser, pode ser.
+
+[34:35] **Andre Campana**: Pode, manda ver.
+
+[34:38] **kiulyn**: Beleza, apresentação técnica. Isso mesmo, já vou deixar travado, tá? Fernando...
+
+[34:49] **Andre Campana**: Dá tempo de voltar do feriado?
+
+[34:51] **kiulyn**: Ah, eu espero que vocês descansem, né?
+
+[34:55] **Andre Campana**: É, anda difícil, cara, tá? Anda difícil.
+
+[35:01] **kiulyn**: Aí. Acabei de disparar o invite, tá?
+
+[35:03] **Andre Campana**: Beleza.
+
+[35:04] **kiulyn**: Ver se vocês receberam aí.
+
+[35:07] **Andre Campana**: Deixa eu ver. Deixa eu ver aqui. Tô terminando uma reunião aqui, daí eu volto. Beleza, já chegou aqui.
+
+[35:24] **kiulyn**: Fechado, então. Nos encontramos na quarta-feira, dia 22, às 9 horas, tá? Isso pra gente apresentar, fazer a apresentação dessa proposta, né? Desse escopo técnico. E amanhã, então, às 17h30, a gente tem a call com o account manager.
+
+[35:41] **Andre Campana**: Tem umas nove também. Só que
+
+[35:43] **kiulyn**: daí
+
+[35:43] **Andre Campana**: é o... com o Diogo.
+
+[35:45] **kiulyn**: É outra frente. Cara, gente... Ô André, do que você me deu... Tô tirando
+
+[35:49] **Andre Campana**: o atraso, Dodô.
+
+[35:50] **kiulyn**: Exatamente. Exatamente, exatamente. Mas beleza,
+
+[35:56] **Andre Campana**: gente.
+
+[35:56] **kiulyn**: Pessoal, obrigado mais ou menos amanhã. Obrigado, gente. Falou,
+
+[36:00] **Andre Campana**: gente. Tchau,
+
+[36:01] **kiulyn**: tchau.
+
+[36:01] **Andre Campana**: Obrigado.
