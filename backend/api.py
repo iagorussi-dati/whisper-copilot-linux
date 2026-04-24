@@ -297,14 +297,12 @@ class Api:
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
                 # Estimate response size
-                resp_size = "CURTA"
+                resp_size = "MÉDIA"
                 for line in classify_result.split("\n"):
                     if line.strip().upper().startswith("RESPOSTA:"):
                         resp_size = line.split(":", 1)[1].strip().upper()
                         break
-                size_map = {"CURTA": 1000, "MÉDIA": 2000, "MEDIA": 2000, "LONGA": 4000}
-                max_tok = size_map.get(resp_size, 2000)
-                log.info(f"[SNAPSHOT] Response size estimate: {resp_size} -> {max_tok} tokens")
+                log.info(f"[SNAPSHOT] Response size estimate: {resp_size}")
                 clean_ctx = context
                 for line in classify_result.split("\n"):
                     if line.strip().upper().startswith("PONTOS:"):
@@ -341,7 +339,7 @@ class Api:
                         extra_instruction = " IMPORTANTE: o cliente mencionou um concorrente — diferencie a AWS com FATOS baseados nos dados da web, sem atacar o concorrente. Foque em segurança, privacidade e controle dos dados."
                     user_msg = (
                         f"Pontos da conversa:\n{clean_ctx}\n\n"
-                        f"Responda a dúvida técnica de forma objetiva.{extra_instruction}{no_repeat_hint}"
+                        f"Responda a dúvida técnica de forma objetiva. Tamanho da resposta: {resp_size} — seja proporcional à quantidade de assuntos.{extra_instruction}{no_repeat_hint}"
                         f"{search_context}"
                     )
             else:
