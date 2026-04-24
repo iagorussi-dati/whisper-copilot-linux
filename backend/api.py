@@ -270,8 +270,11 @@ class Api:
             if needs_search:
                 last_text = " ".join(e['text'] for e in self._transcript[-10:])
                 if last_text:
+                    # Ask model to generate a good search query from the transcript
+                    query_prompt = f"Extraia o tema técnico principal dessa conversa em uma query de busca curta em inglês (max 10 palavras). Só a query, nada mais.\n\nConversa: {last_text[:300]}"
+                    query = self._bedrock.call_raw("Você extrai queries de busca.", query_prompt, max_tokens=30).strip().strip('"').strip("'")
+                    query += " AWS 2026"
                     from .search import web_search
-                    query = last_text[:120] + " AWS pricing specs 2026"
                     log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
                     results = web_search(query, max_results=3)
                     search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, priorize informações atualizadas:\n{results}"
@@ -304,10 +307,15 @@ class Api:
             if self._behavior_template == "assistente":
                 last_text = " ".join(e['text'] for e in self._transcript[-15:])
                 if last_text:
+                    query_prompt = f"Extraia os 2-3 temas técnicos principais dessa conversa em queries de busca curtas em inglês (max 10 palavras cada, separadas por vírgula). Só as queries, nada mais.\n\nConversa: {last_text[:500]}"
+                    raw_queries = self._bedrock.call_raw("Você extrai queries de busca.", query_prompt, max_tokens=50).strip()
                     from .search import web_search
-                    query = last_text[:120] + " AWS pricing specs 2026"
-                    log.info(f"[FULL_CTX] Web search: '{query[:80]}'")
-                    results = web_search(query, max_results=5)
+                    all_results = []
+                    for q in raw_queries.split(",")[:3]:
+                        q = q.strip().strip('"').strip("'") + " AWS 2026"
+                        log.info(f"[FULL_CTX] Web search: '{q[:80]}'")
+                        all_results.append(web_search(q, max_results=2))
+                    results = "\n".join(all_results)
                     search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, priorize informações atualizadas:\n{results}"
                     max_tok = 1200
 
