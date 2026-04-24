@@ -101,11 +101,11 @@ document.getElementById('bp').disabled=cur===0;
 const bn=document.getElementById('bn');
 if(cur===D.length-1){bn.textContent='✅ Finalizar';bn.className='btn-export';bn.onclick=showRes;}
 else{bn.textContent='Próximo →';bn.className='btn-next';bn.onclick=()=>go(1);}
-uStats();}
+}
 function sel_app(n,e){if(e.target.classList.contains('exp-btn'))return;const s=D[cur];if(!A[s.id])A[s.id]={};A[s.id].selected=n;render();}
 function tog(e,b){e.stopPropagation();const p=b.closest('.app');p.classList.toggle('expanded');b.textContent=p.classList.contains('expanded')?'▲ fechar':'▼ ver';}
 function sObs(){const s=D[cur];if(!A[s.id])A[s.id]={};A[s.id].obs=document.getElementById('oi').value;}
-function go(d){cur=Math.max(0,Math.min(D.length-1,cur+d));render();window.scrollTo(0,0);}
+function go(d){uStats();cur=Math.max(0,Math.min(D.length-1,cur+d));render();window.scrollTo(0,0);}
 function uStats(){const n=Object.keys(A).filter(k=>A[k]&&A[k].selected>0).length;document.getElementById('ans').textContent=n;document.getElementById('rem').textContent=D.length-n;}
 function genRes(){let o='# Resultado — Seleção de Abordagens Discovery Dati\n\n';
 o+=`Data: ${new Date().toLocaleString('pt-BR')}\nRespondidas: ${Object.values(A).filter(a=>a.selected).length}/${D.length}\n\n---\n\n`;
