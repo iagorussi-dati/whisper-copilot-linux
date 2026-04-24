@@ -339,7 +339,7 @@ class Api:
                         extra_instruction = " IMPORTANTE: o cliente mencionou um concorrente — diferencie a AWS com FATOS baseados nos dados da web, sem atacar o concorrente. Foque em segurança, privacidade e controle dos dados."
                     user_msg = (
                         f"Pontos da conversa:\n{clean_ctx}\n\n"
-                        f"Responda a dúvida técnica de forma objetiva. Tamanho da resposta: {resp_size} — seja proporcional à quantidade de assuntos. NÃO adicione resumo, observações gerais ou conclusão no final — termine na última sugestão 💬.{extra_instruction}{no_repeat_hint}"
+                        f"Responda a dúvida técnica de forma objetiva. Tamanho: {resp_size}. Se LONGA, seja mais conciso em cada tema (máx 4-5 linhas por tema no 📌 e 2 frases no 💬). NÃO adicione resumo ou conclusão no final — termine na última sugestão 💬.{extra_instruction}{no_repeat_hint}"
                         f"{search_context}"
                     )
             else:
