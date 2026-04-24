@@ -269,16 +269,19 @@ class Api:
             needs_search = (self._response_mode == "research" and self._behavior_template in ("assistente", "pesquisa")) or is_technical
             if needs_search:
                 last_text = " ".join(e['text'] for e in self._transcript[-10:])
-                if last_text:
-                    # Ask model to generate a good search query from the transcript
-                    query_prompt = f"Extraia o tema técnico principal dessa conversa em uma query de busca curta em inglês (max 10 palavras). Só a query, nada mais.\n\nConversa: {last_text[:300]}"
+                if last_text and len(last_text.strip()) > 30:
+                    query_prompt = f"Extraia o tema técnico principal dessa conversa em uma query de busca curta em inglês (max 10 palavras). Se não houver tema técnico claro, responda NONE.\n\nConversa: {last_text[:300]}"
                     query = self._bedrock.call_raw("Você extrai queries de busca.", query_prompt, max_tokens=30).strip().strip('"').strip("'")
-                    query += " AWS 2026"
-                    from .search import web_search
-                    log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
-                    results = web_search(query, max_results=3)
-                    search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, priorize informações atualizadas:\n{results}"
-                    log.info(f"[SNAPSHOT] Search: {len(results)} chars")
+                    if query and "NONE" not in query.upper():
+                        query += " AWS 2026"
+                        from .search import web_search
+                        log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
+                        results = web_search(query, max_results=3)
+                        if len(results) > 50:
+                            search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta APENAS se forem relevantes:\n{results}"
+                            log.info(f"[SNAPSHOT] Search: {len(results)} chars")
+                        else:
+                            log.info("[SNAPSHOT] Search: no useful results, skipping")
 
             user_msg = (
                 f"Conversa:\n{context}\n\n"
