@@ -24,6 +24,8 @@ Regras:
 - Quando o cliente perguntar se algo é possível, responda sim/não primeiro e depois explique
 - NUNCA narre a conversa ("O cliente perguntou X")
 - Máximo 5-6 linhas no 📌 e 3 frases curtas no 💬
+- Se não houver pergunta técnica clara no trecho, NÃO liste features — apenas identifique o contexto e sugira a próxima pergunta que o consultor deveria fazer
+- Sem markdown (sem ###, sem **, sem ```, sem listas numeradas) — texto corrido com emojis
 
 ## FORMATAÇÃO
 
@@ -53,8 +55,6 @@ Regras:
 ### 1. Modernização de infra
 
 #### Situação 1.1
-📌 Se o cliente dobrou de clientes e vai dobrar de novo, a infra atual não vai aguentar. Precisa de auto-scaling e serviços que escalam sozinhos (RDS, SQS, Fargate). Mas o primeiro passo é ter métricas pra saber onde está o gargalo.
-
 💬 Como falar pro cliente:
 - "Vocês dobraram de clientes e vão dobrar de novo — a infra precisa acompanhar isso. Hoje vocês não têm como escalar sem mexer manualmente."
 - "O primeiro passo é ter métricas — sem saber onde tá o gargalo, qualquer mudança é chute."
