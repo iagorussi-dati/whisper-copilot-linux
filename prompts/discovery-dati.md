@@ -58,6 +58,7 @@ Emojis:
 ⚠️ "Esse modelo bootstrap é importante pra gente entender — o custo de infra pesa bastante nessa fase, né?"
 ✅ "Me conta um pouco mais do produto, o que ele faz na prática."
 > Obs: Startup bootstrap — custo é sensível. Entender o momento antes de oferecer qualquer coisa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: mapear escala e crescimento**
 💡 "Hoje vocês têm quantos clientes usando a plataforma?"
@@ -65,6 +66,7 @@ Emojis:
 ⚠️ "Sendo bootstrap, vocês precisam de uma infra que escale sem explodir o custo, né?"
 ✅ "A gente tem experiência com startups nessa fase — posso te mostrar como outros fizeram."
 > Obs: Entender se está validando ou já escalando muda completamente a recomendação de infra.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: entender o time**
 💡 "Quantas pessoas vocês têm no time técnico hoje?"
@@ -72,6 +74,7 @@ Emojis:
 ⚠️ "Isso é importante porque dependendo do tamanho do time, a complexidade da infra tem que ser compatível."
 ✅ "Vou entender melhor o cenário de vocês pra trazer algo que faça sentido pro tamanho do time."
 > Obs: Time pequeno = infra simples. Não adianta propor arquitetura complexa se não tem quem mantenha.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: diferenciais e mercado**
 💡 "O que diferencia vocês dos concorrentes nesse mercado?"
@@ -79,6 +82,7 @@ Emojis:
 ⚠️ "Fintech geralmente tem exigências pesadas de segurança — isso impacta a arquitetura."
 ✅ "Quando vocês começarem a atender bancos maiores, vão precisar de uma estrutura mais robusta. A gente pode já pensar nisso."
 > Obs: Fintech = compliance é inevitável. Plantar a semente de que vai precisar de ajuda profissional.
+> ✏️ Selecionada: [ ]
 
 #### Situação 1.2
 **Cliente:** "A BR Condos nasce de um fundo de investimentos. Desde 2014 a gente usa AWS. Temos cento e poucas franquias, em média 800 usuários e duzentos e poucos mil usuários nos condomínios."
@@ -89,6 +93,7 @@ Emojis:
 ⚠️ "Com esse volume de usuários, a disponibilidade do sistema deve ser crítica pra vocês, né?"
 ✅ "Me conta como está a infra hoje pra suportar isso tudo."
 > Obs: Volume alto de usuários finais — entender se a infra aguenta e se tem pontos de falha.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: maturidade AWS**
 💡 "Desde 2014 na AWS é bastante tempo. Vocês já passaram por alguma otimização de custos nesse período?"
@@ -96,6 +101,7 @@ Emojis:
 ⚠️ "Contas antigas geralmente acumulam recursos esquecidos — pode ter oportunidade de economia aí."
 ✅ "A gente pode fazer um assessment rápido pra identificar onde otimizar."
 > Obs: Cliente antigo na AWS = provavelmente tem recursos legados, instâncias antigas, sem reservas.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: crescimento e franquias**
 💡 "Vocês estão abrindo novas franquias? Qual o ritmo de crescimento?"
@@ -103,6 +109,7 @@ Emojis:
 ⚠️ "Com franquias crescendo, a organização de contas AWS fica cada vez mais importante."
 ✅ "A gente pode estruturar isso pra vocês de um jeito que escale junto com as franquias."
 > Obs: Modelo de franquia = crescimento previsível. Estruturação de contas é porta de entrada natural.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: segurança e regulatório**
 💡 "Vocês lidam com dados financeiros dos condomínios? Tem algum requisito de LGPD ou regulatório?"
@@ -110,6 +117,7 @@ Emojis:
 ⚠️ "Com 200 mil usuários, um incidente de segurança pode ser bem crítico."
 ✅ "O Well-Architected da AWS cobre exatamente esses pontos — a gente pode rodar pra vocês."
 > Obs: Dados de condôminos + financeiro = LGPD é relevante. Well-Architected é gancho natural.
+> ✏️ Selecionada: [ ]
 
 #### Situação 1.3
 **Cliente:** "A gente tem duas empresas. A Puxa Engenharia desenvolve software industrial, coleta dados IoT das máquinas. E a P4Tech trabalha com agro, machine learning, visão computacional. Estamos migrando pra SaaS."
@@ -120,6 +128,7 @@ Emojis:
 ⚠️ "Ter duas empresas na mesma conta pode complicar na hora de separar custos."
 ✅ "A gente pode ajudar a organizar isso — contas separadas com billing consolidado."
 > Obs: Duas empresas = oportunidade de estruturação de contas e billing consolidado.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: migração SaaS**
 💡 "Essa migração pra SaaS, vocês já definiram a arquitetura ou estão planejando ainda?"
@@ -127,6 +136,7 @@ Emojis:
 ⚠️ "Migrar de on-prem pra SaaS é um projeto que a gente faz bastante — tem bastante armadilha no caminho."
 ✅ "Posso trazer nosso time de consulting pra conversar sobre essa migração."
 > Obs: Migração on-prem→SaaS é projeto de consulting. Oportunidade clara.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: IoT e dados**
 💡 "Esses dados de IoT das máquinas, qual o volume que vocês coletam por dia?"
@@ -134,6 +144,7 @@ Emojis:
 ⚠️ "IoT na AWS tem serviços específicos que podem simplificar bastante — IoT Core, Greengrass."
 ✅ "Nosso time de IA trabalha bastante com pipelines de dados — pode fazer sentido uma conversa."
 > Obs: IoT + ML + agro = projeto de IA/dados. Conectar com o time especializado.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: custo e escala**
 💡 "Hoje quanto vocês gastam de AWS nas duas contas?"
@@ -141,6 +152,7 @@ Emojis:
 ⚠️ "É importante planejar o custo antes de escalar — depois fica mais difícil otimizar."
 ✅ "A gente pode fazer uma projeção de custo pra vocês com base no crescimento esperado."
 > Obs: Empresa pequena migrando pra SaaS = custo vai subir. FinOps desde o início é diferencial.
+> ✏️ Selecionada: [ ]
 
 #### Situação 1.4
 **Cliente:** "A Lecimar é uma empresa têxtil e confecção. Tem manufatura, teares, importação de tecidos, sala de corte com Lectra, costura interna é 20% e 80% terceirizado com facções em Santa Catarina."
@@ -151,6 +163,7 @@ Emojis:
 ⚠️ "Com 80% terceirizado, a visibilidade da produção deve ser um desafio grande, né?"
 ✅ "Me conta como vocês acompanham o status da produção nas facções."
 > Obs: Indústria com terceirização pesada = dor de visibilidade e controle. Explorar antes de falar de tecnologia.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: digitalização**
 💡 "Vocês têm algum processo que ainda é manual ou em papel?"
@@ -158,6 +171,7 @@ Emojis:
 ⚠️ "Indústria têxtil tem muito dado de produção que pode virar inteligência — lead time, desperdício, eficiência."
 ✅ "A gente pode mapear onde a digitalização gera mais resultado pra vocês."
 > Obs: Indústria tradicional = muitos processos manuais. Oportunidade de automação e dados.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: comercial e vendas**
 💡 "Como funciona o processo de vendas de vocês? Representantes, loja própria, e-commerce?"
@@ -165,6 +179,7 @@ Emojis:
 ⚠️ "Previsão de demanda em têxtil é um dos casos mais clássicos de IA — reduz estoque parado."
 ✅ "Posso trazer nosso time de IA pra mostrar como funciona previsão de demanda."
 > Obs: Têxtil = sazonalidade + coleções. Previsão de demanda é quick win de IA.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: tecnologia atual**
 💡 "Qual ERP vocês usam hoje?"
@@ -172,6 +187,7 @@ Emojis:
 ⚠️ "Entender o que vocês já têm é importante pra não propor algo que duplique."
 ✅ "Me conta a stack de vocês que eu já consigo ter uma ideia de onde a gente pode ajudar."
 > Obs: Perguntar stack antes de oferecer — evita propor algo que o cliente já tem.
+> ✏️ Selecionada: [ ]
 
 #### Situação 1.5
 **Cliente:** "A gente desenvolve totem de autoatendimento, tanto software Android quanto hardware. A gente oferece a solução completa. O objetivo é agilizar atendimento e aumentar o ticket médio."
@@ -182,6 +198,7 @@ Emojis:
 ⚠️ "Com hardware + software, a parte de atualização remota dos totens deve ser um desafio."
 ✅ "Me conta como funciona a arquitetura por trás do totem."
 > Obs: Produto completo HW+SW = entender a arquitetura é essencial antes de propor IA.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: dados e inteligência**
 💡 "Vocês coletam dados dos pedidos? Histórico de compras, horários, combinações?"
@@ -189,6 +206,7 @@ Emojis:
 ⚠️ "Esses dados de pedidos são ouro pra IA — dá pra fazer sugestão inteligente baseada no histórico."
 ✅ "A gente tem um time de IA que trabalha exatamente com esse tipo de recomendação."
 > Obs: Dados de pedidos já existem = base pra IA sem precisar criar do zero.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: escala e clientes**
 💡 "Vocês atendem que tipo de estabelecimento? Hamburgueria, cafeteria, restaurante?"
@@ -196,6 +214,7 @@ Emojis:
 ⚠️ "Com clientes em regiões diferentes, as preferências mudam bastante — isso é um fator pra IA considerar."
 ✅ "Vou entender melhor o cenário pra trazer uma proposta que faça sentido pro produto de vocês."
 > Obs: Multi-tenant com cardápios diferentes = complexidade que IA resolve bem.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: roadmap e diferencial**
 💡 "Vocês já pensaram em como essa IA vai diferenciar o produto de vocês no mercado?"
@@ -203,6 +222,7 @@ Emojis:
 ⚠️ "Ser o primeiro a ter IA no totem pode ser um diferencial competitivo forte."
 ✅ "A gente pode ajudar a construir isso como um diferencial do produto de vocês."
 > Obs: IA como diferencial de produto = argumento de valor, não só de custo.
+> ✏️ Selecionada: [ ]
 
 #### Situação 1.6
 **Cliente:** "Eu sou o responsável pela TI. Tenho mais uma pessoa. O projeto que apresentei pra diretoria é trabalhar em três: eu como cabeça, um infra/DevOps e um programador multiuso."
@@ -213,6 +233,7 @@ Emojis:
 ⚠️ "Com duas pessoas, qualquer projeto novo compete com a operação do dia a dia."
 ✅ "A gente pode ser esse braço extra que vocês precisam — sem precisar contratar."
 > Obs: Time de 2 = não tem folga pra projetos. Dati como extensão do time é o pitch.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: prioridades**
 💡 "Se tu pudesse resolver uma coisa só esse ano, o que seria?"
@@ -220,6 +241,7 @@ Emojis:
 ⚠️ "Enquanto não vem a terceira pessoa, a gente pode cobrir essa lacuna em projetos específicos."
 ✅ "Vamos focar no que dá mais resultado com menos esforço pra vocês."
 > Obs: Budget pra contratar é limitado — posicionar Dati como alternativa mais rápida que contratar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: riscos**
 💡 "Se tu ficar fora por uma semana, o que acontece com a infra?"
@@ -227,6 +249,7 @@ Emojis:
 ⚠️ "Depender de uma pessoa só pra infra é um risco grande pro negócio."
 ✅ "A gente tem sustentação que funciona como backup do teu time — se precisar, a gente assume."
 > Obs: Pessoa-chave = risco operacional. Sustentação Dati como seguro.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: crescimento**
 💡 "Com o crescimento da empresa, vocês vão precisar de mais gente ou mais automação?"
@@ -234,6 +257,7 @@ Emojis:
 ⚠️ "Às vezes automatizar custa menos do que contratar — e escala melhor."
 ✅ "Posso trazer uma proposta de automação que libera vocês pra focar no que importa."
 > Obs: Automação como alternativa a contratação — argumento forte pra empresa com budget limitado.
+> ✏️ Selecionada: [ ]
 
 ### 2. Stack técnica / infra
 
@@ -246,6 +270,7 @@ Emojis:
 💡 "Vocês têm ambiente separado de produção e desenvolvimento?"
 ✅ "Vou trazer nosso pré-vendas técnico pra olhar essa arquitetura com mais detalhe."
 > Obs: Cliente técnico detalhando stack — comercial não precisa entender tudo, só validar e encaminhar pro técnico.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: riscos da situação atual**
 ⚠️ "Se uma dessas VPS cair, o que acontece? Tem redundância?"
@@ -253,6 +278,7 @@ Emojis:
 🔴 "Tudo em duas VPS sem redundância é um risco grande — qualquer problema para tudo."
 ✅ "A migração pra AWS resolve isso com alta disponibilidade nativa."
 > Obs: VPS sem redundância = risco real. Não precisa ser técnico pra apontar isso.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: custo atual vs AWS**
 💡 "Quanto vocês pagam nessas duas VPS hoje?"
@@ -260,6 +286,7 @@ Emojis:
 ⚠️ "Às vezes o custo parece maior na AWS, mas quando soma o tempo que vocês gastam mantendo VPS, compensa."
 ✅ "A gente pode fazer uma comparação de custo real — VPS atual vs AWS."
 > Obs: Comparação de custo é argumento concreto. Incluir TCO (tempo de manutenção) no cálculo.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: momento certo de migrar**
 💡 "Vocês já têm clientes em produção ou ainda estão validando?"
@@ -267,6 +294,7 @@ Emojis:
 💡 "Qual seria o trigger pra vocês? Primeiro cliente grande? Exigência de compliance?"
 ✅ "A gente pode montar o plano de migração agora e executar quando fizer sentido."
 > Obs: Startup em validação — não forçar migração, mas deixar o plano pronto.
+> ✏️ Selecionada: [ ]
 
 #### Situação 2.2
 **Cliente:** "A gente roda poucas coisas da AWS. Hoje tem EC2 puros, banco de dados em EC2, load balancer clássico, WAF, SES pra email e bastante S3. A arquitetura é muito simples."
@@ -277,6 +305,7 @@ Emojis:
 💡 "Vocês usam instâncias reservadas ou é tudo on-demand?"
 ✅ "Só com essas otimizações já dá pra economizar bastante sem mudar nada na aplicação."
 > Obs: Serviços básicos = muita oportunidade de modernização incremental sem projeto grande.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: segurança**
 💡 "Como está a organização de contas? Tudo numa conta só?"
@@ -284,6 +313,7 @@ Emojis:
 💡 "Vocês usam MFA pra todos os acessos?"
 ✅ "O Well-Architected cobre exatamente esses pontos — a gente pode rodar pra vocês."
 > Obs: Conta única + serviços básicos = provavelmente sem boas práticas de segurança.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: S3 e custos**
 💡 "Vocês falaram que usam bastante S3 — qual o volume de dados hoje?"
@@ -291,6 +321,7 @@ Emojis:
 💡 "Vocês têm lifecycle policies configuradas ou tá tudo na classe padrão?"
 ✅ "Só otimizar o S3 já pode gerar uma economia boa no billing."
 > Obs: "Bastante S3" = provavelmente sem lifecycle policies. Quick win de FinOps.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: evolução gradual**
 💡 "Vocês têm planos de modernizar essa arquitetura ou a prioridade é outra?"
@@ -298,6 +329,7 @@ Emojis:
 ⚠️ "Não precisa mudar tudo de uma vez — dá pra ir modernizando aos poucos."
 ✅ "A gente pode fazer um roadmap de evolução que respeite o ritmo de vocês."
 > Obs: Cliente com arquitetura simples pode não querer mudar — respeitar o timing.
+> ✏️ Selecionada: [ ]
 
 #### Situação 2.3
 **Cliente:** "A gente utiliza toda a parte do repositório de software na AWS, toda a infra tá lá. Usamos Amazon Q no VS Code, Kubernetes, Terraform, Elastic Load Balancer. Tudo containerizado, ambiente Linux."
@@ -308,6 +340,7 @@ Emojis:
 ⚠️ "Kubernetes self-managed dá mais trabalho de manter — EKS tira essa carga."
 ✅ "Nosso time pode fazer um assessment pra identificar pontos de otimização."
 > Obs: Cliente tecnicamente maduro — não ensinar o óbvio, focar em otimização e gaps.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: custo de Kubernetes**
 💡 "Kubernetes na AWS pode ficar caro se não tiver bem dimensionado. Vocês monitoram o custo por namespace?"
@@ -315,6 +348,7 @@ Emojis:
 💡 "Vocês usam Spot Instances pra workloads que toleram interrupção?"
 ✅ "A gente pode fazer uma análise de custo do cluster e identificar onde otimizar."
 > Obs: K8s = custo pode estar escondido. FinOps de Kubernetes é diferencial.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: Amazon Q e IA**
 💡 "Vocês estão usando o Amazon Q pra desenvolvimento — como tem sido a experiência?"
@@ -322,6 +356,7 @@ Emojis:
 ⚠️ "O Amazon Q tem evoluído bastante — pode valer a pena explorar mais funcionalidades."
 ✅ "Se vocês quiserem, a gente pode mostrar outros casos de uso do Q que clientes nossos usam."
 > Obs: Cliente já usa Amazon Q = já comprou a ideia de IA. Expandir o uso é natural.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: Terraform e IaC**
 💡 "Vocês usam Terraform pra toda a infra ou tem coisas criadas manualmente?"
@@ -329,6 +364,7 @@ Emojis:
 ⚠️ "IaC bem feito é a base pra escalar sem dor de cabeça."
 ✅ "Se precisarem de ajuda pra padronizar o IaC, nosso time de consulting faz isso."
 > Obs: Terraform = cliente organizado. Validar se está 100% IaC ou tem drift.
+> ✏️ Selecionada: [ ]
 
 #### Situação 2.4
 **Cliente:** "Meu ERP é o Consistem, de Jaraguá do Sul. Tenho GeoVendas como CRM, Power BI, duas lojas com PDV. Tudo on-prem, só o PDV tá em nuvem como SaaS."
@@ -339,6 +375,7 @@ Emojis:
 ⚠️ "ERP on-prem com BI on-prem — se o servidor cair, para tudo, né?"
 ✅ "A gente pode avaliar o que faz sentido migrar e o que fica on-prem."
 > Obs: ERP on-prem = geralmente pesado e caro de migrar. Não forçar migração total, pensar híbrido.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: BI e dados**
 💡 "O Power BI puxa dados direto do Consistem ou tem um data warehouse no meio?"
@@ -346,6 +383,7 @@ Emojis:
 ⚠️ "Power BI on-prem tem limitações de performance — vocês já tiveram problema com isso?"
 ✅ "A AWS tem o QuickSight que é nativo em nuvem — pode resolver esses problemas de performance."
 > Obs: Power BI on-prem = provavelmente lento com volume. QuickSight como alternativa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: integração entre sistemas**
 💡 "Esses sistemas conversam entre si? ERP com CRM, CRM com BI?"
@@ -353,6 +391,7 @@ Emojis:
 ⚠️ "Sistemas desconectados geram retrabalho e informação desatualizada."
 ✅ "A gente pode mapear essas integrações e propor automações."
 > Obs: Múltiplos sistemas = integrações manuais. Automação é oportunidade.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: backup e continuidade**
 💡 "Como vocês fazem backup do ERP hoje? É automatizado?"
@@ -360,6 +399,7 @@ Emojis:
 💡 "Vocês já pensaram em backup na nuvem como segurança?"
 ✅ "Backup na AWS é simples e barato — pode ser o primeiro passo antes de qualquer migração."
 > Obs: On-prem sem backup em nuvem = risco real. Backup é porta de entrada de baixo custo.
+> ✏️ Selecionada: [ ]
 
 #### Situação 2.5
 **Cliente explica detalhes técnicos que o comercial não domina:** "A gente usa Celery com 4 workers, PGVector como base vetorial, LLM Routers, LangGraph pra orquestração de agentes. O Salary consome muita memória e é limitado."
@@ -370,6 +410,7 @@ Emojis:
 💡 "Vocês já dimensionaram quanto de memória e CPU precisam pra rodar isso sem travar?"
 ✅ "Na próxima reunião trago o pré-vendas técnico pra gente desenhar a arquitetura ideal."
 > Obs: Comercial não precisa entender Celery/PGVector — reconhecer o gargalo e encaminhar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: traduzir em problema de negócio**
 💡 "E quando isso trava, o que acontece pro usuário final? O sistema fica fora?"
@@ -377,6 +418,7 @@ Emojis:
 💡 "Qual a frequência que isso acontece? É diário, semanal?"
 ✅ "Vou anotar tudo isso pra o técnico já vir preparado na próxima."
 > Obs: Traduzir problema técnico em impacto de negócio — isso o comercial consegue fazer.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: mostrar que a Dati entende**
 ⚠️ "A gente tem experiência com workloads pesados de IA — processamento de documentos, pipelines de ML."
@@ -384,6 +426,7 @@ Emojis:
 💡 "Vocês já olharam pra Fargate pra esses workers? Escala automático."
 ✅ "Nosso time de IA já fez projetos parecidos — posso trazer alguém que fale a mesma língua."
 > Obs: Mostrar competência sem entrar em detalhes — o comercial pode mencionar serviços sem explicar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: custo do problema**
 💡 "Quanto tempo vocês perdem por semana lidando com esses gargalos?"
@@ -391,6 +434,7 @@ Emojis:
 💡 "Já calcularam quanto custa manter isso vs migrar pra algo gerenciado?"
 ✅ "A gente pode fazer essa conta pra vocês — TCO atual vs AWS."
 > Obs: Custo de oportunidade — tempo mantendo infra vs desenvolvendo produto.
+> ✏️ Selecionada: [ ]
 
 #### Situação 2.6
 **Cliente:** "A gente usa Cloudflare pro DNS, Grafana com Prometheus pra monitoramento, N8n pra automações, Evolution API pro WhatsApp."
@@ -401,6 +445,7 @@ Emojis:
 💡 "O N8n vocês hospedam onde? Na mesma VPS?"
 ✅ "A gente pode ajudar a migrar só o core e manter essas ferramentas como estão."
 > Obs: Não forçar tudo pra AWS — cliente valoriza quando você respeita as escolhas dele.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: consolidação**
 💡 "Vocês têm muitas ferramentas rodando — isso tudo em quantos servidores?"
@@ -408,6 +453,7 @@ Emojis:
 💡 "Já pensaram em separar as ferramentas de suporte do core da aplicação?"
 ✅ "Na AWS dá pra isolar cada coisa com custo controlado."
 > Obs: Muitas ferramentas = complexidade operacional. Simplificar é argumento.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: observabilidade**
 💡 "O Grafana tá monitorando o quê exatamente? Infra, aplicação, negócio?"
@@ -415,6 +461,7 @@ Emojis:
 ⚠️ "Monitoramento sem alerta é só dashboard bonito — o importante é saber antes do cliente."
 ✅ "A gente pode ajudar a montar uma estratégia de observabilidade completa."
 > Obs: Grafana = já tem cultura de monitoramento. Evoluir pra observabilidade é o próximo passo.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: automações e integrações**
 💡 "O N8n vocês usam pra quê? Automação interna ou integração com clientes?"
@@ -422,6 +469,7 @@ Emojis:
 ⚠️ "N8n é ótimo pra começar, mas quando escala pode ficar instável."
 ✅ "Se precisarem de automações mais robustas, a AWS tem Step Functions e EventBridge."
 > Obs: N8n = ferramenta de automação popular mas com limites. Não criticar, só mostrar alternativa.
+> ✏️ Selecionada: [ ]
 
 ### 3. Billing / forma de pagamento
 
@@ -435,6 +483,7 @@ Emojis:
 💡 "Além disso, a cada 5 mil dólares de consumo, vocês ganham uma hora de consultoria com a gente."
 ✅ "Posso te explicar como funciona a migração do billing — é simples e não muda nada na conta."
 > Obs: $8k/mês no cartão = dor real. Billing é porta de entrada mais fácil da Dati.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: otimização de custo**
 💡 "Desses 8 mil, vocês sabem quanto é EC2, quanto é S3, quanto é transferência?"
@@ -442,6 +491,7 @@ Emojis:
 💡 "Vocês usam instâncias reservadas ou é tudo on-demand?"
 ✅ "A gente pode fazer uma análise de custo sem compromisso — só pra vocês verem onde dá pra economizar."
 > Obs: $8k sem otimização = provavelmente tem desperdício. FinOps é argumento concreto.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: parcelamento de reservas**
 💡 "Com esse volume, reservas fazem muito sentido — economia de 30-40% no EC2."
@@ -449,6 +499,7 @@ Emojis:
 💡 "Vocês já fizeram reserva alguma vez ou sempre foi on-demand?"
 ✅ "Posso simular quanto vocês economizariam com reservas — te mando por email."
 > Obs: Reservas parceladas = economia + fluxo de caixa. Argumento forte pra CFO.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: visibilidade financeira**
 💡 "Vocês têm visibilidade de quanto cada serviço ou projeto consome?"
@@ -456,6 +507,7 @@ Emojis:
 💡 "A gente implementa FinOps com dashboards de custo por projeto, por time, por ambiente."
 ✅ "Com billing pela Dati, vocês ganham essa visibilidade de graça."
 > Obs: Visibilidade de custo = argumento pra gestão. CFO adora dashboard de custo.
+> ✏️ Selecionada: [ ]
 
 #### Situação 3.2
 **Comercial pergunta:** "E esse valor é pago via boleto bancário ou cartão de crédito?"
@@ -469,6 +521,7 @@ Emojis:
 💡 "E o prazo de pagamento é de 50 dias — melhora o fluxo de caixa."
 ✅ "Posso te mandar os detalhes por email pra vocês analisarem com calma."
 > Obs: IOF + câmbio = custo escondido do cartão. Argumento financeiro forte.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: simplicidade da mudança**
 💡 "A mudança é simples — a conta continua sendo de vocês, com total autonomia."
@@ -476,6 +529,7 @@ Emojis:
 💡 "O que muda é só a forma de pagamento — em vez de cartão, boleto."
 ✅ "A gente cuida de toda a migração do billing — vocês não precisam fazer nada."
 > Obs: Medo de perder controle é comum — reforçar que a conta continua sendo deles.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: benefícios extras**
 💡 "Além do boleto, a cada 5 mil dólares de consumo vocês ganham uma hora de consultoria."
@@ -483,6 +537,7 @@ Emojis:
 💡 "E a gente traz FinOps, recomendações de reserva, sizing de máquina — tudo incluído."
 ✅ "Basicamente vocês pagam o mesmo valor e ganham consultoria de graça."
 > Obs: "Paga o mesmo e ganha mais" = argumento irresistível. Focar nisso.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: outros clientes**
 💡 "Vários clientes nossos fizeram essa mudança e a economia no IOF já paga a diferença."
@@ -490,6 +545,7 @@ Emojis:
 💡 "E com o prazo de 50 dias, o financeiro de vocês agradece."
 ✅ "Posso te conectar com um cliente nosso que fez essa mudança, se quiser uma referência."
 > Obs: Social proof — outros clientes já fizeram. Reduz a percepção de risco.
+> ✏️ Selecionada: [ ]
 
 #### Situação 3.3
 **Cliente:** "Esse mês o Bradesco pegou e pau foi 47 mil no cartão. Então sim, é legal ter faturamento via boleto."
@@ -500,6 +556,7 @@ Emojis:
 💡 "Vocês têm mais de uma conta AWS ou é só essa?"
 ✅ "Vou preparar a proposta de billing e te mando até amanhã."
 > Obs: Cliente já comprou a ideia — não ficar vendendo mais, fechar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: expandir o escopo**
 💡 "Com o billing, a gente já começa a olhar a conta de vocês e trazer recomendações."
@@ -507,6 +564,7 @@ Emojis:
 💡 "Vocês querem que a gente já faça um assessment junto com a migração do billing?"
 ✅ "Posso incluir o assessment na proposta — sem custo adicional."
 > Obs: Billing é porta de entrada — aproveitar pra expandir pra assessment/Well-Architected.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: urgência financeira**
 ⚠️ "47 mil no cartão com IOF — vocês estão perdendo dinheiro todo mês."
@@ -514,6 +572,7 @@ Emojis:
 💡 "A migração do billing leva poucos dias — não tem downtime."
 ✅ "Vamos agendar a migração pra essa semana ainda?"
 > Obs: Dor financeira real e imediata — criar senso de urgência sem forçar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: CFO e aprovação**
 💡 "Isso precisa passar por alguém internamente ou tu já consegue aprovar?"
@@ -521,6 +580,7 @@ Emojis:
 💡 "O argumento de eliminar IOF e ganhar prazo de 50 dias geralmente convence rápido."
 ✅ "Me fala quem precisa aprovar que eu preparo o material."
 > Obs: Entender quem decide — às vezes o técnico compra mas quem paga é o CFO.
+> ✏️ Selecionada: [ ]
 
 #### Situação 3.4
 **Cliente:** "Ah, hoje a gente tá pagando em torno de R$1.500, R$1.200. É pouco ainda."
@@ -531,6 +591,7 @@ Emojis:
 💡 "Mesmo com esse valor, o boleto já elimina o IOF do cartão."
 ✅ "Quando vocês chegarem em 5 mil dólares, já ganham consultoria grátis."
 > Obs: Billing baixo = não é prioridade agora. Plantar a semente pra quando crescer.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: crescimento esperado**
 💡 "Com a migração pra SaaS, vocês têm ideia de quanto vai ficar?"
@@ -538,6 +599,7 @@ Emojis:
 ⚠️ "É bom planejar o custo antes de escalar — depois fica mais difícil otimizar."
 ✅ "A gente pode fazer uma projeção de custo baseada no crescimento esperado."
 > Obs: Projeção de custo = mostra valor consultivo mesmo com billing baixo.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: benefícios mesmo com valor baixo**
 💡 "Mesmo com valor baixo, o boleto já traz vantagem fiscal."
@@ -545,6 +607,7 @@ Emojis:
 ⚠️ "Quando o custo subir, vocês já vão estar organizados."
 ✅ "A migração é simples — posso encaminhar pra vocês analisarem."
 > Obs: Não forçar — cliente com billing baixo não vai priorizar isso. Deixar a porta aberta.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: outros benefícios da parceria**
 💡 "Além do billing, como parceiro vocês têm acesso a incentivos da AWS."
@@ -552,6 +615,7 @@ Emojis:
 💡 "Se vocês têm um projeto novo, a AWS pode custear parte dele."
 ✅ "Me conta os projetos que vocês têm em mente que eu vejo o que consigo de incentivo."
 > Obs: Billing baixo mas projeto novo = incentivo é o gancho. Foco no projeto, não no billing.
+> ✏️ Selecionada: [ ]
 
 #### Situação 3.5
 **Comercial explica:** "A cada 5 mil dólares de consumo da AWS, vocês ganham uma hora de consultoria com a Dati. É acumulativo."
@@ -562,6 +626,7 @@ Emojis:
 ⚠️ "É consultoria especializada AWS — o mesmo time que atende empresas grandes."
 ✅ "Vocês podem ir acumulando e usar quando tiverem um projeto específico."
 > Obs: Calcular as horas concretas pro cliente — tangibiliza o benefício.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: exemplos de uso**
 💡 "Outros clientes usam essas horas pra revisão anual de reservas — só nisso já economizam bastante."
@@ -569,6 +634,7 @@ Emojis:
 ⚠️ "É como ter um consultor AWS de plantão sem pagar a mais por isso."
 ✅ "Quando vocês precisarem, é só acionar."
 > Obs: Dar exemplos concretos de como usar as horas — cliente não sabe o que pedir.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: comparar com suporte AWS**
 💡 "O plano de suporte Business da AWS custa no mínimo 100 dólares por mês."
@@ -576,6 +642,7 @@ Emojis:
 💡 "E a gente não só responde ticket — a gente proativamente olha a conta de vocês."
 ✅ "É um suporte mais próximo do que a AWS oferece diretamente."
 > Obs: Comparar com suporte AWS = mostra que o billing da Dati entrega mais.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: reservas parceladas**
 💡 "Além das horas, a gente também parcela reservas em até 6x no boleto."
@@ -583,6 +650,7 @@ Emojis:
 💡 "Todo ano a gente faz uma revisão de reservas com os clientes pra garantir o melhor desconto."
 ✅ "Posso já simular as reservas pra vocês verem a economia."
 > Obs: Reservas parceladas = economia + fluxo de caixa. Argumento forte pra financeiro.
+> ✏️ Selecionada: [ ]
 
 ### 4. Dores e problemas
 
@@ -595,6 +663,7 @@ Emojis:
 💡 "Vocês preferem alguém que execute ou que oriente e vocês executam?"
 ✅ "Posso montar uma proposta de sustentação que cobre essa lacuna."
 > Obs: Falta de braço = dor real e recorrente. Dati como extensão do time é o pitch perfeito.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: priorizar**
 💡 "De todos esses projetos parados, qual daria mais resultado se saísse primeiro?"
@@ -602,6 +671,7 @@ Emojis:
 ⚠️ "Com recurso limitado, o segredo é atacar o que dá mais resultado com menos esforço."
 ✅ "Vamos identificar o quick win e começar por ele."
 > Obs: Ajudar a priorizar = mostrar valor consultivo antes de vender qualquer coisa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: parceiro fixo**
 💡 "Vocês já tiveram parceiro antes ou sempre foi tudo interno?"
@@ -609,6 +679,7 @@ Emojis:
 💡 "A gente tem clientes que nos usam como o 'TI externo' — ligam quando precisam."
 ✅ "Posso te mostrar como funciona o modelo de sustentação da Dati."
 > Obs: Sem parceiro = oportunidade de relacionamento de longo prazo, não só projeto pontual.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: gestão visual / BI**
 💡 "Essa parte de gestão visual, o que vocês precisam exatamente? Dashboards, relatórios, alertas?"
@@ -616,6 +687,7 @@ Emojis:
 ⚠️ "Gestão visual bem feita muda a tomada de decisão — a diretoria passa a cobrar com dados."
 ✅ "A gente tem experiência com BI na AWS — QuickSight, dashboards customizados."
 > Obs: Gestão visual fraca = oportunidade de BI. Conectar com QuickSight ou solução de dados.
+> ✏️ Selecionada: [ ]
 
 #### Situação 4.2
 **Cliente:** "A gente foi meio na raça. Se não der ruim, a gente continua. Se der ruim, a gente dá o rollback. A gente vem lá da época que a gente mesmo fazia as coisas, montava os servidores."
@@ -626,6 +698,7 @@ Emojis:
 💡 "Vocês já tiveram algum incidente sério? Queda, perda de dados?"
 ✅ "A gente pode trazer boas práticas sem mudar o que já funciona."
 > Obs: Não criticar o "na raça" — validar a experiência e mostrar que o próximo nível precisa de apoio.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: risco operacional**
 🔴 "Se acontecer um incidente grave num final de semana, quem resolve?"
@@ -633,6 +706,7 @@ Emojis:
 💡 "A gente tem sustentação 24/7 que funciona como seguro — vocês ligam e a gente resolve."
 ✅ "Posso te mostrar os planos de sustentação que a gente tem."
 > Obs: "Na raça" funciona até dar errado. Sustentação como seguro é argumento forte.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: conhecimento concentrado**
 💡 "Hoje quem sabe como a infra funciona? É só vocês dois?"
@@ -640,6 +714,7 @@ Emojis:
 💡 "A gente pode documentar e padronizar a infra pra não depender de uma pessoa só."
 ✅ "Isso faz parte do Well-Architected que a gente oferece."
 > Obs: Conhecimento concentrado = risco de bus factor. Documentação e padronização resolvem.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: evolução natural**
 💡 "Vocês chegaram até aqui na raça — imagina com um parceiro técnico do lado."
@@ -647,6 +722,7 @@ Emojis:
 💡 "A gente cuida da infra e vocês focam no que gera receita."
 ✅ "Vamos conversar sobre como dividir essa responsabilidade."
 > Obs: Posicionar parceria como evolução natural, não como correção de erro.
+> ✏️ Selecionada: [ ]
 
 #### Situação 4.3
 **Cliente:** "Ter tudo isso dentro de duas VPS é loucura. Em termos de escala, você não tem como escalar isso. Se eu jogo 50 documentos e o worker começa a trabalhar e alguém joga mais 50, ele vai bater na API e pode falhar."
@@ -657,6 +733,7 @@ Emojis:
 💡 "Vocês têm algum workaround ou simplesmente esperam?"
 ✅ "Na AWS isso se resolve com filas e auto-scaling — o pré-vendas pode detalhar."
 > Obs: Cliente já sabe que é problema — validar e mostrar que tem solução.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: impacto no negócio**
 💡 "Quando isso acontece, vocês perdem clientes ou é mais uma inconveniência?"
@@ -664,6 +741,7 @@ Emojis:
 ⚠️ "Conforme vocês crescem, isso vai piorar — mais clientes, mais documentos, mais concorrência por recurso."
 ✅ "A migração resolve isso de forma definitiva — vamos planejar."
 > Obs: Traduzir problema técnico em risco de negócio — isso o comercial consegue fazer.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: solução sem over-engineering**
 💡 "Não precisa resolver tudo de uma vez — dá pra começar separando o Brain do resto."
@@ -671,6 +749,7 @@ Emojis:
 💡 "Vocês já pensaram em qual seria o mínimo pra resolver esse problema?"
 ✅ "A gente pode montar um plano de migração faseado — começa pelo mais crítico."
 > Obs: Faseamento = menos risco, menos custo inicial. Cliente em validação não quer projeto grande.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: custo de não fazer nada**
 💡 "Quanto tempo vocês perdem por semana lidando com esses travamentos?"
@@ -678,6 +757,7 @@ Emojis:
 💡 "Já calcularam quanto custa manter isso vs migrar?"
 ✅ "A gente pode fazer essa conta — TCO atual vs AWS. Geralmente surpreende."
 > Obs: Custo de oportunidade é argumento forte pra startup — tempo é o recurso mais escasso.
+> ✏️ Selecionada: [ ]
 
 #### Situação 4.4
 **Cliente:** "Não tem plano de suporte. Nunca usei suporte da AWS. A gente não tem essa arquitetura organizacional de contas."
@@ -688,6 +768,7 @@ Emojis:
 💡 "A estruturação de contas é o primeiro passo pra organizar — e a AWS não cobra por criar contas."
 ✅ "A gente faz essa estruturação como parte do Well-Architected."
 > Obs: Conta única = risco de segurança. Estruturação é projeto de baixo custo e alto impacto.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: suporte**
 💡 "Vocês nunca precisaram de suporte ou nunca tiveram um problema grave?"
@@ -695,6 +776,7 @@ Emojis:
 💡 "A gente oferece sustentação que funciona como suporte — mais próximo e mais rápido."
 ✅ "Posso te mostrar como funciona o nosso modelo de sustentação."
 > Obs: Nunca usou suporte ≠ nunca vai precisar. Plantar a semente.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: segurança**
 🔴 "Sem organização de contas, como vocês controlam quem acessa o quê?"
@@ -702,6 +784,7 @@ Emojis:
 ⚠️ "Com dados financeiros de condomínios, um vazamento pode ser muito grave."
 ✅ "O Well-Architected cobre segurança como prioridade — a gente pode rodar pra vocês."
 > Obs: Segurança é argumento que pega — especialmente com dados sensíveis.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: maturidade**
 💡 "Vocês chegaram num momento de maturidade que precisa dessa organização."
@@ -709,6 +792,7 @@ Emojis:
 💡 "A gente já fez isso pra vários clientes no mesmo estágio que vocês."
 ✅ "Vamos começar pelo assessment pra ver onde estão os gaps."
 > Obs: Normalizar a situação — não é culpa deles, é momento de evoluir.
+> ✏️ Selecionada: [ ]
 
 #### Situação 4.5
 **Cliente:** "No nosso sistema hoje o dono do estabelecimento tem que entrar manualmente e configurar que se comprar esse item ele ofereça uma Coca. É tudo manual. Às vezes esquece de fazer ou o produto acabou."
@@ -719,6 +803,7 @@ Emojis:
 💡 "Vocês têm ideia de quanto o ticket médio aumenta quando a sugestão funciona?"
 ✅ "Esse é exatamente o tipo de problema que IA resolve — sugestão automática baseada em dados."
 > Obs: Quantificar a perda = justificar o investimento em IA. ROI concreto.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: experiência do cliente final**
 💡 "E quando o produto sugerido está em falta, o que acontece? O totem sugere mesmo assim?"
@@ -726,6 +811,7 @@ Emojis:
 💡 "Com IA integrada ao estoque, isso não acontece — só sugere o que tem disponível."
 ✅ "A gente pode desenhar isso integrado com o banco de dados de vocês."
 > Obs: Problema de estoque + sugestão manual = experiência ruim. IA resolve os dois juntos.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: escala**
 💡 "Conforme vocês crescem em número de clientes, esse processo manual vai ficar insustentável."
@@ -733,6 +819,7 @@ Emojis:
 💡 "Com IA, a sugestão é automática e personalizada por estabelecimento."
 ✅ "Isso vira um diferencial do produto de vocês — os concorrentes oferecem isso?"
 > Obs: Escala = processo manual não sobrevive. IA como feature do produto, não como custo.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: dados que já existem**
 💡 "Vocês já têm o histórico de pedidos no banco — isso é a base pra IA funcionar."
@@ -740,6 +827,7 @@ Emojis:
 💡 "Com o histórico de combinações que os clientes já fazem, a IA aprende o que sugerir."
 ✅ "Nosso time de IA pode fazer um piloto rápido com os dados que vocês já têm."
 > Obs: Dados existentes = projeto mais rápido e barato. Argumento forte pra começar.
+> ✏️ Selecionada: [ ]
 
 #### Situação 4.6
 **Cliente:** "Parte de IA, a gente tá bem raso. Parte de RPA, bem raso também. A gente tem um mundo pra desbravar aqui dentro, tem informação sem fim que não tá sendo usada da forma correta."
@@ -750,6 +838,7 @@ Emojis:
 💡 "Vocês já tentaram algum projeto de IA ou automação antes?"
 ✅ "A gente tem um time de IA que faz exatamente esse mapeamento inicial."
 > Obs: Cliente admitiu que está raso — momento de entender onde dói mais antes de oferecer solução.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: quick wins**
 💡 "Normalmente o primeiro passo é identificar os quick wins — onde IA dá resultado em semanas."
@@ -757,6 +846,7 @@ Emojis:
 💡 "Vocês têm algum processo repetitivo que consome muito tempo do time?"
 ✅ "Posso trazer nosso especialista de IA pra uma conversa focada em identificar esses quick wins."
 > Obs: Quick wins = resultado rápido com investimento baixo. Gera confiança pra projetos maiores.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: referências do setor**
 ⚠️ "Vários clientes nossos começaram exatamente assim — com muita informação e sem saber por onde atacar."
@@ -764,6 +854,7 @@ Emojis:
 💡 "Vocês conhecem algum concorrente que já usa IA?"
 ✅ "A gente pode mostrar cases parecidos pra vocês terem uma referência."
 > Obs: Referências do setor = reduz incerteza. Cliente que não sabe por onde começar precisa de direção.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: cultura e processo**
 💡 "Antes de IA, os processos de vocês estão bem definidos?"
@@ -771,6 +862,7 @@ Emojis:
 💡 "Às vezes o primeiro passo é organizar os dados antes de colocar IA em cima."
 ✅ "A gente pode ajudar nessa organização — dados, processos e depois IA."
 > Obs: "Bem raso em IA" pode significar que os processos não estão prontos. Ser honesto sobre isso.
+> ✏️ Selecionada: [ ]
 
 #### Situação 4.7
 **Cliente:** "A gente tem a SCD que é regulada pelo Banco Central. Pelo regulatório a gente não pode misturar negócios. BR-Condos e SCD são coisas separadas."
@@ -781,6 +873,7 @@ Emojis:
 💡 "Vocês têm documentação de compliance da infra atual?"
 ✅ "A gente tem experiência com clientes regulados — fintech, bancos. Podemos ajudar."
 > Obs: Regulatório = não é opcional. Cliente PRECISA resolver. Urgência natural.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: estruturação de contas**
 💡 "Com o regulatório, faz sentido ter contas AWS separadas — uma pra BR Condos, outra pra SCD."
@@ -788,6 +881,7 @@ Emojis:
 💡 "A AWS tem o Organizations que permite separar contas com billing consolidado."
 ✅ "A estruturação de contas resolve isso — e a gente já fez pra outros clientes regulados."
 > Obs: Regulatório + conta única = risco real de auditoria. Estruturação é urgente.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: segurança de dados**
 🔴 "Dados financeiros regulados pelo BC precisam de criptografia, controle de acesso, logs de auditoria."
@@ -795,6 +889,7 @@ Emojis:
 ⚠️ "CloudTrail, Config, GuardDuty — são serviços que ajudam no compliance."
 ✅ "O Well-Architected cobre o pilar de segurança com foco em compliance."
 > Obs: Segurança + regulatório = argumento irrefutável. Cliente não pode ignorar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: custo de não estar em compliance**
 💡 "Vocês sabem qual é a penalidade se o BC encontrar uma não-conformidade?"
@@ -802,6 +897,7 @@ Emojis:
 💡 "Além da multa, tem o risco reputacional — especialmente pra uma fintech."
 ✅ "Vamos priorizar a parte regulatória — é o que tem mais urgência."
 > Obs: Custo de não-compliance > custo do projeto. Argumento definitivo.
+> ✏️ Selecionada: [ ]
 
 ### 5. Orçamento / timeline
 
@@ -815,6 +911,7 @@ Emojis:
 ⚠️ "É normal não ter noção de custo nessa fase — a gente traz a estimativa."
 ✅ "Vou montar uma proposta com fases e custos pra vocês terem uma base."
 > Obs: Cliente sem noção de custo = oportunidade de ser o primeiro a apresentar números. Quem apresenta primeiro ancora a expectativa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: faseamento**
 💡 "Dá pra dividir em fases — começar com o mínimo e ir evoluindo."
@@ -822,6 +919,7 @@ Emojis:
 💡 "Qual seria a primeira entrega que vocês precisam ver funcionando?"
 ✅ "Vou montar a proposta faseada — fase 1 com custo menor pra vocês validarem."
 > Obs: Faseamento reduz barreira de aprovação. Fase 1 pequena = mais fácil de aprovar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: concorrência**
 💡 "Vocês estão conversando com outras empresas também?"
@@ -829,6 +927,7 @@ Emojis:
 💡 "O importante é comparar escopo, não só preço — às vezes o mais barato entrega menos."
 ✅ "Me passa o que os outros propuseram que eu te mostro onde a gente se diferencia."
 > Obs: Se tem concorrente (como Google/Gemini no caso GoTotem), entender o que já foi proposto.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: incentivos AWS**
 💡 "A AWS tem incentivos que podem custear parte do projeto — a gente consegue buscar isso."
@@ -836,6 +935,7 @@ Emojis:
 💡 "Pra buscar incentivo, precisa passar por um parceiro — e a gente é parceiro Advanced."
 ✅ "Vou verificar quais incentivos se aplicam ao projeto de vocês."
 > Obs: Incentivo = reduz custo real pro cliente. Argumento decisivo quando orçamento é incerto.
+> ✏️ Selecionada: [ ]
 
 #### Situação 5.2
 **Cliente:** "Budget tô fraco. Mas sempre que eu consigo um contato que vem a partir do diretor, eu consigo ter uma chancezinha melhor de sucesso."
@@ -846,6 +946,7 @@ Emojis:
 ⚠️ "Se o diretor já indicou o contato, ele tem interesse — precisa do argumento certo."
 ✅ "Posso preparar um material focado no que o diretor precisa ver pra aprovar."
 > Obs: Budget fraco mas diretor envolvido = tem chance. Preparar material pro decisor.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: começar sem custo**
 💡 "A gente pode começar pelo billing — não tem custo nenhum pra vocês."
@@ -853,6 +954,7 @@ Emojis:
 💡 "É uma forma de começar a parceria sem precisar de aprovação de orçamento."
 ✅ "Vamos começar pelo billing e depois a gente evolui."
 > Obs: Billing como porta de entrada zero custo — perfeito pra cliente com budget fraco.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: ROI rápido**
 💡 "Se a gente conseguir mostrar resultado rápido, fica mais fácil pedir orçamento pro próximo projeto."
@@ -860,6 +962,7 @@ Emojis:
 💡 "Qual seria um resultado que o diretor olharia e diria 'valeu a pena'?"
 ✅ "Vamos focar num quick win que gere resultado visível."
 > Obs: ROI rápido = argumento pra liberar mais budget. Estratégia de land and expand.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: incentivos e parceria AWS**
 💡 "Com incentivos da AWS, o custo pro cliente pode ser zero ou muito baixo."
@@ -867,6 +970,7 @@ Emojis:
 💡 "Isso facilita a aprovação interna — o diretor não precisa aprovar um custo alto."
 ✅ "Vou levantar o que consigo de incentivo e te passo pra você apresentar internamente."
 > Obs: Incentivo que cobre o projeto = remove a objeção de budget completamente.
+> ✏️ Selecionada: [ ]
 
 #### Situação 5.3
 **Cliente:** "Não é projeto urgente. A gente não está com aquela urgência que nós tínhamos por questão da infra. É projeto que a gente está pesquisando, mas é inevitável. É uma modernização do nosso produto que a gente enxerga como inevitável."
@@ -877,6 +981,7 @@ Emojis:
 💡 "Vocês têm algum evento ou deadline que pode acelerar? Lançamento, cliente grande?"
 ✅ "Vou preparar tudo e quando vocês estiverem prontos, a gente executa rápido."
 > Obs: Não forçar urgência — respeitar o timing do cliente. Mas deixar tudo pronto.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: vantagem de começar cedo**
 💡 "Se é inevitável, começar a planejar agora dá vantagem competitiva."
@@ -884,6 +989,7 @@ Emojis:
 💡 "Dá pra começar com o planejamento sem compromisso de execução."
 ✅ "Posso trazer uma proposta de arquitetura pra vocês já terem o plano pronto."
 > Obs: "Inevitável" = cliente já decidiu que vai fazer. A questão é quando, não se.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: faseamento sem pressão**
 💡 "Dá pra começar com uma fase de discovery técnica — sem compromisso de execução."
@@ -891,6 +997,7 @@ Emojis:
 💡 "Isso também ajuda vocês a comparar propostas de outros fornecedores."
 ✅ "Vou montar o escopo técnico e vocês decidem o timing."
 > Obs: Discovery técnica como primeiro passo sem compromisso — reduz barreira.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: aproveitar incentivos agora**
 💡 "Os incentivos da AWS têm janelas — nem sempre estão disponíveis."
@@ -898,6 +1005,7 @@ Emojis:
 💡 "É como reservar o desconto — não precisa executar imediatamente."
 ✅ "Vou verificar os incentivos disponíveis agora pra vocês não perderem a janela."
 > Obs: Incentivos com prazo = cria urgência natural sem forçar. "Não é urgente mas o desconto é."
+> ✏️ Selecionada: [ ]
 
 #### Situação 5.4
 **Cliente:** "A gente começa a se preocupar com isso já mais para o segundo semestre. E daí a ideia é começar a escalonar isso."
@@ -908,6 +1016,7 @@ Emojis:
 ⚠️ "Até lá, se surgir alguma dúvida ou necessidade, a gente tá disponível."
 ✅ "Vou deixar agendado um follow-up pra julho."
 > Obs: Respeitar o timing — não insistir. Agendar follow-up e manter relacionamento.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: preparar o terreno**
 💡 "Até o segundo semestre, vocês podem ir organizando os dados e processos."
@@ -915,6 +1024,7 @@ Emojis:
 💡 "Posso te mandar um checklist do que preparar até lá."
 ✅ "Assim quando chegar o segundo semestre, a gente já sai executando."
 > Obs: Dar tarefa pro cliente = mantém engajamento sem pressionar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: billing como ponte**
 💡 "Enquanto isso, o billing já pode rodar — não depende do projeto."
@@ -922,6 +1032,7 @@ Emojis:
 💡 "Quando chegar o segundo semestre, vocês já vão ter horas acumuladas pra usar."
 ✅ "Vamos encaminhar o billing agora e o projeto fica pro segundo semestre."
 > Obs: Billing como ação imediata mesmo com projeto futuro — mantém a parceria ativa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: eventos e conteúdo**
 💡 "A gente tem eventos e workshops ao longo do ano — posso te convidar?"
@@ -929,6 +1040,7 @@ Emojis:
 ⚠️ "Quando chegar a hora de executar, vocês já vão ter mais clareza do que querem."
 ✅ "Vou te incluir na lista de eventos — sem compromisso."
 > Obs: Eventos = manter relacionamento sem pressão comercial. Nurturing.
+> ✏️ Selecionada: [ ]
 
 #### Situação 5.5
 **Cliente:** "Eu nas calculadoras aqui sozinho, sem ter um conhecimento técnico aprofundado em AWS, cara, ficou uma coisa absurda. Ficou tipo 18, 19 mil por mês pra colocar na nuvem."
@@ -939,6 +1051,7 @@ Emojis:
 💡 "Vocês calcularam com instâncias on-demand? Reservas reduzem 30-40%."
 ✅ "Deixa a gente fazer essa conta — com sizing correto e reservas, o número muda muito."
 > Obs: Cliente assustado com preço = precisa de ajuda profissional pra dimensionar. Oportunidade.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: comparar com custo atual**
 💡 "Quanto vocês gastam hoje com o on-prem? Servidor, energia, manutenção, licenças?"
@@ -946,6 +1059,7 @@ Emojis:
 💡 "Quando soma tudo — hardware, energia, espaço, tempo de manutenção — geralmente empata ou fica mais barato."
 ✅ "A gente pode fazer essa comparação TCO completa pra vocês."
 > Obs: TCO = argumento que muda a percepção. On-prem parece barato mas tem custo escondido.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: não precisa migrar tudo**
 💡 "Não precisa jogar tudo pra nuvem — pode ser híbrido."
@@ -953,6 +1067,7 @@ Emojis:
 💡 "Backup na nuvem, BI na nuvem, CRM na nuvem — o core fica onde está."
 ✅ "Vou montar um cenário híbrido com custo real pra vocês compararem."
 > Obs: Híbrido = custo menor que migração total. Remove o susto do 18-19 mil.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: começar pequeno**
 💡 "Dá pra começar com o que faz mais sentido — backup, por exemplo, é barato e resolve um risco."
@@ -960,6 +1075,7 @@ Emojis:
 💡 "Qual seria a primeira coisa que vocês gostariam de ter na nuvem?"
 ✅ "Vamos começar pelo mais simples e ir evoluindo."
 > Obs: Começar pequeno = custo baixo, resultado rápido, confiança pra expandir.
+> ✏️ Selecionada: [ ]
 
 ### 6. Ofertas / oportunidades Dati
 
@@ -973,6 +1089,7 @@ Emojis:
 💡 "Vocês continuam com acesso root, podem criar e destruir recursos normalmente."
 ✅ "Nada muda na operação — só melhora o financeiro."
 > Obs: Medo de perder controle é a objeção #1 do billing. Reforçar autonomia total.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: o que ganha**
 💡 "Além de manter tudo igual, vocês ganham consultoria, FinOps e suporte."
@@ -980,6 +1097,7 @@ Emojis:
 💡 "E se um dia quiserem voltar pro cartão, é simples — sem lock-in."
 ✅ "Posso te mostrar o contrato — é bem transparente."
 > Obs: Sem lock-in = remove medo. Transparência gera confiança.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: outros clientes**
 💡 "Todos os nossos clientes de billing mantêm autonomia total — ninguém nunca reclamou disso."
@@ -987,6 +1105,7 @@ Emojis:
 💡 "Vocês podem perguntar pra ele como funciona na prática."
 ✅ "Referência de quem já usa é o melhor argumento."
 > Obs: Social proof do próprio indicador = argumento irrefutável.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: Organization e estrutura**
 💡 "Se vocês tiverem uma Organization, a gente traz pra dentro — continua sendo de vocês."
@@ -994,6 +1113,7 @@ Emojis:
 💡 "Vocês definem o nível de acesso que a gente tem."
 ✅ "Posso explicar em detalhe como funciona a governança."
 > Obs: Governança e controle de acesso = preocupação legítima. Explicar com clareza.
+> ✏️ Selecionada: [ ]
 
 #### Situação 6.2
 **Comercial menciona Well-Architected.**
@@ -1005,6 +1125,7 @@ Emojis:
 💡 "A gente não só identifica os problemas — a gente resolve."
 ✅ "Posso te mostrar um exemplo de relatório que a gente entrega."
 > Obs: Diferencial claro da Dati vs AWS direta — execução, não só recomendação.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: benefícios práticos**
 💡 "O Well-Architected vai mostrar onde vocês estão vulneráveis e onde estão gastando demais."
@@ -1012,6 +1133,7 @@ Emojis:
 💡 "E as otimizações de custo que saem do WAR geralmente pagam o projeto."
 ✅ "É um investimento que se paga sozinho."
 > Obs: WAR que se paga = argumento de ROI. Segurança + economia no mesmo projeto.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: como funciona na prática**
 💡 "A gente roda um CloudFormation que coleta informações do ambiente — não acessa workloads."
@@ -1019,6 +1141,7 @@ Emojis:
 💡 "Com base nisso, a gente gera um relatório com findings e prioridades."
 ✅ "Depois a gente executa as correções junto com vocês."
 > Obs: "Não-invasivo" = remove medo de mexer no ambiente. Importante pra cliente que faz tudo sozinho.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: compliance e auditoria**
 💡 "O relatório do Well-Architected serve como evidência de compliance."
@@ -1026,6 +1149,7 @@ Emojis:
 💡 "Especialmente pra parte regulatória, isso é documentação importante."
 ✅ "A gente pode priorizar os pilares que são mais relevantes pro regulatório de vocês."
 > Obs: WAR como evidência de compliance = argumento pra clientes regulados.
+> ✏️ Selecionada: [ ]
 
 #### Situação 6.3
 **Comercial menciona incentivos AWS.**
@@ -1037,6 +1161,7 @@ Emojis:
 💡 "Pra acessar esses incentivos, precisa passar por um parceiro — e a gente é parceiro Advanced."
 ✅ "Me conta o que vocês estão planejando que eu vejo o que consigo."
 > Obs: Cliente não conhece incentivos = oportunidade de mostrar valor da parceria.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: exemplos concretos**
 💡 "Por exemplo, se vocês vão migrar de on-prem pra AWS, a AWS pode custear a consultoria."
@@ -1044,6 +1169,7 @@ Emojis:
 💡 "Também tem incentivos pra projetos de IA, modernização, e até treinamento."
 ✅ "Vou mapear quais incentivos se aplicam ao caso de vocês."
 > Obs: Exemplos concretos = tangibiliza. "100% do custo" é argumento forte.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: como funciona o processo**
 💡 "A gente aplica o incentivo junto com a AWS — vocês não precisam fazer nada."
@@ -1051,6 +1177,7 @@ Emojis:
 💡 "Geralmente leva algumas semanas pra aprovar — por isso é bom aplicar cedo."
 ✅ "Posso já iniciar o processo enquanto vocês definem o escopo."
 > Obs: Processo = a Dati faz. Cliente não precisa se preocupar. Aplicar cedo = criar urgência leve.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: janela de oportunidade**
 💡 "Os incentivos têm janelas — nem sempre estão disponíveis."
@@ -1058,6 +1185,7 @@ Emojis:
 💡 "Se a gente aplicar agora, vocês garantem o incentivo mesmo que executem depois."
 ✅ "Vou verificar o que está disponível agora e te passo."
 > Obs: Janela de incentivo = urgência natural sem forçar. "Agora é bom momento."
+> ✏️ Selecionada: [ ]
 
 #### Situação 6.4
 **Comercial propõe assessment.**
@@ -1069,6 +1197,7 @@ Emojis:
 ⚠️ "Às vezes durante o projeto surgem decisões de arquitetura que a gente pode ajudar."
 ✅ "Vou te mandar meu contato direto — qualquer coisa, é só chamar."
 > Obs: Cliente definiu timing — respeitar. Manter porta aberta sem pressionar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: assessment antes da reestruturação**
 💡 "Na verdade, o assessment antes da reestruturação pode ser mais útil."
@@ -1076,6 +1205,7 @@ Emojis:
 💡 "É mais fácil fazer certo do começo do que corrigir depois."
 ✅ "Posso fazer um assessment rápido agora — leva poucos dias."
 > Obs: Assessment antes > depois. Argumento técnico válido, mas sem forçar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: billing como ponte**
 💡 "Enquanto o assessment fica pro segundo semestre, o billing já pode rodar agora."
@@ -1083,6 +1213,7 @@ Emojis:
 💡 "Quando chegar o assessment, vocês já vão ter horas acumuladas."
 ✅ "Vamos encaminhar o billing agora?"
 > Obs: Billing como ação imediata — não depende do projeto. Mantém parceria ativa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: conteúdo e relacionamento**
 💡 "A gente tem workshops e eventos ao longo do ano — posso te convidar?"
@@ -1090,6 +1221,7 @@ Emojis:
 ⚠️ "É uma forma de vocês irem se preparando pro assessment."
 ✅ "Vou te incluir na nossa lista e te mandar os materiais."
 > Obs: Nurturing = manter relacionamento sem pressão. Quando chegar a hora, já tem confiança.
+> ✏️ Selecionada: [ ]
 
 #### Situação 6.5
 **Comercial propõe faseamento do projeto.**
@@ -1101,6 +1233,7 @@ Emojis:
 💡 "A fase 1 já vai gerar valor pros clientes de vocês — aumento de ticket médio."
 ✅ "Vou montar a proposta da fase 1 com escopo e custo."
 > Obs: Cliente concordou com faseamento — fechar o escopo da fase 1 rápido.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: arquitetura preparada**
 💡 "Mesmo fazendo em fases, a gente já desenha a arquitetura pensando na fase 2."
@@ -1108,6 +1241,7 @@ Emojis:
 💡 "A API de sugestões já vai estar pronta pra ser consumida pela interface de voz."
 ✅ "Nosso arquiteto vai desenhar pensando nas duas fases."
 > Obs: Arquitetura forward-looking = mostra maturidade técnica da Dati.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: timeline da fase 1**
 💡 "Pra fase 1, qual seria o prazo ideal pra vocês? Quando querem ter isso rodando?"
@@ -1115,6 +1249,7 @@ Emojis:
 ⚠️ "Ter um piloto ajuda a validar rápido e ajustar antes de escalar."
 ✅ "Posso incluir um piloto com um cliente de vocês no escopo da fase 1."
 > Obs: Piloto = resultado rápido com risco baixo. Valida antes de escalar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: métricas de sucesso**
 💡 "Como vocês vão medir se a IA está funcionando? Aumento de ticket médio?"
@@ -1122,6 +1257,7 @@ Emojis:
 💡 "A gente pode instrumentar o totem pra medir antes e depois da IA."
 ✅ "Vou incluir as métricas de sucesso no escopo do projeto."
 > Obs: Métricas = ROI comprovável. Importante pra justificar fase 2 e expansão.
+> ✏️ Selecionada: [ ]
 
 #### Situação 6.6
 **Comercial identifica múltiplas frentes e resume.**
@@ -1133,6 +1269,7 @@ Emojis:
 ⚠️ "A gente pode tocar as três, mas começar pela mais urgente faz mais sentido."
 ✅ "Vamos definir a prioridade e eu trago a proposta da primeira."
 > Obs: Múltiplas frentes = não tentar vender tudo de uma vez. Priorizar com o cliente.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: interdependência**
 💡 "Essas frentes se conectam — o BI precisa de dados organizados, a IA precisa de BI."
@@ -1140,6 +1277,7 @@ Emojis:
 💡 "Vocês já têm os dados organizados ou está tudo espalhado?"
 ✅ "Posso trazer o pré-vendas pra mapear a interdependência e definir a ordem."
 > Obs: Mostrar visão sistêmica = diferencial consultivo. Não é só vender serviço.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: quick win primeiro**
 💡 "Qual dessas três daria resultado mais rápido?"
@@ -1147,6 +1285,7 @@ Emojis:
 💡 "Geralmente billing ou BI são os mais rápidos de entregar resultado."
 ✅ "Vamos começar pelo que dá resultado em semanas, não meses."
 > Obs: Quick win = confiança. Resultado rápido justifica investimento nas próximas frentes.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: proposta consolidada**
 💡 "Posso montar uma proposta com as três frentes, cada uma com escopo e custo separado."
@@ -1154,6 +1293,7 @@ Emojis:
 💡 "E se tiver incentivo da AWS, pode cobrir parte de alguma delas."
 ✅ "Vou preparar e te mando até semana que vem."
 > Obs: Proposta consolidada mas modular = flexibilidade pro cliente aprovar no ritmo dele.
+> ✏️ Selecionada: [ ]
 
 ### 7. Próximos passos / fechamento
 
@@ -1167,6 +1307,7 @@ Emojis:
 💡 "Vocês conseguem me mandar um diagrama do ambiente atual? Mesmo que simples."
 ✅ "Vou alinhar com o arquiteto e te mando os horários disponíveis."
 > Obs: Preparar a reunião técnica = mais produtiva. Pedir diagrama mostra profissionalismo.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: definir expectativa**
 💡 "Nessa reunião técnica, o objetivo é entender a arquitetura e propor a solução."
@@ -1174,6 +1315,7 @@ Emojis:
 💡 "Depois dessa reunião, a gente monta a proposta formal."
 ✅ "Assim vocês têm tudo documentado pra apresentar internamente."
 > Obs: Definir expectativa = sem pressão. Cliente sabe que não vai ser forçado a fechar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: quem precisa estar**
 💡 "Quem mais deveria participar dessa reunião? Alguém da diretoria, do financeiro?"
@@ -1181,6 +1323,7 @@ Emojis:
 💡 "Mas se preferir só técnico primeiro, sem problema — a gente faz em etapas."
 ✅ "Me diz quem vai participar que eu ajusto a pauta."
 > Obs: Incluir decisor na reunião técnica = acelera o processo. Mas não forçar.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: documentos prévios**
 💡 "Vocês têm algum documento de requisitos ou escopo que possam compartilhar antes?"
@@ -1188,6 +1331,7 @@ Emojis:
 💡 "Quanto mais contexto o técnico tiver, melhor a proposta que ele vai montar."
 ✅ "Me manda o que tiver e eu repasso pro arquiteto antes da reunião."
 > Obs: Pedir documentos = mostra interesse genuíno. Se tem proposta de concorrente, melhor saber antes.
+> ✏️ Selecionada: [ ]
 
 #### Situação 7.2
 **Cliente vai mandar documentos / requisitos.**
@@ -1199,6 +1343,7 @@ Emojis:
 ⚠️ "Não precisa ser perfeito — qualquer informação já ajuda a gente a montar a proposta."
 ✅ "Vou criar o email do projeto e te mando o endereço."
 > Obs: Facilitar = reduzir fricção. Cliente ocupado pode desistir se for complicado.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: o que precisa ter**
 💡 "Se puder incluir os requisitos principais e o que vocês esperam como entrega, já é ótimo."
@@ -1206,6 +1351,7 @@ Emojis:
 💡 "Se tiver diagrama de arquitetura ou fluxo, melhor ainda."
 ✅ "Com isso a gente já consegue montar uma proposta inicial."
 > Obs: Guiar o que mandar = recebe informação útil. Sem guia, pode vir qualquer coisa.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: prazo**
 💡 "Consegue me mandar até quando? Pra eu já alinhar com o técnico."
@@ -1213,6 +1359,7 @@ Emojis:
 💡 "Se precisar de mais tempo, sem problema — me avisa o prazo."
 ✅ "Vou aguardar e assim que receber, já encaminho."
 > Obs: Definir prazo = compromisso. Sem prazo, pode demorar semanas.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: confidencialidade**
 💡 "Pode mandar tranquilo — a gente trata tudo com confidencialidade."
@@ -1220,6 +1367,7 @@ Emojis:
 💡 "O importante é a gente ter o máximo de contexto pra montar a melhor proposta."
 ✅ "Fica à vontade pra mandar o que puder."
 > Obs: Cliente mencionou que não quer mandar proposta do concorrente como veio — respeitar e garantir confidencialidade.
+> ✏️ Selecionada: [ ]
 
 #### Situação 7.3
 **Comercial resume as frentes identificadas e confirma.**
@@ -1231,6 +1379,7 @@ Emojis:
 ⚠️ "Quero ter certeza que não esqueci nada antes de montar a proposta."
 ✅ "Vou documentar tudo e te mando um resumo por email."
 > Obs: Confirmar = evita mal-entendido. Resumo por email = registro formal.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: prioridade**
 💡 "Dessas quatro, qual vocês gostariam de começar primeiro?"
@@ -1238,6 +1387,7 @@ Emojis:
 💡 "Estruturação de contas e Well-Architected podem ser um projeto só."
 ✅ "Vou montar a proposta com a ordem que fizer mais sentido pra vocês."
 > Obs: Agrupar projetos relacionados = simplifica pra o cliente. Billing em paralelo = ação imediata.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: timeline geral**
 💡 "Pra quando vocês gostariam de ter tudo isso rodando?"
@@ -1245,6 +1395,7 @@ Emojis:
 ⚠️ "Saber o prazo ajuda a gente a dimensionar o time e os recursos."
 ✅ "Vou montar um cronograma com as quatro frentes e te apresento."
 > Obs: Timeline = compromisso mútuo. Deadline externo cria urgência natural.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: investimento**
 💡 "Vou trazer o custo de cada frente separado — assim vocês aprovam uma de cada vez."
@@ -1252,6 +1403,7 @@ Emojis:
 💡 "O billing não tem custo — já pode começar."
 ✅ "Semana que vem te trago a proposta completa."
 > Obs: Custo separado por frente = flexibilidade. Billing sem custo = ação imediata.
+> ✏️ Selecionada: [ ]
 
 #### Situação 7.4
 **Agendar próxima reunião.**
@@ -1264,6 +1416,7 @@ Emojis:
 💡 "Se puder me mandar os documentos antes, ele já vem preparado."
 ✅ "Qualquer coisa antes disso, me chama."
 > Obs: Confirmar rápido = não dar chance de desmarcar. Pedir documentos antes = reunião produtiva.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: pauta da reunião**
 💡 "Vou montar uma pauta e te mando junto com o convite."
@@ -1271,6 +1424,7 @@ Emojis:
 💡 "Se tiver algum ponto específico que vocês querem cobrir, me avisa."
 ✅ "Mando o convite com a pauta até amanhã."
 > Obs: Pauta = profissionalismo. Cliente sabe que a Dati é organizada.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: quem participa**
 💡 "Do lado de vocês, quem mais deveria participar? Alguém da infra, do financeiro?"
@@ -1278,6 +1432,7 @@ Emojis:
 💡 "Do nosso lado vai eu e o arquiteto de soluções."
 ✅ "Me manda os emails dos participantes que eu incluo no convite."
 > Obs: Garantir que as pessoas certas estejam na reunião = evita ter que repetir.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: expectativa de entrega**
 💡 "Depois dessa reunião, a gente vai montar a proposta formal."
@@ -1285,6 +1440,7 @@ Emojis:
 💡 "Mas já saímos da reunião com um direcionamento claro."
 ✅ "Terça às 10, te espero. Boa semana!"
 > Obs: Definir o que vem depois = cliente sabe o processo. Sem surpresas.
+> ✏️ Selecionada: [ ]
 
 #### Situação 7.5
 **Fechamento da reunião — rapport final.**
@@ -1296,6 +1452,7 @@ Emojis:
 💡 "E quando vier pra Blumenau, avisa que a gente marca um café."
 ✅ "Boa semana e até a próxima!"
 > Obs: Rapport no fechamento = relacionamento. WhatsApp = canal direto, mais pessoal.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: resumo por email**
 💡 "Vou te mandar um email com o resumo do que conversamos hoje."
@@ -1303,6 +1460,7 @@ Emojis:
 💡 "Incluo os próximos passos e os prazos que combinamos."
 ✅ "Obrigado pelo tempo e até a próxima!"
 > Obs: Email de resumo = profissionalismo + registro. Cliente pode encaminhar pro decisor.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: manter engajamento**
 💡 "Vou te incluir na nossa newsletter — a gente manda conteúdo relevante sobre AWS."
@@ -1310,6 +1468,7 @@ Emojis:
 ⚠️ "É uma forma de vocês ficarem atualizados sem compromisso."
 ✅ "Obrigado e até breve!"
 > Obs: Newsletter + eventos = nurturing. Mantém o relacionamento ativo entre reuniões.
+> ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: próximo passo claro**
 💡 "Então ficou assim: eu te mando o resumo, você me manda os documentos, e a gente se fala semana que vem."
@@ -1317,3 +1476,4 @@ Emojis:
 💡 "Vou acompanhar de perto pra não deixar esfriar."
 ✅ "Valeu, pessoal. Até a próxima!"
 > Obs: Próximo passo claro = compromisso mútuo. "Não deixar esfriar" = proatividade.
+> ✏️ Selecionada: [ ]
