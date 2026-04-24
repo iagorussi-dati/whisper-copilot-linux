@@ -21,7 +21,6 @@ Regras:
 - NUNCA narre a conversa ("O cliente falou X", "Foi mencionado que...")
 - Quando o cliente tem dúvida → dê frase objetiva respondendo
 - Quando identificar dor → sugira pergunta que aprofunda
-- Quando surgir tema técnico demais → sugira como o comercial redireciona sem parecer que não sabe
 - Priorize: dúvidas do cliente > dores > oportunidades > próximos passos
 
 ## FORMATAÇÃO
@@ -46,7 +45,6 @@ Emojis:
 
 ## EXEMPLOS
 
-
 ### 1. Entendimento do negócio
 
 #### Situação 1.1
@@ -61,26 +59,26 @@ Emojis:
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: mapear escala e crescimento**
-💡 "Hoje vocês atendem quantos clientes? Qual a expectativa de crescimento?"
-💡 "Esse crescimento impacta a infra de vocês? Vocês sentem que a estrutura atual aguenta?"
-⚠️ "Dependendo do ritmo de crescimento, a infra precisa acompanhar pra não virar gargalo."
-✅ "A gente pode ajudar a planejar essa escala — mesmo que seja pra daqui a 6 meses."
+💡 "Hoje vocês atendem quantos clientes mais ou menos? Tá crescendo bastante?"
+💡 "E esse crescimento, vocês sentem que a estrutura de vocês tá acompanhando ou já tá apertando?"
+⚠️ "É bom a gente entender isso porque dependendo do ritmo, a infra precisa acompanhar pra não virar problema."
+✅ "A gente pode ajudar a planejar esse crescimento — mesmo que seja pra daqui a uns meses."
 > Obs: Entender se está validando ou escalando muda a recomendação. Não propor infra pesada pra quem está validando.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: entender o time e a capacidade interna**
-💡 "Quantas pessoas vocês têm no time de tecnologia hoje?"
-💡 "Quem cuida da infra? É o próprio time de dev ou tem alguém dedicado?"
-⚠️ "Isso é importante porque a complexidade da solução tem que ser compatível com o tamanho do time."
-✅ "Vou entender melhor o cenário pra trazer algo que faça sentido pro tamanho de vocês."
+💡 "E na parte de tecnologia, quantas pessoas vocês têm hoje?"
+💡 "Quem cuida da parte de sistemas, servidores, essas coisas? É alguém dedicado ou o pessoal se divide?"
+⚠️ "Isso é importante porque a solução que a gente propor tem que caber no tamanho do time de vocês."
+✅ "Vou entender melhor o cenário pra trazer algo que faça sentido pra realidade de vocês."
 > Obs: Time pequeno = solução simples. Não propor arquitetura complexa se não tem quem mantenha.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: diferenciais e posicionamento de mercado**
-💡 "O que diferencia vocês dos concorrentes nesse mercado?"
-💡 "Vocês têm algum requisito regulatório ou de compliance que impacta a tecnologia?"
-⚠️ "Dependendo do setor, compliance pode ser um driver importante pra decisão de infra."
-✅ "Quando a gente entender melhor o cenário regulatório, consigo trazer recomendações mais assertivas."
+💡 "O que vocês sentem que diferencia vocês dos concorrentes?"
+💡 "Vocês têm alguma exigência de segurança ou regulatório que impacta a parte de tecnologia?"
+⚠️ "Dependendo do setor, essas exigências acabam direcionando bastante as decisões de infra."
+✅ "Quando a gente entender melhor esse cenário, consigo trazer recomendações mais certeiras."
 > Obs: Compliance e regulatório criam urgência natural — o cliente PRECISA resolver, não é opcional.
 > ✏️ Selecionada: [ ]
 
@@ -88,33 +86,33 @@ Emojis:
 **SITUAÇÃO:** Cliente menciona que tem múltiplas empresas, CNPJs ou unidades de negócio com necessidades diferentes.
 
 **Abordagem 1 — Foco: entender a separação**
-💡 "Essas empresas compartilham a mesma infra ou são ambientes separados?"
-💡 "O time técnico é o mesmo pras duas ou cada uma tem o seu?"
-⚠️ "Ter empresas diferentes na mesma estrutura pode complicar na hora de separar custos e compliance."
-✅ "A gente pode ajudar a organizar isso — ambientes separados com gestão centralizada."
+💡 "Essas empresas rodam na mesma estrutura ou cada uma tem o seu ambiente separado?"
+💡 "E o time de TI é o mesmo pras duas ou cada uma tem o seu pessoal?"
+⚠️ "Ter empresas diferentes na mesma estrutura pode complicar na hora de separar custos e questões de segurança."
+✅ "A gente pode ajudar a organizar isso — cada uma no seu canto mas com uma gestão centralizada."
 > Obs: Múltiplas empresas = oportunidade de estruturação de contas e billing consolidado.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: regulatório entre entidades**
-💡 "Tem alguma questão regulatória que impede misturar os ambientes dessas empresas?"
-⚠️ "Dependendo do setor, misturar workloads de entidades diferentes pode dar problema em auditoria."
-💡 "A AWS permite separar contas com billing consolidado — cada empresa isolada mas gestão unificada."
-✅ "A gente já fez isso pra outros clientes com cenário parecido."
+💡 "Tem alguma questão de regulamentação que impede misturar os ambientes dessas empresas?"
+⚠️ "Dependendo do setor, misturar as coisas pode dar problema em auditoria."
+💡 "Na AWS dá pra separar tudo certinho — cada empresa isolada mas a gestão fica unificada."
+✅ "A gente já fez isso pra outros clientes que tinham esse mesmo cenário."
 > Obs: Regulatório entre entidades é comum em fintech, saúde, governo. Perguntar antes de propor.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: custo e gestão**
-💡 "Vocês conseguem separar quanto cada empresa gasta de infra hoje?"
-⚠️ "Sem essa visibilidade, fica difícil saber se uma empresa está subsidiando a outra."
-💡 "Com contas separadas, cada uma tem seu billing — facilita a gestão financeira."
+💡 "Vocês conseguem saber hoje quanto cada empresa gasta de infra separadamente?"
+⚠️ "Sem essa visibilidade, fica difícil saber se uma tá bancando a outra sem perceber."
+💡 "Com contas separadas, cada uma tem seu custo claro — facilita muito a gestão financeira."
 ✅ "Posso mostrar como outros clientes organizaram isso."
 > Obs: Visibilidade de custo por empresa = argumento pra CFO.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: simplificar a gestão**
 💡 "Hoje quem gerencia a infra das duas? É a mesma pessoa?"
-⚠️ "Gerenciar múltiplos ambientes com equipe pequena é desafiador."
-💡 "A gente pode centralizar a gestão e simplificar o dia a dia de vocês."
+⚠️ "Cuidar de vários ambientes com equipe pequena é puxado, né?"
+💡 "A gente pode centralizar essa gestão e simplificar o dia a dia de vocês."
 ✅ "Vou trazer uma proposta que cubra as duas empresas de forma organizada."
 > Obs: Equipe pequena gerenciando múltiplas empresas = dor operacional. Dati como braço extra.
 > ✏️ Selecionada: [ ]
@@ -123,34 +121,34 @@ Emojis:
 **SITUAÇÃO:** Cliente explica que está em fase inicial, bootstrap ou validando produto — ainda sem clientes grandes ou receita consolidada.
 
 **Abordagem 1 — Foco: respeitar o momento**
-💡 "Faz sentido começar simples e ir evoluindo conforme a demanda aparece."
-⚠️ "Não adianta investir pesado em infra agora se vocês ainda estão validando o produto."
-💡 "Qual seria o trigger pra vocês? Primeiro cliente grande? Exigência de compliance?"
-✅ "A gente pode montar o plano agora e executar quando fizer sentido."
+💡 "Faz total sentido começar mais simples e ir evoluindo conforme a demanda for aparecendo."
+⚠️ "Não vale a pena investir pesado em infra agora se vocês ainda tão validando o produto."
+💡 "O que vocês acham que seria o gatilho pra mudar? Primeiro cliente grande? Alguma exigência de segurança?"
+✅ "A gente pode montar o plano agora e executar quando fizer sentido pra vocês."
 > Obs: Startup em validação — não forçar investimento. Planejar sim, executar no timing certo.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: custo controlado**
-💡 "Sendo bootstrap, o custo de infra pesa bastante, né?"
-⚠️ "A gente tem experiência em montar ambientes que escalam sem explodir o custo."
-💡 "Dá pra começar com o mínimo e ir adicionando conforme cresce."
+💡 "Sendo que vocês tão bancando tudo do próprio bolso, o custo de infra pesa bastante, né?"
+⚠️ "A gente tem experiência em montar ambientes que crescem junto com o negócio sem estourar o orçamento."
+💡 "Dá pra começar bem enxuto e ir adicionando conforme a coisa cresce."
 ✅ "Posso montar uma estimativa de custo pra fase atual e pra quando escalar."
 > Obs: Bootstrap = cada real conta. Mostrar que entende a realidade financeira.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: preparar pra escala futura**
 💡 "Vocês já pensaram no que muda quando vier o primeiro cliente grande?"
-⚠️ "Geralmente o primeiro cliente enterprise traz exigências de segurança e compliance que mudam tudo."
-💡 "É mais barato preparar agora do que corrigir depois com pressão."
+⚠️ "Geralmente o primeiro cliente enterprise traz exigências de segurança que mudam tudo."
+💡 "É mais barato se preparar agora do que corrigir depois com pressão."
 ✅ "A gente pode deixar o ambiente pronto pra quando esse momento chegar."
 > Obs: Plantar a semente de que vai precisar de ajuda profissional quando escalar.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: incentivos pra startups**
-💡 "A AWS tem programas específicos pra startups — créditos, suporte, treinamento."
+💡 "A AWS tem programas específicos pra empresas que tão começando — créditos, suporte, treinamento."
 ⚠️ "Dependendo do estágio de vocês, dá pra conseguir créditos que cobrem meses de infra."
-💡 "Pra acessar esses programas, precisa passar por um parceiro — e a gente é parceiro Advanced."
-✅ "Vou verificar quais programas se aplicam ao caso de vocês."
+💡 "Pra acessar esses programas, precisa passar por um parceiro — e a gente é parceiro Advanced da AWS."
+✅ "Vou verificar quais programas se encaixam no caso de vocês."
 > Obs: Incentivos pra startups = argumento forte. Créditos AWS podem ser decisivos.
 > ✏️ Selecionada: [ ]
 
@@ -158,34 +156,34 @@ Emojis:
 **SITUAÇÃO:** Cliente é uma empresa consolidada, já usa AWS há anos, mas de forma básica — serviços simples, sem otimização, sem parceiro.
 
 **Abordagem 1 — Foco: reconhecer a maturidade**
-💡 "Vocês já têm bastante tempo na AWS — isso mostra maturidade. Já passaram por alguma otimização nesse período?"
-⚠️ "Contas antigas geralmente acumulam recursos esquecidos — pode ter oportunidade de economia."
-💡 "Vocês têm plano de suporte da AWS ou fazem tudo internamente?"
-✅ "A gente pode fazer um assessment rápido pra identificar onde otimizar."
+💡 "Vocês já têm bastante tempo na AWS — isso é ótimo. Já fizeram alguma revisão de custos nesse período?"
+⚠️ "Contas mais antigas geralmente acumulam coisas que ninguém lembra — pode ter economia escondida aí."
+💡 "Vocês têm algum plano de suporte da AWS ou se viram sozinhos?"
+✅ "A gente pode dar uma olhada rápida na conta pra ver se tem alguma oportunidade."
 > Obs: Cliente antigo na AWS = provavelmente tem recursos legados e oportunidades de FinOps.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: evolução sem ruptura**
-💡 "Vocês estão satisfeitos com o que têm ou sentem que poderia ser melhor?"
-⚠️ "Não precisa mudar tudo de uma vez — dá pra ir modernizando aos poucos."
-💡 "A AWS atualiza os serviços todo ano — quanto mais atualizado, menor o custo e melhor a performance."
-✅ "A gente pode fazer um roadmap de evolução que respeite o ritmo de vocês."
+💡 "Vocês tão satisfeitos com o que têm ou sentem que poderia ser melhor?"
+⚠️ "Não precisa mudar tudo de uma vez — dá pra ir melhorando aos poucos."
+💡 "A AWS lança coisa nova todo ano — às vezes tem serviço que resolve um problema que vocês têm e vocês nem sabem."
+✅ "A gente pode montar um plano de evolução que respeite o ritmo de vocês."
 > Obs: Não criticar o que o cliente construiu — validar e propor evolução gradual.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: segurança e boas práticas**
-💡 "Como está a organização de contas? Tudo numa conta só?"
-⚠️ "Conta única com tudo junto é um risco — se alguém acessa com permissão errada, acessa tudo."
-💡 "O Well-Architected da AWS cobre exatamente esses pontos — segurança, custo, performance."
-✅ "A gente pode rodar o Well-Architected pra vocês — e a gente executa, não só manda documentação."
+💡 "E a parte de organização de contas, como tá? Tudo numa conta só ou já separaram?"
+⚠️ "Conta única com tudo junto é um risco — se alguém faz alguma coisa errada, afeta tudo."
+💡 "A gente tem um trabalho de boas práticas da AWS que cobre segurança, custo, performance — tudo junto."
+✅ "E o legal é que a gente não só aponta o que precisa melhorar — a gente faz junto com vocês."
 > Obs: Diferencial da Dati vs AWS direta: a gente executa, não só recomenda.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: parceiro de longo prazo**
-💡 "Vocês já tiveram parceiro AWS antes ou sempre foi tudo interno?"
+💡 "Vocês já tiveram algum parceiro da AWS antes ou sempre foi tudo por conta própria?"
 ⚠️ "Sem parceiro, cada problema novo é uma pesquisa do zero — consome muito tempo."
-💡 "A gente funciona como extensão do time de vocês — sem precisar contratar."
-✅ "Posso te mostrar como funciona o modelo de parceria da Dati."
+💡 "A gente funciona como uma extensão do time de vocês — tá ali quando precisa, sem precisar contratar."
+✅ "Posso te mostrar como funciona essa parceria na prática."
 > Obs: Posicionar Dati como parceiro de longo prazo, não fornecedor pontual.
 > ✏️ Selecionada: [ ]
 
@@ -193,34 +191,34 @@ Emojis:
 **SITUAÇÃO:** Cliente tem demanda específica de IA/dados — quer usar IA no produto, automatizar processos ou criar inteligência em cima dos dados que já tem.
 
 **Abordagem 1 — Foco: entender o que já foi feito**
-💡 "Vocês já testaram alguma coisa de IA internamente? Fizeram alguma POC?"
-💡 "Se já testaram, o que funcionou e o que não funcionou?"
-⚠️ "Entender o que já foi tentado evita a gente repetir erros."
-✅ "Me conta o que vocês já fizeram que eu trago o nosso time de IA pra evoluir a partir daí."
+💡 "Vocês já chegaram a testar alguma coisa de IA internamente? Fizeram algum teste, alguma prova de conceito?"
+💡 "Se já testaram, o que deu certo e o que não rolou?"
+⚠️ "Entender o que já foi tentado ajuda a gente a não repetir o que não funcionou."
+✅ "Me conta o que vocês já fizeram que a gente evolui a partir daí."
 > Obs: Muitos clientes já testaram IA e se frustraram. Entender o histórico antes de propor.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: dados disponíveis**
 💡 "Vocês já têm os dados organizados pra isso? Banco de dados, histórico, documentos?"
-⚠️ "IA funciona bem quando os dados estão organizados — senão ela automatiza a bagunça."
-💡 "Às vezes o primeiro passo é organizar os dados antes de colocar IA em cima."
-✅ "A gente pode ajudar nessa organização — dados, processos e depois IA."
+⚠️ "IA funciona muito bem quando os dados tão organizados — se não tiver, ela acaba fazendo coisa errada."
+💡 "Às vezes o primeiro passo é arrumar a casa dos dados antes de colocar IA em cima."
+✅ "A gente pode ajudar nessa organização — primeiro os dados, depois a IA."
 > Obs: Dados desorganizados = projeto de IA vai falhar. Ser honesto sobre isso.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: ROI e métricas**
-💡 "Como vocês vão medir se a IA está funcionando? Qual o resultado esperado?"
-⚠️ "É importante definir as métricas antes de começar — senão não tem como provar ROI."
-💡 "Vocês têm uma estimativa do impacto financeiro que isso teria?"
-✅ "A gente pode ajudar a definir as métricas de sucesso junto com vocês."
+**Abordagem 3 — Foco: resultado esperado e métricas**
+💡 "E como vocês vão saber se a IA tá funcionando? Qual o resultado que vocês esperam?"
+⚠️ "É importante definir isso antes de começar — senão no final ninguém sabe se valeu a pena."
+💡 "Vocês têm uma ideia do impacto financeiro que isso teria?"
+✅ "A gente pode ajudar a definir essas métricas junto com vocês."
 > Obs: ROI definido antes = projeto com mais chance de aprovação e continuidade.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: faseamento**
-💡 "Dá pra começar com um piloto focado numa área só e ir expandindo conforme dá resultado."
-⚠️ "Projeto grande de IA sem piloto é arriscado — melhor validar pequeno primeiro."
-💡 "Vocês têm uma área ou processo específico que seria o melhor candidato pro piloto?"
-✅ "A gente pode montar um MVP rápido pra vocês testarem antes de escalar."
+💡 "Dá pra começar com um teste focado numa área só e ir expandindo conforme dá resultado."
+⚠️ "Projeto grande de IA sem testar antes é arriscado — melhor validar pequeno primeiro."
+💡 "Vocês têm uma área ou processo específico que seria o melhor candidato pra esse teste?"
+✅ "A gente pode montar um piloto rápido pra vocês verem funcionando antes de investir mais."
 > Obs: Piloto = resultado rápido com risco baixo. Valida antes de investir pesado.
 > ✏️ Selecionada: [ ]
 
@@ -236,15 +234,15 @@ Emojis:
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: entender a expectativa**
-💡 "O que te motivou a aceitar essa reunião? Tem alguma dor específica ou é mais exploratório?"
-💡 "Vocês estão buscando algo específico ou querem entender o que é possível?"
-⚠️ "Saber a expectativa ajuda a gente a focar no que realmente importa pra vocês."
+💡 "O que te motivou a aceitar essa reunião? Tem alguma necessidade específica ou é mais pra conhecer?"
+💡 "Vocês tão buscando algo específico ou querem entender o que é possível?"
+⚠️ "Saber o que vocês esperam ajuda a gente a focar no que realmente importa."
 ✅ "Me conta o que vocês esperam dessa conversa."
 > Obs: Entender se o cliente veio com dor real ou só por educação com quem indicou.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: apresentar a Dati brevemente**
-💡 "A Dati é uma consultoria AWS com ~90 pessoas, a gente atua em cloud, IA e dados."
+💡 "A Dati é uma consultoria da AWS aqui de Blumenau, a gente tem uns 90 profissionais e atua em cloud, IA e dados."
 ⚠️ "Mas antes de falar mais da gente, quero entender o cenário de vocês."
 💡 "A gente prefere ouvir primeiro e depois ver onde faz sentido ajudar."
 ✅ "Me conta um pouco da empresa e do momento de vocês."
@@ -254,7 +252,7 @@ Emojis:
 **Abordagem 4 — Foco: construir relacionamento**
 💡 "Mesmo que agora não tenha um projeto específico, é bom a gente se conhecer."
 ⚠️ "Quando surgir uma necessidade, vocês já sabem quem procurar."
-💡 "A gente tem eventos, workshops — posso te convidar pra ir conhecendo."
+💡 "A gente faz eventos, workshops — posso te convidar pra ir conhecendo."
 ✅ "Vamos manter contato e quando fizer sentido a gente aprofunda."
 > Obs: Nem toda reunião vira projeto. Construir relacionamento pra colher depois.
 > ✏️ Selecionada: [ ]
@@ -264,211 +262,211 @@ Emojis:
 #### Situação 2.1
 **SITUAÇÃO:** Cliente descreve a stack atual em detalhes — servidores, banco de dados, containers, ferramentas — tudo concentrado em poucas máquinas ou VPS.
 
-**Abordagem 1 — Foco: validar sem se aprofundar tecnicamente**
-💡 "Então hoje tá tudo concentrado nessas máquinas, certo? E o principal gargalo é qual desses serviços?"
-⚠️ "Isso é bastante coisa pra pouca infra — vocês já tiveram problema de performance?"
-💡 "Vocês têm ambiente separado de produção e desenvolvimento?"
-✅ "Vou trazer nosso pré-vendas técnico pra olhar essa arquitetura com mais detalhe."
-> Obs: Cliente técnico detalhando stack — comercial não precisa entender tudo, só validar e encaminhar pro técnico.
+**Abordagem 1 — Foco: entender o cenário sem se perder nos detalhes**
+💡 "Então hoje tá tudo rodando nessas máquinas, certo? E qual desses sistemas é o que mais dá trabalho?"
+⚠️ "É bastante coisa pra pouca estrutura — vocês já tiveram algum problema de lentidão ou queda?"
+💡 "Vocês têm um ambiente separado pra testes ou tá tudo junto com produção?"
+✅ "Vou anotar tudo isso aqui pra gente trazer uma proposta que faça sentido."
+> Obs: Comercial não precisa entender cada detalhe técnico — focar no gargalo principal.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: riscos da concentração**
-⚠️ "Se uma dessas máquinas cair, o que acontece? Tem redundância?"
-💡 "Vocês fazem backup automatizado ou é manual?"
-🔴 "Tudo concentrado sem redundância é um risco — qualquer problema para tudo."
-✅ "A migração pra cloud resolve isso com alta disponibilidade nativa."
-> Obs: Concentração = risco real. Não precisa ser técnico pra apontar isso.
+**Abordagem 2 — Foco: riscos de ter tudo concentrado**
+⚠️ "Se uma dessas máquinas parar, o que acontece? Tem algum backup, alguma redundância?"
+💡 "Vocês fazem backup de tudo isso? É automático ou alguém tem que lembrar de fazer?"
+🔴 "Tudo junto num lugar só é arriscado — qualquer problema para tudo de uma vez."
+✅ "Na nuvem isso se resolve porque a estrutura já tem redundância embutida."
+> Obs: Concentração = risco real. Apontar sem ser alarmista.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: custo atual vs cloud**
-💡 "Quanto vocês pagam nessa infra hoje? Servidor, manutenção, licenças?"
-💡 "Já fizeram alguma estimativa de quanto ficaria na cloud?"
-⚠️ "Às vezes o custo parece maior na cloud, mas quando soma o tempo de manutenção, compensa."
-✅ "A gente pode fazer uma comparação de custo real — infra atual vs AWS."
-> Obs: TCO (custo total de propriedade) muda a percepção. Incluir tempo de manutenção no cálculo.
+**Abordagem 3 — Foco: custo atual vs nuvem**
+💡 "E quanto vocês gastam hoje com essa estrutura? Servidor, manutenção, licenças, tudo junto?"
+💡 "Vocês já chegaram a olhar quanto ficaria na nuvem?"
+⚠️ "Às vezes parece mais caro na nuvem, mas quando soma o tempo que vocês gastam cuidando disso tudo, acaba compensando."
+✅ "A gente pode fazer essa conta certinha pra vocês — comparar o que gastam hoje com o que gastariam na AWS."
+> Obs: TCO muda a percepção. Incluir tempo de manutenção no cálculo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: momento certo de migrar**
-💡 "Vocês já têm clientes em produção ou ainda estão validando?"
-⚠️ "Migrar agora pode ser cedo se vocês ainda estão validando — mas planejar já faz sentido."
-💡 "Qual seria o trigger pra vocês migrarem? Primeiro cliente grande? Problema de escala?"
-✅ "A gente pode montar o plano de migração agora e executar quando fizer sentido."
+**Abordagem 4 — Foco: timing da migração**
+💡 "Vocês já têm clientes usando o sistema ou ainda tão construindo?"
+⚠️ "Migrar agora pode ser cedo se vocês ainda tão validando — mas planejar já faz sentido."
+💡 "O que seria o gatilho pra vocês? Primeiro cliente grande? Algum problema de escala?"
+✅ "A gente pode montar o plano agora e executar quando vocês acharem que é a hora."
 > Obs: Não forçar migração — planejar sim, executar no timing certo.
 > ✏️ Selecionada: [ ]
 
 #### Situação 2.2
-**SITUAÇÃO:** Cliente já está na AWS mas usa serviços básicos — EC2, S3, load balancer clássico — sem otimização, sem organização de contas.
+**SITUAÇÃO:** Cliente já está na AWS mas usa serviços básicos — EC2, S3, load balancer — sem otimização, sem organização de contas.
 
-**Abordagem 1 — Foco: otimização do que já tem**
-💡 "Vocês usam instâncias reservadas ou é tudo on-demand?"
-⚠️ "Geralmente quando a gente olha uma conta desse tamanho, encontra 20-30% de otimização."
-💡 "Tem serviços que vocês usam que já têm versões mais novas e mais baratas."
-✅ "Só com otimizações simples já dá pra economizar bastante sem mudar nada na aplicação."
-> Obs: Serviços básicos = muita oportunidade de modernização incremental.
+**Abordagem 1 — Foco: otimizar o que já tem**
+💡 "Vocês já olharam se tão usando o tipo de máquina mais adequado? Às vezes trocar o tipo já economiza bastante."
+⚠️ "Geralmente quando a gente olha uma conta desse tamanho, encontra uns 20-30% de economia."
+💡 "Vocês compram capacidade reservada ou pagam tudo por uso?"
+✅ "Só com uns ajustes simples já dá pra economizar bastante sem mudar nada no sistema."
+> Obs: Serviços básicos = muita oportunidade de otimização sem projeto grande.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: segurança e organização**
-💡 "Como está a organização de contas? Tudo numa conta só?"
-⚠️ "Conta única com tudo junto é um risco — se alguém acessa com permissão errada, acessa tudo."
-💡 "Vocês usam MFA pra todos os acessos?"
-✅ "O Well-Architected cobre exatamente esses pontos — a gente pode rodar pra vocês."
+💡 "E a parte de organização das contas, como tá? Tudo numa conta só ou já separaram?"
+⚠️ "Conta única com tudo junto é um risco — se alguém faz alguma coisa errada, afeta tudo."
+💡 "Vocês usam autenticação em dois fatores pra todo mundo que acessa?"
+✅ "A gente tem um trabalho de boas práticas que cobre exatamente esses pontos."
 > Obs: Conta única + serviços básicos = provavelmente sem boas práticas de segurança.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: storage e custos escondidos**
-💡 "Vocês usam bastante S3? Qual o volume de dados?"
-⚠️ "S3 tem classes de armazenamento diferentes — Glacier reduz até 90% pra dados que vocês acessam pouco."
-💡 "Vocês têm lifecycle policies configuradas ou tá tudo na classe padrão?"
-✅ "Só otimizar o storage já pode gerar uma economia boa no billing."
+💡 "Vocês usam bastante armazenamento na AWS? Qual o volume mais ou menos?"
+⚠️ "Tem tipos de armazenamento mais baratos pra dados que vocês não acessam todo dia — pode reduzir até 90% do custo."
+💡 "Vocês já configuraram regras pra mover dados antigos pra um armazenamento mais barato automaticamente?"
+✅ "Só otimizar o armazenamento já pode fazer uma diferença boa na conta."
 > Obs: Storage sem lifecycle = custo crescente silencioso. Quick win de FinOps.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: evolução gradual**
-💡 "Vocês têm planos de modernizar essa arquitetura ou a prioridade é outra?"
-💡 "O que mais incomoda vocês hoje? Performance, custo ou gestão?"
-⚠️ "Não precisa mudar tudo de uma vez — dá pra ir modernizando aos poucos."
-✅ "A gente pode fazer um roadmap de evolução que respeite o ritmo de vocês."
-> Obs: Respeitar o timing do cliente. Nem todo mundo quer modernizar agora.
+💡 "Vocês têm planos de melhorar essa estrutura ou a prioridade de vocês é outra agora?"
+💡 "O que mais incomoda vocês hoje? É custo, é performance, é a gestão do dia a dia?"
+⚠️ "Não precisa mudar tudo de uma vez — dá pra ir melhorando aos poucos."
+✅ "A gente pode montar um plano de evolução que respeite o ritmo de vocês."
+> Obs: Respeitar o timing. Nem todo mundo quer modernizar agora.
 > ✏️ Selecionada: [ ]
 
 #### Situação 2.3
-**SITUAÇÃO:** Cliente é tecnicamente maduro — usa Kubernetes, Terraform, IaC, ferramentas modernas — e já tem boa autonomia na AWS.
+**SITUAÇÃO:** Cliente é tecnicamente maduro — usa containers, automação de infra, ferramentas modernas — e já tem boa autonomia.
 
 **Abordagem 1 — Foco: identificar gaps**
-💡 "Vocês já estão bem estruturados. Tem algum ponto que sentem que poderia melhorar?"
-💡 "Vocês monitoram custo por namespace/projeto ou é tudo junto?"
-⚠️ "Muita empresa gasta mais do que precisa por falta de right-sizing."
-✅ "Nosso time pode fazer um assessment pra identificar pontos de otimização."
+💡 "Vocês já tão bem estruturados. Tem algum ponto que vocês sentem que poderia melhorar?"
+💡 "Vocês conseguem ver quanto cada projeto ou área consome de recurso separadamente?"
+⚠️ "Muita empresa gasta mais do que precisa porque não tá dimensionando direito."
+✅ "A gente pode fazer uma análise pra identificar onde dá pra otimizar."
 > Obs: Cliente maduro — não ensinar o óbvio, focar em otimização e gaps que ele não vê.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: FinOps avançado**
-💡 "Vocês usam Spot Instances pra workloads que toleram interrupção?"
-⚠️ "Kubernetes na AWS pode ficar caro se não tiver bem dimensionado."
-💡 "A gente tem ferramentas de FinOps que mostram exatamente onde otimizar."
-✅ "Posso fazer uma análise de custo do ambiente e identificar onde economizar."
-> Obs: FinOps de Kubernetes é diferencial — poucos parceiros fazem isso bem.
+**Abordagem 2 — Foco: otimização de custo avançada**
+💡 "Vocês usam máquinas spot pra coisas que podem ser interrompidas? Economiza bastante."
+⚠️ "Ambiente de containers na AWS pode ficar caro se não tiver bem dimensionado."
+💡 "A gente tem ferramentas que mostram exatamente onde tá o desperdício."
+✅ "Posso fazer uma análise de custo do ambiente e mostrar onde dá pra economizar."
+> Obs: FinOps avançado é diferencial — poucos parceiros fazem isso bem.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: expandir uso de serviços AWS**
+**Abordagem 3 — Foco: expandir uso de serviços**
 💡 "Vocês já usam algum serviço de IA ou dados da AWS?"
-⚠️ "Às vezes tem serviço gerenciado que substitui algo que vocês mantêm manualmente."
-💡 "A AWS lança serviços novos todo ano — pode ter algo que resolve um problema que vocês têm."
+⚠️ "Às vezes tem serviço pronto que substitui algo que vocês mantêm na mão."
+💡 "A AWS lança coisa nova todo ano — pode ter algo que resolve um problema que vocês têm."
 ✅ "Se quiserem, a gente pode mostrar o que tem de novo que se aplica ao cenário de vocês."
 > Obs: Cliente maduro pode não estar acompanhando novidades. Mostrar valor consultivo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: sustentação e backup**
-💡 "Vocês têm alguém de plantão pra incidentes fora do horário?"
-⚠️ "Depender de uma ou duas pessoas pra infra é um risco pro negócio."
-💡 "A gente tem sustentação que funciona como backup do time — se precisar, a gente assume."
-✅ "Posso te mostrar como funciona o modelo de sustentação da Dati."
+**Abordagem 4 — Foco: sustentação e backup de time**
+💡 "Vocês têm alguém de plantão pra quando dá problema fora do horário?"
+⚠️ "Depender de uma ou duas pessoas pra tudo é um risco pro negócio."
+💡 "A gente tem um serviço de sustentação que funciona como backup do time de vocês — tá ali quando precisa."
+✅ "Posso te mostrar como funciona esse modelo."
 > Obs: Mesmo cliente maduro pode ter risco de pessoa-chave. Sustentação como seguro.
 > ✏️ Selecionada: [ ]
 
 #### Situação 2.4
 **SITUAÇÃO:** Cliente está 100% on-premise com ERP, BI e sistemas internos — nunca migrou pra cloud ou tem muito pouco em nuvem.
 
-**Abordagem 1 — Foco: entender o cenário sem forçar migração**
-💡 "Vocês já pensaram em migrar alguma coisa pra nuvem ou a ideia é manter on-prem?"
-💡 "Tem alguma limitação que impede? Internet, custo, compliance?"
-⚠️ "Nem tudo precisa ir pra cloud — pode ser híbrido, só o que faz sentido."
-✅ "A gente pode avaliar o que faz sentido migrar e o que fica on-prem."
+**Abordagem 1 — Foco: entender sem forçar migração**
+💡 "Vocês já pensaram em levar alguma coisa pra nuvem ou a ideia é manter tudo aí dentro mesmo?"
+💡 "Tem alguma coisa que impede? Questão de internet, custo, alguma exigência?"
+⚠️ "Nem tudo precisa ir pra nuvem — pode ser só uma parte, o que fizer mais sentido."
+✅ "A gente pode avaliar junto o que vale a pena e o que fica onde tá."
 > Obs: Não forçar migração total. Muitos clientes têm razões legítimas pra ficar on-prem.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: backup e continuidade**
-💡 "Como vocês fazem backup hoje? É automatizado?"
-🔴 "Se o servidor principal morrer, em quanto tempo vocês voltam a operar?"
-💡 "Backup na nuvem é simples e barato — pode ser o primeiro passo antes de qualquer migração."
-✅ "Backup na AWS pode ser a porta de entrada mais segura e de menor custo."
+**Abordagem 2 — Foco: backup e segurança**
+💡 "E backup, como vocês fazem hoje? É automático ou alguém tem que lembrar?"
+🔴 "Se o servidor principal der problema, em quanto tempo vocês conseguem voltar a funcionar?"
+💡 "Backup na nuvem é simples e barato — pode ser o primeiro passo sem mexer em mais nada."
+✅ "Isso pode ser a porta de entrada mais segura e mais tranquila pra vocês."
 > Obs: Backup é porta de entrada de baixo custo e baixo risco pra cliente on-prem.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: BI e dados na nuvem**
-💡 "O BI de vocês roda on-prem também? Quem monta os relatórios?"
-⚠️ "BI on-prem geralmente tem limitações de performance e acesso."
-💡 "Dá pra manter o ERP on-prem e levar só o BI pra nuvem — é um cenário híbrido comum."
-✅ "A AWS tem o QuickSight que é nativo em nuvem — pode resolver problemas de performance."
+💡 "O BI de vocês roda aí dentro também? Quem monta os relatórios pro pessoal?"
+⚠️ "BI rodando local geralmente tem limitação de performance e de acesso."
+💡 "Dá pra manter o sistema principal aí e levar só o BI pra nuvem — é um cenário bem comum."
+✅ "A AWS tem ferramentas de BI que rodam na nuvem e podem resolver esses problemas de performance."
 > Obs: BI na nuvem com ERP on-prem = cenário híbrido de baixo risco.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: custo e TCO**
-💡 "Quanto vocês gastam hoje com a infra on-prem? Servidor, energia, manutenção, licenças?"
-⚠️ "Muita gente compara só o preço da cloud com o preço do servidor — mas esquece o TCO."
-💡 "Quando soma tudo — hardware, energia, espaço, tempo de manutenção — geralmente empata ou fica mais barato."
-✅ "A gente pode fazer essa comparação TCO completa pra vocês."
+**Abordagem 4 — Foco: custo real**
+💡 "Quanto vocês gastam hoje com essa estrutura toda? Servidor, energia, manutenção, licenças?"
+⚠️ "Muita gente compara só o preço da nuvem com o preço do servidor — mas esquece de somar tudo."
+💡 "Quando soma hardware, energia, espaço, tempo de manutenção — geralmente empata ou fica mais barato na nuvem."
+✅ "A gente pode fazer essa conta completa pra vocês compararem."
 > Obs: TCO muda a percepção. On-prem parece barato mas tem custo escondido.
 > ✏️ Selecionada: [ ]
 
 #### Situação 2.5
-**SITUAÇÃO:** Cliente entra em detalhes técnicos profundos que o comercial não domina — arquitetura de microserviços, workers, filas, frameworks específicos.
+**SITUAÇÃO:** Cliente entra em detalhes técnicos mais profundos — arquitetura de sistemas, workers, filas, frameworks específicos.
 
-**Abordagem 1 — Foco: redirecionar pro técnico**
-💡 "Entendi, isso é bem específico. Vou trazer nosso arquiteto de soluções pra olhar isso com detalhe."
-⚠️ "Pelo que tu tá descrevendo, parece que o gargalo é de recurso computacional, né?"
-💡 "Vocês já dimensionaram quanto de recurso precisam pra rodar isso sem travar?"
-✅ "Na próxima reunião trago o pré-vendas técnico pra gente desenhar a solução ideal."
-> Obs: Comercial não precisa entender tudo — reconhecer o gargalo e encaminhar.
+**Abordagem 1 — Foco: manter a conversa fluindo**
+💡 "Entendi, então o gargalo principal tá nessa parte de processamento, né?"
+⚠️ "Parece que quando entra muita coisa ao mesmo tempo, o sistema não dá conta."
+💡 "Vocês já mediram quanto de recurso precisa pra isso rodar sem travar?"
+✅ "Vou anotar tudo isso — na próxima reunião a gente traz o nosso especialista pra desenhar a solução."
+> Obs: Comercial mantém a conversa traduzindo em termos simples. Só encaminha pro técnico quando for realmente profundo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: traduzir em impacto de negócio**
-💡 "E quando isso trava, o que acontece pro usuário final? O sistema fica fora?"
-⚠️ "Isso impacta os clientes de vocês diretamente ou é mais interno?"
-💡 "Qual a frequência que isso acontece? É diário, semanal?"
-✅ "Vou anotar tudo isso pra o técnico já vir preparado na próxima."
+**Abordagem 2 — Foco: traduzir em impacto pro negócio**
+💡 "E quando isso trava, o que acontece pro cliente de vocês? O sistema fica fora?"
+⚠️ "Isso impacta diretamente quem usa ou é mais um problema interno?"
+💡 "Com que frequência isso acontece? É todo dia, toda semana?"
+✅ "Vou anotar tudo pra gente já vir preparado na próxima conversa."
 > Obs: Traduzir problema técnico em impacto de negócio — isso o comercial consegue fazer.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: mostrar competência sem detalhar**
-⚠️ "A gente tem experiência com workloads pesados — processamento de documentos, pipelines de dados, IA."
-💡 "Na AWS tem serviços gerenciados que resolvem isso sem precisar gerenciar manualmente."
-💡 "Nosso time já fez projetos parecidos — posso trazer alguém que fale a mesma língua."
+**Abordagem 3 — Foco: mostrar que a Dati entende**
+⚠️ "A gente tem bastante experiência com esse tipo de cenário — processamento pesado, filas, IA."
+💡 "Na AWS tem serviços que resolvem isso sem vocês precisarem gerenciar tudo na mão."
+💡 "Nosso time já fez projetos parecidos — posso trazer alguém que entende bem dessa parte."
 ✅ "Vou conectar vocês com o especialista certo do nosso time."
-> Obs: Mostrar competência sem entrar em detalhes — o comercial pode mencionar serviços sem explicar.
+> Obs: Mostrar competência sem entrar em detalhes que o comercial não domina.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: custo de oportunidade**
-💡 "Quanto tempo vocês perdem por semana lidando com esses gargalos?"
-⚠️ "Esse tempo que vocês gastam mantendo isso é tempo que não estão desenvolvendo produto."
-💡 "Já calcularam quanto custa manter isso vs usar algo gerenciado?"
-✅ "A gente pode fazer essa conta pra vocês — TCO atual vs AWS."
+**Abordagem 4 — Foco: custo de ficar como está**
+💡 "Quanto tempo vocês perdem por semana lidando com esses problemas?"
+⚠️ "Esse tempo que vocês gastam apagando incêndio é tempo que não tão investindo no produto."
+💡 "Já pararam pra pensar quanto custa manter isso assim vs resolver de vez?"
+✅ "A gente pode fazer essa conta pra vocês — geralmente surpreende."
 > Obs: Custo de oportunidade — tempo mantendo infra vs desenvolvendo produto.
 > ✏️ Selecionada: [ ]
 
 #### Situação 2.6
-**SITUAÇÃO:** Cliente menciona que usa ferramentas de terceiros (Cloudflare, Grafana, N8n, ferramentas de BI, CRM externo) junto com a infra principal.
+**SITUAÇÃO:** Cliente menciona que usa ferramentas de terceiros (DNS externo, monitoramento, automação, BI, CRM) junto com a infra principal.
 
 **Abordagem 1 — Foco: manter o que funciona**
-💡 "Essas ferramentas estão funcionando bem pra vocês? Pretendem manter ou migrar?"
+💡 "Essas ferramentas tão funcionando bem pra vocês? Pretendem manter ou tão pensando em trocar?"
 ⚠️ "Nem tudo precisa ser AWS — o que funciona bem pode ficar."
-💡 "A gente pode ajudar a migrar só o core e manter essas ferramentas como estão."
+💡 "A gente pode ajudar a migrar só o core e manter essas ferramentas como tão."
 ✅ "Vou entender o que faz sentido mexer e o que fica."
 > Obs: Não forçar tudo pra AWS — cliente valoriza quando você respeita as escolhas dele.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: consolidação e simplificação**
-💡 "Vocês têm muitas ferramentas rodando — isso tudo em quantos servidores?"
-⚠️ "Muita ferramenta no mesmo servidor compete por recurso — pode causar instabilidade."
-💡 "Já pensaram em separar as ferramentas de suporte do core da aplicação?"
-✅ "Na AWS dá pra isolar cada coisa com custo controlado."
+**Abordagem 2 — Foco: simplificar**
+💡 "Vocês têm bastante ferramenta rodando — isso tudo tá em quantos servidores?"
+⚠️ "Muita coisa no mesmo lugar compete por recurso — pode causar instabilidade."
+💡 "Já pensaram em separar as ferramentas de apoio do sistema principal?"
+✅ "Na nuvem dá pra isolar cada coisa com custo controlado."
 > Obs: Muitas ferramentas = complexidade operacional. Simplificar é argumento.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: integrações e automação**
-💡 "Esses sistemas conversam entre si? Tem integração automatizada ou é manual?"
+**Abordagem 3 — Foco: integrações**
+💡 "Esses sistemas conversam entre si? Tem integração automática ou é na mão?"
 💡 "Tem alguma integração manual que consome tempo do time?"
-⚠️ "Sistemas desconectados geram retrabalho e informação desatualizada."
-✅ "A gente pode mapear essas integrações e propor automações."
+⚠️ "Sistemas que não conversam geram retrabalho e informação desatualizada."
+✅ "A gente pode mapear essas integrações e ver o que dá pra automatizar."
 > Obs: Integrações manuais = oportunidade de automação.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: observabilidade**
-💡 "Vocês monitoram tudo isso? Tem alertas configurados?"
-⚠️ "Monitoramento sem alerta é só dashboard bonito — o importante é saber antes do cliente."
-💡 "A gente pode ajudar a montar uma estratégia de observabilidade completa."
-✅ "Isso faz parte do que a gente entrega no Well-Architected."
-> Obs: Monitoramento = já tem cultura. Evoluir pra observabilidade é o próximo passo.
+**Abordagem 4 — Foco: monitoramento**
+💡 "Vocês monitoram tudo isso? Tem alerta configurado pra quando dá problema?"
+⚠️ "Monitoramento sem alerta é só tela bonita — o importante é saber antes do cliente reclamar."
+💡 "A gente pode ajudar a montar uma estratégia de monitoramento completa."
+✅ "Isso faz parte do trabalho de boas práticas que a gente entrega."
+> Obs: Monitoramento = já tem cultura. Evoluir pra algo mais proativo é o próximo passo.
 > ✏️ Selecionada: [ ]
 
 ### 3. Billing / forma de pagamento
@@ -476,125 +474,125 @@ Emojis:
 #### Situação 3.1
 **SITUAÇÃO:** Comercial pergunta sobre o billing da AWS e o cliente revela um valor significativo pago via cartão de crédito.
 
-**Abordagem 1 — Foco: dor do cartão e IOF**
-⚠️ "Pagar AWS no cartão tem IOF de 6.38% em cima — no boleto não tem isso."
-💡 "Com boleto vocês pagam em real, já com impostos, e ganham prazo de 50 dias."
-💡 "Além disso, a cada 5 mil dólares de consumo, vocês ganham uma hora de consultoria com a gente."
-✅ "Posso te explicar como funciona a migração do billing — é simples e não muda nada na conta."
+**Abordagem 1 — Foco: dor do cartão**
+⚠️ "Pagar AWS no cartão tem aquele IOF em cima — no boleto não tem isso."
+💡 "Com boleto vocês pagam em real, já com os impostos certinhos, e ainda ganham um prazo de 50 dias."
+💡 "E a cada 5 mil dólares de consumo, vocês ganham uma hora de consultoria com a gente de graça."
+✅ "Posso te explicar como funciona essa mudança — é bem simples e não muda nada na conta de vocês."
 > Obs: Billing no cartão = dor financeira real. Porta de entrada mais fácil da Dati.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: otimização de custo**
-💡 "Desse valor, vocês sabem quanto é cada serviço? EC2, S3, transferência?"
-⚠️ "Geralmente quando a gente olha uma conta desse tamanho, encontra 20-30% de otimização."
-💡 "Vocês usam instâncias reservadas ou é tudo on-demand?"
-✅ "A gente pode fazer uma análise de custo sem compromisso."
-> Obs: Billing sem otimização = provavelmente tem desperdício. FinOps é argumento concreto.
+💡 "Desse valor, vocês sabem mais ou menos quanto é de cada coisa? Servidor, armazenamento, transferência?"
+⚠️ "Geralmente quando a gente olha uma conta desse tamanho, encontra uns 20-30% de economia."
+💡 "Vocês compram capacidade reservada ou pagam tudo por uso?"
+✅ "A gente pode dar uma olhada na conta sem compromisso — só pra vocês verem onde dá pra economizar."
+> Obs: Billing sem otimização = provavelmente tem desperdício.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: reservas parceladas**
-💡 "Com esse volume, reservas fazem muito sentido — economia de 30-40%."
-⚠️ "E com a gente, vocês podem parcelar as reservas em 6x no boleto."
-💡 "Vocês já fizeram reserva alguma vez ou sempre foi on-demand?"
-✅ "Posso simular quanto vocês economizariam com reservas."
-> Obs: Reservas parceladas = economia + fluxo de caixa. Argumento forte pra CFO.
+💡 "Com esse volume, comprar capacidade reservada faz muito sentido — economia de 30-40%."
+⚠️ "E com a gente, vocês podem parcelar isso em 6x no boleto."
+💡 "Vocês já fizeram reserva alguma vez ou sempre pagaram por uso?"
+✅ "Posso simular quanto vocês economizariam — te mando por email."
+> Obs: Reservas parceladas = economia + fluxo de caixa. Argumento forte pra financeiro.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: visibilidade financeira**
-💡 "Vocês têm visibilidade de quanto cada projeto ou área consome?"
-⚠️ "Sem tags e organização, fica difícil saber onde o dinheiro tá indo."
-💡 "A gente implementa FinOps com dashboards de custo por projeto, por time, por ambiente."
-✅ "Com billing pela Dati, vocês ganham essa visibilidade incluída."
-> Obs: Visibilidade de custo = argumento pra gestão. CFO adora dashboard de custo.
+💡 "Vocês conseguem ver quanto cada projeto ou área consome na AWS?"
+⚠️ "Sem essa organização, fica difícil saber onde o dinheiro tá indo."
+💡 "A gente monta dashboards de custo por projeto, por time, por ambiente — vocês passam a ter essa visibilidade."
+✅ "Com o billing pela Dati, vocês ganham isso incluído."
+> Obs: Visibilidade de custo = argumento pra gestão.
 > ✏️ Selecionada: [ ]
 
 #### Situação 3.2
 **SITUAÇÃO:** Cliente não conhece a opção de pagamento via boleto e pergunta qual a diferença.
 
 **Abordagem 1 — Foco: benefício fiscal e financeiro**
-💡 "A vantagem principal é fiscal — vocês pagam em real, já com impostos, sem IOF do cartão."
-💡 "O prazo de pagamento é de 50 dias — melhora o fluxo de caixa."
-⚠️ "No cartão vocês pagam IOF + câmbio variável — no boleto é fixo em real."
+💡 "A vantagem principal é que vocês pagam em real, já com os impostos certinhos, sem aquele IOF do cartão."
+💡 "E o prazo de pagamento é de 50 dias — ajuda bastante no fluxo de caixa."
+⚠️ "No cartão vocês pagam IOF mais o câmbio que varia — no boleto é tudo fixo em real."
 ✅ "Posso te mandar os detalhes por email pra vocês analisarem com calma."
-> Obs: IOF + câmbio = custo escondido do cartão. Argumento financeiro forte.
+> Obs: IOF + câmbio = custo escondido do cartão.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: autonomia e simplicidade**
-💡 "A conta continua sendo de vocês — vocês fazem o que quiserem, total autonomia."
-⚠️ "O que muda é só a forma de pagamento — em vez de cartão, boleto."
-💡 "Se um dia quiserem voltar pro cartão, é simples — sem lock-in."
-✅ "A gente cuida de toda a migração do billing — vocês não precisam fazer nada."
+💡 "A conta continua sendo toda de vocês — vocês fazem o que quiserem, total liberdade."
+⚠️ "O que muda é só a forma de pagar — em vez de cartão, boleto."
+💡 "Se um dia quiserem voltar pro cartão, é simples — sem amarração nenhuma."
+✅ "A gente cuida de toda essa mudança — vocês não precisam fazer nada."
 > Obs: Medo de perder controle é a objeção #1. Reforçar autonomia total.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: benefícios extras incluídos**
-💡 "Além do boleto, a cada 5 mil dólares vocês ganham uma hora de consultoria."
-⚠️ "É acumulativo — e a gente traz FinOps, recomendações de reserva, sizing — tudo incluído."
+**Abordagem 3 — Foco: benefícios extras**
+💡 "Além do boleto, a cada 5 mil dólares vocês ganham uma hora de consultoria com a gente."
+⚠️ "É acumulativo — e a gente traz análise de custo, recomendações de economia, tudo incluído."
 💡 "Basicamente vocês pagam o mesmo valor e ganham consultoria de graça."
-✅ "Posso te mostrar o que está incluído no billing."
-> Obs: "Paga o mesmo e ganha mais" = argumento irresistível.
+✅ "Posso te mostrar tudo que tá incluído."
+> Obs: "Paga o mesmo e ganha mais" = argumento simples e forte.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: referências de outros clientes**
-💡 "Vários clientes nossos fizeram essa mudança e a economia no IOF já paga a diferença."
+**Abordagem 4 — Foco: referências**
+💡 "Vários clientes nossos fizeram essa mudança e a economia no IOF já fez diferença."
 ⚠️ "Tem cliente que economizou mais de 10% só mudando a forma de pagamento."
 💡 "E com o prazo de 50 dias, o financeiro de vocês agradece."
-✅ "Posso te conectar com um cliente nosso que fez essa mudança, se quiser uma referência."
-> Obs: Social proof — outros clientes já fizeram. Reduz percepção de risco.
+✅ "Se quiser, posso te conectar com um cliente nosso que já fez essa mudança."
+> Obs: Social proof — outros já fizeram. Reduz percepção de risco.
 > ✏️ Selecionada: [ ]
 
 #### Situação 3.3
 **SITUAÇÃO:** Cliente demonstra interesse no billing e quer avançar — já entendeu os benefícios.
 
 **Abordagem 1 — Foco: fechar rápido**
-✅ "Ótimo, então vamos encaminhar o billing. É rápido de migrar."
-💡 "Além do boleto, já aproveito pra fazer uma análise de custo da conta de vocês."
-💡 "Vocês têm mais de uma conta AWS ou é só essa?"
-✅ "Vou preparar a proposta e te mando até amanhã."
+✅ "Ótimo, então vamos encaminhar. É rápido de fazer essa mudança."
+💡 "Já aproveito pra dar uma olhada na conta de vocês e ver se tem alguma economia fácil."
+💡 "Vocês têm mais de uma conta na AWS ou é só essa?"
+✅ "Vou preparar tudo e te mando até amanhã."
 > Obs: Cliente já comprou a ideia — não ficar vendendo mais, fechar.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: expandir o escopo**
-💡 "Com o billing, a gente já começa a olhar a conta e trazer recomendações."
-⚠️ "Geralmente no primeiro mês a gente já identifica oportunidades de economia."
-💡 "Vocês querem que a gente já faça um assessment junto com a migração do billing?"
-✅ "Posso incluir o assessment na proposta — sem custo adicional."
-> Obs: Billing é porta de entrada — aproveitar pra expandir pra assessment/Well-Architected.
+💡 "Com o billing, a gente já começa a olhar a conta e trazer recomendações de economia."
+⚠️ "Geralmente no primeiro mês a gente já acha oportunidades."
+💡 "Vocês querem que a gente já faça uma análise do ambiente junto?"
+✅ "Posso incluir isso — sem custo adicional."
+> Obs: Billing é porta de entrada — aproveitar pra expandir.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: aprovação interna**
-💡 "Isso precisa passar por alguém internamente ou tu já consegue aprovar?"
+💡 "Isso precisa passar por alguém aí dentro ou tu já consegue resolver?"
 ⚠️ "Se precisar apresentar pro financeiro, posso preparar um comparativo cartão vs boleto."
-💡 "O argumento de eliminar IOF e ganhar prazo de 50 dias geralmente convence rápido."
+💡 "O argumento de tirar o IOF e ganhar prazo de 50 dias geralmente convence rápido."
 ✅ "Me fala quem precisa aprovar que eu preparo o material."
 > Obs: Entender quem decide — às vezes o técnico compra mas quem paga é o CFO.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: urgência financeira**
-⚠️ "Quanto antes migrar, antes vocês param de pagar IOF."
-💡 "A migração do billing leva poucos dias — não tem downtime."
-💡 "Vocês podem começar no próximo ciclo de faturamento."
-✅ "Vamos agendar a migração pra essa semana?"
-> Obs: Dor financeira real e imediata — criar senso de urgência sem forçar.
+**Abordagem 4 — Foco: agilizar**
+⚠️ "Quanto antes mudar, antes vocês param de pagar IOF."
+💡 "A mudança leva poucos dias — não para nada."
+💡 "Vocês podem começar já no próximo ciclo."
+✅ "Vamos agendar pra essa semana?"
+> Obs: Dor financeira real — criar senso de urgência sem forçar.
 > ✏️ Selecionada: [ ]
 
 #### Situação 3.4
 **SITUAÇÃO:** Cliente tem billing baixo na AWS (menos de $2k/mês) — o billing sozinho não é argumento forte.
 
-**Abordagem 1 — Foco: plantar semente pro crescimento**
+**Abordagem 1 — Foco: plantar semente**
 💡 "Hoje é pouco, mas com o crescimento esse valor vai subir rápido."
-⚠️ "É melhor organizar o billing agora que é simples do que quando estiver grande."
-💡 "Mesmo com esse valor, o boleto já elimina o IOF do cartão."
+⚠️ "É melhor organizar isso agora que é simples do que quando tiver grande."
+💡 "Mesmo com esse valor, o boleto já tira o IOF do cartão."
 ✅ "Quando vocês chegarem em 5 mil dólares, já ganham consultoria grátis."
 > Obs: Billing baixo = não é prioridade agora. Plantar semente pra quando crescer.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: incentivos como gancho**
-💡 "Além do billing, como parceiro vocês têm acesso a incentivos da AWS."
-⚠️ "Pra buscar incentivos, vocês precisam passar por um parceiro — a gente faz isso."
-💡 "Se vocês têm um projeto novo, a AWS pode custear parte dele."
-✅ "Me conta os projetos que vocês têm em mente que eu vejo o que consigo de incentivo."
-> Obs: Billing baixo mas projeto novo = incentivo é o gancho. Foco no projeto, não no billing.
+💡 "Além do billing, como parceiro vocês passam a ter acesso a incentivos da AWS."
+⚠️ "Pra buscar esses incentivos, precisa passar por um parceiro — e a gente faz isso."
+💡 "Se vocês têm algum projeto novo, a AWS pode bancar parte dele."
+✅ "Me conta o que vocês tão planejando que eu vejo o que consigo."
+> Obs: Billing baixo mas projeto novo = incentivo é o gancho.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: relacionamento**
@@ -602,13 +600,13 @@ Emojis:
 ⚠️ "Quando surgir uma necessidade maior, vocês já têm quem procurar."
 💡 "A gente pode ir acompanhando o crescimento de vocês e apoiando quando fizer sentido."
 ✅ "Vamos manter contato — quando o cenário mudar, a gente já se conhece."
-> Obs: Não forçar billing baixo. Construir relacionamento pra colher depois.
+> Obs: Não forçar. Construir relacionamento pra colher depois.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: projeção de custo**
 💡 "Com os projetos que vocês têm planejados, vocês têm ideia de quanto vai ficar?"
-⚠️ "É bom planejar o custo antes de escalar — depois fica mais difícil otimizar."
-💡 "A gente pode fazer uma projeção de custo baseada no crescimento esperado."
+⚠️ "É bom planejar o custo antes de crescer — depois fica mais difícil ajustar."
+💡 "A gente pode fazer uma projeção de custo baseada no crescimento que vocês esperam."
 ✅ "Assim vocês já sabem o que esperar e podem se preparar."
 > Obs: Projeção de custo = mostra valor consultivo mesmo com billing baixo.
 > ✏️ Selecionada: [ ]
@@ -616,33 +614,33 @@ Emojis:
 #### Situação 3.5
 **SITUAÇÃO:** Comercial explica o benefício de consultoria grátis por consumo ($5k = 1h) e o cliente quer entender melhor.
 
-**Abordagem 1 — Foco: tangibilizar o benefício**
-💡 "Com o consumo de vocês, isso dá X horas por ano de consultoria grátis."
-💡 "Essas horas podem ser usadas pra qualquer coisa — assessment, otimização, arquitetura."
-⚠️ "É consultoria especializada AWS — o mesmo time que atende empresas grandes."
-✅ "Vocês podem ir acumulando e usar quando tiverem um projeto específico."
+**Abordagem 1 — Foco: deixar concreto**
+💡 "Com o consumo de vocês, isso dá mais ou menos X horas por ano de consultoria grátis."
+💡 "Essas horas podem ser usadas pra qualquer coisa — análise de ambiente, otimização, arquitetura."
+⚠️ "É consultoria especializada em AWS — o mesmo time que atende empresas grandes."
+✅ "Vocês podem ir acumulando e usar quando tiverem uma necessidade específica."
 > Obs: Calcular as horas concretas — tangibiliza o benefício.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: exemplos de uso**
-💡 "Outros clientes usam essas horas pra revisão anual de reservas — só nisso já economizam bastante."
-💡 "Também dá pra usar pra assessment de segurança, sizing de máquinas, análise de custo."
+💡 "Outros clientes usam essas horas pra revisão anual de custos — só nisso já economizam bastante."
+💡 "Também dá pra usar pra análise de segurança, ajuste de máquinas, análise de custo."
 ⚠️ "É como ter um consultor AWS de plantão sem pagar a mais."
 ✅ "Quando vocês precisarem, é só acionar."
-> Obs: Dar exemplos concretos de como usar — cliente não sabe o que pedir.
+> Obs: Dar exemplos concretos — cliente não sabe o que pedir.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: comparar com suporte AWS**
-💡 "O plano de suporte Business da AWS custa no mínimo 100 dólares por mês."
+💡 "O plano de suporte da AWS custa no mínimo 100 dólares por mês."
 ⚠️ "Com a gente, vocês têm consultoria especializada incluída no billing — sem custo extra."
-💡 "E a gente não só responde ticket — a gente proativamente olha a conta de vocês."
-✅ "É um suporte mais próximo do que a AWS oferece diretamente."
+💡 "E a gente não só responde quando vocês pedem — a gente olha a conta de vocês proativamente."
+✅ "É um suporte mais próximo do que a AWS oferece direto."
 > Obs: Comparar com suporte AWS = mostra que billing da Dati entrega mais.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: reservas parceladas**
 💡 "Além das horas, a gente também parcela reservas em até 6x no boleto."
-⚠️ "Reserva All Upfront tem o maior desconto — e com parcelamento, não pesa no caixa."
+⚠️ "Reserva com pagamento antecipado tem o maior desconto — e com parcelamento, não pesa no caixa."
 💡 "Todo ano a gente faz uma revisão de reservas com os clientes pra garantir o melhor desconto."
 ✅ "Posso já simular as reservas pra vocês verem a economia."
 > Obs: Reservas parceladas = economia + fluxo de caixa.
@@ -654,105 +652,105 @@ Emojis:
 **SITUAÇÃO:** Cliente menciona que o time de TI é pequeno e não tem braço pra tocar projetos novos — a operação do dia a dia consome tudo.
 
 **Abordagem 1 — Foco: ser o braço que falta**
-💡 "Quais projetos estão parados hoje por falta de braço?"
-⚠️ "A gente funciona como extensão do time de vocês — sem precisar contratar."
-💡 "Vocês preferem alguém que execute ou que oriente e vocês executam?"
-✅ "Posso montar uma proposta que cobre essa lacuna."
-> Obs: Falta de braço = dor recorrente. Dati como extensão do time é o pitch perfeito.
+💡 "E quais projetos tão parados hoje por falta de gente?"
+⚠️ "A gente funciona como uma extensão do time de vocês — sem precisar contratar ninguém."
+💡 "Vocês preferem alguém que faça por vocês ou que oriente e vocês executam?"
+✅ "Posso montar uma proposta que cubra essa lacuna."
+> Obs: Falta de braço = dor recorrente. Dati como extensão do time.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: priorizar**
-💡 "De todos esses projetos parados, qual daria mais resultado se saísse primeiro?"
-💡 "Tem algum que a diretoria está cobrando?"
+💡 "De tudo que tá parado, qual daria mais resultado se saísse primeiro?"
+💡 "Tem algum que a diretoria tá cobrando?"
 ⚠️ "Com recurso limitado, o segredo é atacar o que dá mais resultado com menos esforço."
-✅ "Vamos identificar o quick win e começar por ele."
+✅ "Vamos identificar o que dá pra resolver rápido e começar por aí."
 > Obs: Ajudar a priorizar = mostrar valor consultivo antes de vender.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: risco de pessoa-chave**
-💡 "Se tu ficar fora por uma semana, o que acontece com a infra?"
+**Abordagem 3 — Foco: risco de depender de poucas pessoas**
+💡 "Se tu ficar fora uma semana, o que acontece com a infra?"
 ⚠️ "Depender de uma pessoa só é um risco grande pro negócio."
-💡 "A gente pode documentar e padronizar pra não depender de uma pessoa só."
-✅ "A gente tem sustentação que funciona como backup do teu time."
+💡 "A gente pode documentar e padronizar pra não ficar tudo na cabeça de uma pessoa."
+✅ "A gente tem um serviço de sustentação que funciona como backup do teu time."
 > Obs: Pessoa-chave = risco operacional. Sustentação como seguro.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: automação vs contratação**
+**Abordagem 4 — Foco: automatizar em vez de contratar**
 💡 "Já pensaram em automatizar parte da operação pra liberar tempo do time?"
-⚠️ "Às vezes automatizar custa menos do que contratar — e escala melhor."
+⚠️ "Às vezes automatizar sai mais barato do que contratar — e escala melhor."
 💡 "Com o crescimento da empresa, vocês vão precisar de mais gente ou mais automação?"
 ✅ "Posso trazer uma proposta de automação que libera vocês pra focar no que importa."
-> Obs: Automação como alternativa a contratação — argumento forte pra empresa com budget limitado.
+> Obs: Automação como alternativa a contratação — argumento forte pra budget limitado.
 > ✏️ Selecionada: [ ]
 
 #### Situação 4.2
 **SITUAÇÃO:** Cliente diz que faz tudo sozinho, sem parceiro, "na raça" — e reconhece que isso traz limitações.
 
 **Abordagem 1 — Foco: validar sem criticar**
-💡 "Isso mostra que vocês têm muita experiência — e funcionou até aqui."
+💡 "Isso mostra que vocês têm muita experiência — e funcionou até aqui, né?"
 ⚠️ "Só que conforme cresce, o risco de dar problema aumenta — e resolver sozinho fica mais caro."
-💡 "Vocês já tiveram algum incidente sério? Queda, perda de dados?"
+💡 "Vocês já tiveram algum susto? Queda, perda de dados, alguma coisa assim?"
 ✅ "A gente pode trazer boas práticas sem mudar o que já funciona."
 > Obs: Não criticar o "na raça" — validar e mostrar que o próximo nível precisa de apoio.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: suporte e sustentação**
-🔴 "Se acontecer um incidente grave num final de semana, quem resolve?"
-⚠️ "Sem parceiro, vocês estão sozinhos na hora do problema."
+**Abordagem 2 — Foco: suporte quando der problema**
+🔴 "Se acontecer um problema grave num final de semana, quem resolve?"
+⚠️ "Sem parceiro, vocês tão sozinhos na hora que mais precisa."
 💡 "A gente tem sustentação que funciona como seguro — vocês ligam e a gente resolve."
-✅ "Posso te mostrar os planos de sustentação que a gente tem."
+✅ "Posso te mostrar como funciona esse modelo."
 > Obs: "Na raça" funciona até dar errado. Sustentação como seguro.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: evolução natural**
 💡 "Vocês chegaram até aqui na raça — imagina com um parceiro técnico do lado."
-⚠️ "Não é que vocês não sabem — é que o tempo de vocês vale mais focando no produto."
-💡 "A gente cuida da infra e vocês focam no que gera receita."
+⚠️ "Não é que vocês não sabem — é que o tempo de vocês vale mais focando no negócio."
+💡 "A gente cuida da parte de infra e vocês focam no que gera receita."
 ✅ "Vamos conversar sobre como dividir essa responsabilidade."
-> Obs: Posicionar parceria como evolução natural, não como correção de erro.
+> Obs: Parceria como evolução natural, não como correção de erro.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: conhecimento concentrado**
+**Abordagem 4 — Foco: conhecimento na cabeça de poucos**
 💡 "Hoje quem sabe como a infra funciona? É só vocês?"
 ⚠️ "Se alguém sair, o conhecimento vai junto — isso é um risco pro negócio."
-💡 "A gente pode documentar e padronizar a infra pra não depender de uma pessoa só."
-✅ "Isso faz parte do Well-Architected que a gente oferece."
-> Obs: Conhecimento concentrado = risco de bus factor.
+💡 "A gente pode documentar e padronizar pra não ficar tudo na cabeça de uma pessoa."
+✅ "Isso faz parte do trabalho de boas práticas que a gente entrega."
+> Obs: Conhecimento concentrado = risco.
 > ✏️ Selecionada: [ ]
 
 #### Situação 4.3
 **SITUAÇÃO:** Cliente descreve gargalos de performance ou escala — sistema trava, não aguenta carga, processos concorrem por recurso.
 
-**Abordagem 1 — Foco: validar e quantificar**
+**Abordagem 1 — Foco: validar e entender a frequência**
 ⚠️ "Isso é um gargalo real — quando trava, os clientes de vocês sentem?"
-💡 "Com que frequência isso acontece hoje?"
-💡 "Vocês têm algum workaround ou simplesmente esperam?"
-✅ "Na AWS isso se resolve com auto-scaling e serviços gerenciados — o técnico pode detalhar."
+💡 "Com que frequência isso acontece?"
+💡 "Vocês têm algum jeito de contornar ou simplesmente esperam?"
+✅ "Na nuvem isso se resolve com escala automática — o sistema cresce sozinho quando precisa."
 > Obs: Cliente já sabe que é problema — validar e mostrar que tem solução.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: impacto no negócio**
-💡 "Quando isso acontece, vocês perdem clientes ou é mais uma inconveniência?"
-🔴 "Se isso acontecer durante uma demo pra um cliente grande, é crítico."
-⚠️ "Conforme vocês crescem, isso vai piorar — mais usuários, mais carga."
+💡 "Quando isso acontece, vocês perdem clientes ou é mais um incômodo interno?"
+🔴 "Se isso acontecer na frente de um cliente importante, é crítico."
+⚠️ "Conforme vocês crescem, isso vai piorar — mais gente usando, mais carga."
 ✅ "Vamos planejar a solução antes que vire um problema maior."
 > Obs: Traduzir problema técnico em risco de negócio.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: faseamento da solução**
-💡 "Não precisa resolver tudo de uma vez — dá pra começar pelo gargalo principal."
-⚠️ "O primeiro passo é tirar o ponto mais crítico — depois vai evoluindo."
-💡 "Vocês já pensaram em qual seria o mínimo pra resolver esse problema?"
-✅ "A gente pode montar um plano faseado — começa pelo mais crítico."
+**Abordagem 3 — Foco: resolver por partes**
+💡 "Não precisa resolver tudo de uma vez — dá pra começar pelo que mais trava."
+⚠️ "O primeiro passo é tirar o gargalo principal — depois vai evoluindo."
+💡 "Vocês já sabem qual é o ponto mais crítico?"
+✅ "A gente pode montar um plano por etapas — começa pelo que mais dói."
 > Obs: Faseamento = menos risco, menos custo inicial.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: custo de não resolver**
+**Abordagem 4 — Foco: custo de ficar como está**
 💡 "Quanto tempo vocês perdem por semana lidando com esses travamentos?"
-⚠️ "Esse tempo é tempo que vocês não estão desenvolvendo features novas ou atendendo clientes."
-💡 "Já calcularam quanto custa manter isso vs resolver de vez?"
-✅ "A gente pode fazer essa conta — geralmente surpreende."
-> Obs: Custo de oportunidade é argumento forte — tempo é o recurso mais escasso.
+⚠️ "Esse tempo é tempo que vocês não tão investindo em coisas novas."
+💡 "Já pararam pra pensar quanto custa manter isso assim vs resolver de vez?"
+✅ "A gente pode fazer essa conta pra vocês — geralmente surpreende."
+> Obs: Custo de oportunidade — tempo é o recurso mais escasso.
 > ✏️ Selecionada: [ ]
 
 #### Situação 4.4
@@ -760,32 +758,32 @@ Emojis:
 
 **Abordagem 1 — Foco: organização de contas**
 💡 "Vocês têm tudo numa conta só ou já separaram alguma coisa?"
-⚠️ "Conta única com tudo junto é um risco — se alguém acessa com permissão errada, acessa tudo."
-💡 "A estruturação de contas é o primeiro passo — e a AWS não cobra por criar contas."
-✅ "A gente faz essa estruturação como parte do Well-Architected."
+⚠️ "Conta única com tudo junto é arriscado — se alguém faz algo errado, afeta tudo."
+💡 "Criar contas separadas é de graça na AWS — o que muda é a organização."
+✅ "A gente faz essa organização como parte do trabalho de boas práticas."
 > Obs: Conta única = risco de segurança. Estruturação é projeto de baixo custo e alto impacto.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: normalizar a situação**
-💡 "Vocês chegaram num momento de maturidade que precisa dessa organização."
-⚠️ "É normal — muita empresa cresce primeiro e organiza depois. O importante é organizar."
-💡 "A gente já fez isso pra vários clientes no mesmo estágio."
-✅ "Vamos começar pelo assessment pra ver onde estão os gaps."
+**Abordagem 2 — Foco: normalizar**
+💡 "Vocês chegaram num momento que precisa dessa organização — é natural."
+⚠️ "Muita empresa cresce primeiro e organiza depois. O importante é organizar."
+💡 "A gente já fez isso pra vários clientes que tavam no mesmo estágio."
+✅ "Vamos começar com uma análise pra ver onde tão os gaps."
 > Obs: Normalizar — não é culpa deles, é momento de evoluir.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: segurança**
 🔴 "Sem organização de contas, como vocês controlam quem acessa o quê?"
-💡 "Vocês usam MFA? IAM com políticas de menor privilégio?"
-⚠️ "Um vazamento pode ser muito grave — especialmente com dados sensíveis."
-✅ "O Well-Architected cobre segurança como prioridade."
+💡 "Vocês usam autenticação em dois fatores pra todo mundo?"
+⚠️ "Com dados sensíveis, um vazamento pode ser muito grave."
+✅ "O trabalho de boas práticas que a gente faz cobre segurança como prioridade."
 > Obs: Segurança é argumento que pega — especialmente com dados sensíveis.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: compliance e auditoria**
+**Abordagem 4 — Foco: auditoria e compliance**
 💡 "Vocês já passaram por alguma auditoria na parte de infra?"
-⚠️ "O custo de organizar agora é muito menor do que o custo de uma não-conformidade."
-💡 "O relatório do Well-Architected serve como evidência de boas práticas."
+⚠️ "Organizar agora custa muito menos do que resolver uma não-conformidade depois."
+💡 "O relatório de boas práticas que a gente gera serve como evidência em auditoria."
 ✅ "Vamos priorizar o que tem mais impacto de segurança."
 > Obs: Compliance como driver — o cliente PRECISA resolver.
 > ✏️ Selecionada: [ ]
@@ -793,9 +791,9 @@ Emojis:
 #### Situação 4.5
 **SITUAÇÃO:** Cliente tem processos manuais que poderiam ser automatizados — configurações manuais, relatórios feitos pelo TI, ETL manual, comunicações repetitivas.
 
-**Abordagem 1 — Foco: quantificar o trabalho manual**
+**Abordagem 1 — Foco: quanto tempo gasta**
 💡 "Quanto tempo o time gasta por semana nessas tarefas manuais?"
-⚠️ "Esse tempo manual é tempo que não estão investindo em coisas estratégicas."
+⚠️ "Esse tempo manual é tempo que não tão investindo em coisas mais estratégicas."
 💡 "Vocês já tentaram automatizar alguma dessas tarefas?"
 ✅ "A gente pode mapear o que dá pra automatizar e priorizar pelo impacto."
 > Obs: Quantificar = justificar investimento. "X horas por semana" é argumento concreto.
@@ -805,46 +803,46 @@ Emojis:
 💡 "Esse tipo de tarefa repetitiva é exatamente onde IA faz diferença."
 ⚠️ "Não precisa de um projeto enorme — às vezes um assistente simples já resolve."
 💡 "Vocês já pensaram em usar IA pra que as áreas acessem as informações direto, sem passar pelo TI?"
-✅ "A gente pode montar um piloto rápido pra vocês testarem."
+✅ "A gente pode montar um teste rápido pra vocês verem funcionando."
 > Obs: IA pra self-service de informação = tira gargalo do TI.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: escala do problema**
 💡 "Conforme a empresa cresce, esse processo manual vai ficar insustentável."
-⚠️ "Imagina dobrar o número de clientes — o time aguenta fazer isso manualmente?"
+⚠️ "Imagina dobrar o número de clientes — o time aguenta fazer isso na mão?"
 💡 "Automatizar agora prepara vocês pro crescimento."
 ✅ "Vamos identificar o processo mais crítico e começar por ele."
-> Obs: Escala = processo manual não sobrevive. Automação como investimento, não custo.
+> Obs: Escala = processo manual não sobrevive.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: dados que já existem**
+**Abordagem 4 — Foco: usar dados que já existem**
 💡 "Vocês já têm os dados — o que falta é uma camada inteligente em cima."
-⚠️ "Não precisa começar do zero — os dados já existem, só precisa de automação."
-💡 "Com os dados que vocês já coletam, dá pra fazer muita coisa."
-✅ "Nosso time pode fazer um piloto rápido com os dados que vocês já têm."
+⚠️ "Não precisa começar do zero — os dados já tão aí, só precisa de automação."
+💡 "Com o que vocês já coletam hoje, dá pra fazer muita coisa."
+✅ "Nosso time pode montar um teste rápido com os dados que vocês já têm."
 > Obs: Dados existentes = projeto mais rápido e barato.
 > ✏️ Selecionada: [ ]
 
 #### Situação 4.6
 **SITUAÇÃO:** Cliente quer usar IA mas não sabe por onde começar — reconhece que tem potencial mas não tem clareza do caminho.
 
-**Abordagem 1 — Foco: mapear onde IA faz sentido**
-💡 "Que tipo de problema vocês gostariam que a IA resolvesse? Operacional, comercial, atendimento?"
-⚠️ "O primeiro passo é mapear onde IA gera resultado — não sair implementando sem foco."
-💡 "Vocês já tentaram algum projeto de IA antes? O que aconteceu?"
+**Abordagem 1 — Foco: mapear onde faz sentido**
+💡 "Que tipo de problema vocês gostariam que a IA resolvesse? É mais operacional, comercial, atendimento?"
+⚠️ "O primeiro passo é entender onde IA gera resultado de verdade — não sair fazendo sem foco."
+💡 "Vocês já tentaram alguma coisa de IA antes? O que aconteceu?"
 ✅ "A gente tem um time de IA que faz exatamente esse mapeamento inicial."
 > Obs: Cliente sem clareza — ajudar a focar antes de propor solução.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: quick wins**
-💡 "Normalmente o primeiro passo é identificar os quick wins — onde IA dá resultado em semanas."
+**Abordagem 2 — Foco: resultado rápido**
+💡 "Normalmente o primeiro passo é achar os quick wins — onde IA dá resultado em semanas, não meses."
 ⚠️ "Não precisa de um projeto enorme — às vezes um chatbot ou um relatório inteligente já muda o jogo."
 💡 "Vocês têm algum processo repetitivo que consome muito tempo?"
-✅ "Posso trazer nosso especialista de IA pra identificar esses quick wins."
-> Obs: Quick wins = resultado rápido com investimento baixo. Gera confiança pra projetos maiores.
+✅ "Posso trazer nosso pessoal de IA pra identificar esses quick wins junto com vocês."
+> Obs: Quick wins = resultado rápido com investimento baixo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: referências e cases**
+**Abordagem 3 — Foco: referências**
 ⚠️ "Vários clientes nossos começaram exatamente assim — com potencial mas sem saber por onde atacar."
 💡 "No setor de vocês, os casos mais comuns são [adaptar ao contexto]."
 💡 "Vocês conhecem algum concorrente que já usa IA?"
@@ -853,46 +851,46 @@ Emojis:
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: processo antes de tecnologia**
-💡 "Antes de IA, os processos de vocês estão bem definidos?"
+💡 "Antes de IA, os processos de vocês tão bem definidos?"
 ⚠️ "IA funciona melhor quando o processo é claro — senão ela automatiza a bagunça."
-💡 "Às vezes o primeiro passo é organizar os dados e processos antes de colocar IA."
-✅ "A gente pode ajudar nessa organização — dados, processos e depois IA."
-> Obs: Ser honesto — se o processo não está pronto, IA vai falhar.
+💡 "Às vezes o primeiro passo é arrumar a casa antes de colocar IA."
+✅ "A gente pode ajudar nessa organização — primeiro os processos, depois a IA."
+> Obs: Ser honesto — se o processo não tá pronto, IA vai falhar.
 > ✏️ Selecionada: [ ]
 
 #### Situação 4.7
 **SITUAÇÃO:** Cliente tem requisitos regulatórios ou de compliance que impactam decisões de tecnologia — Banco Central, LGPD, auditoria, dados sensíveis.
 
-**Abordagem 1 — Foco: compliance como driver**
+**Abordagem 1 — Foco: compliance como necessidade**
 💡 "Vocês já passaram por alguma auditoria na parte de infra?"
-⚠️ "Requisitos regulatórios impactam diretamente a arquitetura — isolamento, criptografia, logs."
+⚠️ "Requisitos regulatórios impactam direto na estrutura — isolamento, criptografia, logs de acesso."
 💡 "Vocês têm documentação de compliance da infra atual?"
 ✅ "A gente tem experiência com clientes regulados — fintech, saúde, varejo. Podemos ajudar."
-> Obs: Regulatório = não é opcional. Cliente PRECISA resolver. Urgência natural.
+> Obs: Regulatório = não é opcional. Urgência natural.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: estruturação pra compliance**
-💡 "Com requisitos regulatórios, faz sentido ter ambientes isolados — produção separada de desenvolvimento."
-⚠️ "Misturar workloads regulados com não-regulados pode dar problema em auditoria."
-💡 "A AWS tem serviços específicos pra compliance — CloudTrail, Config, GuardDuty."
-✅ "A estruturação de contas resolve isso — e a gente já fez pra outros clientes regulados."
-> Obs: Estruturação + compliance = projeto de alto valor e urgência natural.
+**Abordagem 2 — Foco: separar ambientes**
+💡 "Com essas exigências, faz sentido ter os ambientes bem separados — produção longe de teste."
+⚠️ "Misturar coisas reguladas com não-reguladas pode dar problema em auditoria."
+💡 "Na AWS dá pra separar tudo certinho — cada coisa no seu lugar."
+✅ "A gente já fez isso pra outros clientes com exigências parecidas."
+> Obs: Estruturação + compliance = projeto de alto valor.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: custo de não-compliance**
+**Abordagem 3 — Foco: custo de não estar em conformidade**
 💡 "Vocês sabem qual é a penalidade se encontrarem uma não-conformidade?"
-⚠️ "O custo de organizar agora é muito menor do que o custo de uma multa ou sanção."
-💡 "Além da multa, tem o risco reputacional."
+⚠️ "Organizar agora custa muito menos do que uma multa ou sanção."
+💡 "Além da multa, tem o risco de imagem."
 ✅ "Vamos priorizar a parte regulatória — é o que tem mais urgência."
-> Obs: Custo de não-compliance > custo do projeto. Argumento definitivo.
+> Obs: Custo de não-compliance > custo do projeto.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: evidência de boas práticas**
-💡 "O relatório do Well-Architected serve como evidência de compliance."
-⚠️ "Se vocês passarem por auditoria, ter o WAR feito mostra que seguem boas práticas."
-💡 "A gente pode priorizar os pilares mais relevantes pro regulatório de vocês."
+💡 "O relatório de boas práticas que a gente gera serve como evidência de compliance."
+⚠️ "Se vocês passarem por auditoria, ter isso feito mostra que vocês seguem as melhores práticas."
+💡 "A gente pode priorizar os pontos mais relevantes pro regulatório de vocês."
 ✅ "Isso é documentação que protege vocês em qualquer auditoria."
-> Obs: WAR como evidência = argumento pra clientes regulados.
+> Obs: Relatório como evidência = argumento pra clientes regulados.
 > ✏️ Selecionada: [ ]
 
 ### 5. Orçamento / timeline
@@ -901,42 +899,42 @@ Emojis:
 **SITUAÇÃO:** Cliente diz que o orçamento é embrionário, está pesquisando, não tem noção de quanto custa — está comparando fornecedores.
 
 **Abordagem 1 — Foco: ajudar a dimensionar**
-💡 "Sem problema, a gente pode ajudar a dimensionar. Pra isso preciso entender melhor o escopo."
-💡 "Vocês têm uma ideia do que seria o mínimo viável? O que precisa sair primeiro?"
+💡 "Sem problema, a gente pode ajudar a ter uma noção. Pra isso preciso entender melhor o que vocês precisam."
+💡 "Vocês já têm uma ideia do mínimo que precisa funcionar primeiro?"
 ⚠️ "É normal não ter noção de custo nessa fase — a gente traz a estimativa."
-✅ "Vou montar uma proposta com fases e custos pra vocês terem uma base."
-> Obs: Quem apresenta números primeiro ancora a expectativa. Ser o primeiro a propor.
+✅ "Vou montar uma proposta com etapas e custos pra vocês terem uma base."
+> Obs: Quem apresenta números primeiro ancora a expectativa.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: faseamento pra reduzir barreira**
-💡 "Dá pra dividir em fases — começar com o mínimo e ir evoluindo."
-⚠️ "Assim vocês não precisam aprovar um orçamento grande de uma vez."
-💡 "Qual seria a primeira entrega que vocês precisam ver funcionando?"
-✅ "Vou montar a proposta faseada — fase 1 com custo menor pra vocês validarem."
+**Abordagem 2 — Foco: dividir em etapas**
+💡 "Dá pra dividir em etapas — começar com o mínimo e ir evoluindo."
+⚠️ "Assim vocês não precisam aprovar um valor grande de uma vez."
+💡 "Qual seria a primeira coisa que vocês precisam ver funcionando?"
+✅ "Vou montar a proposta por etapas — a primeira com custo menor pra vocês validarem."
 > Obs: Faseamento reduz barreira de aprovação.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: concorrência**
-💡 "Vocês estão conversando com outras empresas também?"
+💡 "Vocês tão conversando com outras empresas também?"
 ⚠️ "Se tiver proposta de outro fornecedor, posso olhar e trazer uma comparação."
-💡 "O importante é comparar escopo, não só preço — às vezes o mais barato entrega menos."
+💡 "O importante é comparar o que cada um entrega, não só o preço."
 ✅ "Me passa o que os outros propuseram que eu te mostro onde a gente se diferencia."
-> Obs: Se tem concorrente, entender o que já foi proposto. Diferenciar por escopo, não por preço.
+> Obs: Se tem concorrente, entender o que já foi proposto. Diferenciar por escopo.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: incentivos AWS**
-💡 "A AWS tem incentivos que podem custear parte do projeto — a gente consegue buscar isso."
-⚠️ "Dependendo do escopo, a AWS pode cobrir 50-100% do custo de consultoria."
-💡 "Pra buscar incentivo, precisa passar por um parceiro — e a gente é parceiro Advanced."
-✅ "Vou verificar quais incentivos se aplicam ao projeto de vocês."
+💡 "A AWS tem incentivos que podem bancar parte do projeto — a gente consegue buscar isso pra vocês."
+⚠️ "Dependendo do que vocês vão fazer, a AWS pode cobrir boa parte do custo."
+💡 "Pra acessar esses incentivos, precisa passar por um parceiro — e a gente é parceiro Advanced."
+✅ "Vou verificar quais incentivos se encaixam no projeto de vocês."
 > Obs: Incentivo = reduz custo real. Argumento decisivo quando orçamento é incerto.
 > ✏️ Selecionada: [ ]
 
 #### Situação 5.2
 **SITUAÇÃO:** Cliente diz que o budget é fraco, mas tem interesse — precisa convencer a diretoria ou o decisor.
 
-**Abordagem 1 — Foco: entender o decisor**
-💡 "Quem aprova o orçamento pra esse tipo de projeto?"
+**Abordagem 1 — Foco: entender quem decide**
+💡 "Quem aprova o orçamento pra esse tipo de projeto aí dentro?"
 💡 "O que convence ele? Economia, produtividade, inovação?"
 ⚠️ "Se o diretor já demonstrou interesse, ele precisa do argumento certo pra aprovar."
 ✅ "Posso preparar um material focado no que o decisor precisa ver."
@@ -947,22 +945,22 @@ Emojis:
 💡 "A gente pode começar pelo billing — não tem custo nenhum pra vocês."
 ⚠️ "Com o billing, vocês já ganham consultoria grátis e a gente começa a olhar o ambiente."
 💡 "É uma forma de começar a parceria sem precisar de aprovação de orçamento."
-✅ "Vamos começar pelo billing e depois a gente evolui."
-> Obs: Billing como porta de entrada zero custo — perfeito pra budget fraco.
+✅ "Vamos começar por aí e depois a gente evolui."
+> Obs: Billing como porta de entrada zero custo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: ROI rápido**
-💡 "Se a gente mostrar resultado rápido, fica mais fácil pedir orçamento pro próximo projeto."
-⚠️ "O segredo é começar pequeno, mostrar resultado, e usar isso pra justificar o próximo passo."
+**Abordagem 3 — Foco: resultado rápido pra justificar mais**
+💡 "Se a gente mostrar resultado rápido, fica mais fácil pedir orçamento pro próximo passo."
+⚠️ "O segredo é começar pequeno, mostrar resultado, e usar isso pra justificar o investimento."
 💡 "Qual seria um resultado que o diretor olharia e diria 'valeu a pena'?"
-✅ "Vamos focar num quick win que gere resultado visível."
-> Obs: ROI rápido = argumento pra liberar mais budget. Land and expand.
+✅ "Vamos focar num resultado rápido e visível."
+> Obs: ROI rápido = argumento pra liberar mais budget.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: incentivos que cobrem o projeto**
-💡 "Com incentivos da AWS, o custo pro cliente pode ser zero ou muito baixo."
-⚠️ "A gente já conseguiu incentivos que cobriram 100% do projeto pra clientes no mesmo estágio."
-💡 "Isso facilita a aprovação interna — o decisor não precisa aprovar um custo alto."
+💡 "Com incentivos da AWS, o custo pra vocês pode ser zero ou bem baixo."
+⚠️ "A gente já conseguiu incentivos que cobriram o projeto inteiro pra clientes no mesmo estágio."
+💡 "Isso facilita a aprovação — o decisor não precisa aprovar um custo alto."
 ✅ "Vou levantar o que consigo de incentivo e te passo pra apresentar internamente."
 > Obs: Incentivo que cobre o projeto = remove objeção de budget.
 > ✏️ Selecionada: [ ]
@@ -973,50 +971,50 @@ Emojis:
 **Abordagem 1 — Foco: respeitar o timing**
 💡 "Entendi, faz sentido. Qual seria o timing ideal pra vocês?"
 ⚠️ "Não é urgente, mas quanto antes começar a planejar, melhor o resultado."
-💡 "Vocês têm algum evento ou deadline que pode acelerar? Lançamento, cliente grande?"
+💡 "Vocês têm algum evento ou prazo que pode acelerar? Lançamento, cliente grande?"
 ✅ "Vou preparar tudo e quando vocês estiverem prontos, a gente executa rápido."
-> Obs: Respeitar o timing — mas deixar tudo pronto pra quando decidir.
+> Obs: Respeitar o timing — mas deixar tudo pronto.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: vantagem competitiva**
-💡 "Se é inevitável, começar a planejar agora dá vantagem competitiva."
-⚠️ "Os concorrentes de vocês podem estar fazendo isso agora."
+**Abordagem 2 — Foco: vantagem de sair na frente**
+💡 "Se é inevitável, começar a planejar agora dá vantagem."
+⚠️ "Os concorrentes de vocês podem tá fazendo isso agora."
 💡 "Dá pra começar com o planejamento sem compromisso de execução."
-✅ "Posso trazer uma proposta de arquitetura pra vocês já terem o plano pronto."
-> Obs: "Inevitável" = cliente já decidiu que vai fazer. A questão é quando, não se.
+✅ "Posso trazer uma proposta pra vocês já terem o plano pronto."
+> Obs: "Inevitável" = cliente já decidiu que vai fazer. A questão é quando.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: incentivos com janela**
-💡 "Os incentivos da AWS têm janelas — nem sempre estão disponíveis."
+💡 "Os incentivos da AWS têm janelas — nem sempre tão disponíveis."
 ⚠️ "Se a gente aplicar agora, vocês garantem o incentivo e executam quando quiserem."
-💡 "É como reservar o desconto — não precisa executar imediatamente."
-✅ "Vou verificar os incentivos disponíveis agora."
+💡 "É como reservar o desconto — não precisa executar agora."
+✅ "Vou verificar o que tá disponível agora pra vocês não perderem a janela."
 > Obs: Incentivos com prazo = urgência natural sem forçar.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: discovery técnica sem compromisso**
-💡 "Dá pra começar com uma fase de discovery técnica — sem compromisso de execução."
-⚠️ "Assim vocês já têm escopo, custo e arquitetura definidos quando decidirem avançar."
+**Abordagem 4 — Foco: planejamento sem compromisso**
+💡 "Dá pra começar com um planejamento técnico — sem compromisso de execução."
+⚠️ "Assim vocês já têm escopo, custo e tudo definido quando decidirem avançar."
 💡 "Isso também ajuda a comparar propostas de outros fornecedores."
-✅ "Vou montar o escopo técnico e vocês decidem o timing."
-> Obs: Discovery técnica como primeiro passo sem compromisso.
+✅ "Vou montar o escopo e vocês decidem o timing."
+> Obs: Planejamento como primeiro passo sem compromisso.
 > ✏️ Selecionada: [ ]
 
 #### Situação 5.4
-**SITUAÇÃO:** Cliente define um timing claro — "segundo semestre", "depois de terminar o projeto X", "semana que vem" — com data ou período definido.
+**SITUAÇÃO:** Cliente define um timing claro — "segundo semestre", "depois de terminar o projeto X", "semana que vem".
 
 **Abordagem 1 — Foco: agendar e manter contato**
 💡 "Perfeito, [período]. Posso te procurar em [data] pra retomar?"
-💡 "Enquanto isso, se surgir alguma dúvida, pode me acionar."
-⚠️ "Até lá, se surgir alguma necessidade, a gente tá disponível."
+💡 "Enquanto isso, se surgir alguma coisa, pode me chamar."
+⚠️ "Até lá, qualquer necessidade, a gente tá disponível."
 ✅ "Vou deixar agendado um follow-up."
-> Obs: Respeitar o timing — agendar follow-up e manter relacionamento.
+> Obs: Respeitar o timing — agendar e manter relacionamento.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: preparar o terreno**
 💡 "Até lá, vocês podem ir organizando os dados e processos."
-⚠️ "Quanto mais organizado estiver quando a gente começar, mais rápido o resultado."
-💡 "Posso te mandar um checklist do que preparar até lá."
+⚠️ "Quanto mais organizado tiver quando a gente começar, mais rápido sai."
+💡 "Posso te mandar uma lista do que preparar até lá."
 ✅ "Assim quando chegar a hora, a gente já sai executando."
 > Obs: Dar tarefa pro cliente = mantém engajamento sem pressionar.
 > ✏️ Selecionada: [ ]
@@ -1030,44 +1028,44 @@ Emojis:
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: eventos e conteúdo**
-💡 "A gente tem eventos e workshops ao longo do ano — posso te convidar?"
-💡 "É uma forma de vocês irem se atualizando sobre o que a AWS oferece."
+💡 "A gente faz eventos e workshops ao longo do ano — posso te convidar?"
+💡 "É uma forma de vocês irem se atualizando sobre o que tem de novo."
 ⚠️ "Quando chegar a hora de executar, vocês já vão ter mais clareza."
-✅ "Vou te incluir na lista de eventos — sem compromisso."
-> Obs: Eventos = nurturing. Manter relacionamento ativo entre reuniões.
+✅ "Vou te incluir na lista — sem compromisso nenhum."
+> Obs: Eventos = nurturing. Manter relacionamento ativo.
 > ✏️ Selecionada: [ ]
 
 #### Situação 5.5
-**SITUAÇÃO:** Cliente tentou estimar custo de cloud sozinho (calculadora AWS, pesquisa) e achou muito caro — ficou assustado com o valor.
+**SITUAÇÃO:** Cliente tentou estimar custo de cloud sozinho e achou muito caro — ficou assustado com o valor.
 
-**Abordagem 1 — Foco: desmistificar o custo**
-⚠️ "A calculadora da AWS é complicada — é muito fácil superestimar."
-💡 "Geralmente quando a gente faz o sizing correto, o custo cai bastante."
-💡 "Vocês calcularam com instâncias on-demand? Reservas reduzem 30-40%."
-✅ "Deixa a gente fazer essa conta — com sizing correto e reservas, o número muda muito."
+**Abordagem 1 — Foco: desmistificar**
+⚠️ "A calculadora da AWS é complicada — é muito fácil colocar mais do que precisa."
+💡 "Geralmente quando a gente faz o dimensionamento correto, o custo cai bastante."
+💡 "Vocês calcularam com o preço cheio? Reservas reduzem 30-40%."
+✅ "Deixa a gente fazer essa conta — com o dimensionamento certo, o número muda muito."
 > Obs: Cliente assustado com preço = precisa de ajuda profissional pra dimensionar.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: TCO completo**
-💡 "Quanto vocês gastam hoje com a infra atual? Servidor, energia, manutenção, licenças?"
-⚠️ "Muita gente compara só o preço da cloud com o preço do servidor — mas esquece o TCO."
-💡 "Quando soma tudo, geralmente empata ou fica mais barato."
-✅ "A gente pode fazer essa comparação TCO completa."
-> Obs: TCO muda a percepção. On-prem parece barato mas tem custo escondido.
+**Abordagem 2 — Foco: comparar com custo real atual**
+💡 "Quanto vocês gastam hoje com tudo? Servidor, energia, manutenção, licenças?"
+⚠️ "Muita gente compara só o preço da nuvem com o preço do servidor — mas esquece de somar tudo."
+💡 "Quando soma hardware, energia, espaço, tempo de manutenção — geralmente empata ou fica mais barato."
+✅ "A gente pode fazer essa conta completa pra vocês."
+> Obs: TCO muda a percepção.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: não precisa migrar tudo**
-💡 "Não precisa jogar tudo pra cloud — pode ser híbrido."
-⚠️ "O core pesado pode ficar on-prem e o resto vai pra AWS."
-💡 "Backup, BI, aplicações leves — isso vai pra cloud com custo baixo."
-✅ "Vou montar um cenário híbrido com custo real pra vocês compararem."
+💡 "Não precisa levar tudo pra nuvem — pode ser só uma parte."
+⚠️ "O sistema mais pesado pode ficar onde tá e o resto vai pra AWS."
+💡 "Backup, BI, aplicações mais leves — isso vai pra nuvem com custo baixo."
+✅ "Vou montar um cenário parcial com custo real pra vocês compararem."
 > Obs: Híbrido = custo menor que migração total. Remove o susto.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: começar pequeno**
-💡 "Dá pra começar com o que faz mais sentido — backup, por exemplo, é barato e resolve um risco."
-⚠️ "Não precisa ser tudo ou nada — vai migrando conforme faz sentido."
-💡 "Qual seria a primeira coisa que vocês gostariam de ter na cloud?"
+**Abordagem 4 — Foco: começar pelo mais simples**
+💡 "Dá pra começar com o que faz mais sentido — backup, por exemplo, é barato e já resolve um risco."
+⚠️ "Não precisa ser tudo ou nada — vai levando conforme faz sentido."
+💡 "Qual seria a primeira coisa que vocês gostariam de ter na nuvem?"
 ✅ "Vamos começar pelo mais simples e ir evoluindo."
 > Obs: Começar pequeno = custo baixo, resultado rápido, confiança pra expandir.
 > ✏️ Selecionada: [ ]
@@ -1075,277 +1073,277 @@ Emojis:
 ### 6. Ofertas / oportunidades Dati
 
 #### Situação 6.1
-**SITUAÇÃO:** Comercial apresenta o billing e o cliente pergunta se vai perder autonomia ou ficar engessado — medo de depender de terceiro.
+**SITUAÇÃO:** Comercial apresenta o billing e o cliente pergunta se vai perder autonomia ou ficar engessado.
 
 **Abordagem 1 — Foco: autonomia total**
-💡 "Total autonomia. A conta continua sendo de vocês — vocês fazem o que quiserem."
-⚠️ "O que muda é só a forma de pagamento — em vez de cartão, boleto."
-💡 "Se um dia quiserem voltar pro cartão, é simples — sem lock-in."
+💡 "Total liberdade. A conta continua sendo toda de vocês — vocês fazem o que quiserem."
+⚠️ "O que muda é só a forma de pagar — em vez de cartão, boleto."
+💡 "Se um dia quiserem voltar pro cartão, é simples — sem amarração."
 ✅ "Nada muda na operação — só melhora o financeiro."
-> Obs: Medo de perder controle é a objeção #1 do billing. Reforçar autonomia.
+> Obs: Medo de perder controle é a objeção #1. Reforçar autonomia.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: transparência**
-💡 "A gente só tem acesso de leitura do billing — não mexe em nada da conta."
+💡 "A gente só tem acesso de leitura do faturamento — não mexe em nada da conta."
 ⚠️ "Vocês definem o nível de acesso que a gente tem."
 💡 "Posso te mostrar o contrato — é bem transparente."
-✅ "Referência de quem já usa é o melhor argumento — posso te conectar com um cliente nosso."
-> Obs: Transparência gera confiança. Social proof do indicador é irrefutável.
+✅ "Se quiser, posso te conectar com um cliente nosso que já usa pra te dar uma referência."
+> Obs: Transparência gera confiança.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: o que ganha além**
-💡 "Além de manter tudo igual, vocês ganham consultoria, FinOps e suporte."
-⚠️ "É como trocar de plano — mesmo serviço, mais benefícios."
-💡 "A gente proativamente olha a conta de vocês e traz recomendações."
-✅ "Posso te mostrar o que está incluído."
+💡 "Além de manter tudo igual, vocês ganham consultoria, análise de custo e suporte."
+⚠️ "É tipo trocar de plano — mesmo serviço, mais benefícios."
+💡 "A gente olha a conta de vocês proativamente e traz recomendações."
+✅ "Posso te mostrar tudo que tá incluído."
 > Obs: "Paga o mesmo e ganha mais" = argumento simples e forte.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: Organization e governança**
-💡 "Se vocês tiverem uma Organization, a gente traz pra dentro — continua sendo de vocês."
-⚠️ "A gente não acessa a conta sem permissão — tudo é controlado."
-💡 "Se não têm Organization, a gente pode criar — é o primeiro passo pra organizar."
-✅ "Posso explicar em detalhe como funciona a governança."
-> Obs: Governança e controle de acesso = preocupação legítima. Explicar com clareza.
+**Abordagem 4 — Foco: organização e governança**
+💡 "Se vocês já têm uma organização de contas, a gente traz pra dentro — continua sendo de vocês."
+⚠️ "A gente não acessa nada sem permissão — tudo é controlado."
+💡 "Se não têm organização, a gente pode criar — é o primeiro passo pra organizar."
+✅ "Posso explicar em detalhe como funciona."
+> Obs: Governança = preocupação legítima. Explicar com clareza.
 > ✏️ Selecionada: [ ]
 
 #### Situação 6.2
-**SITUAÇÃO:** Comercial ou pré-vendas menciona o Well-Architected e o cliente quer entender o que é e como funciona.
+**SITUAÇÃO:** Comercial ou pré-vendas menciona o Well-Architected e o cliente quer entender o que é.
 
 **Abordagem 1 — Foco: diferenciar da AWS direta**
-💡 "O pessoal da AWS costuma só mandar documentação. A gente pega e executa."
-⚠️ "Well-Architected da AWS é um checklist — o nosso é um projeto com entrega."
-💡 "A gente não só identifica os problemas — a gente resolve."
-✅ "Posso te mostrar um exemplo de relatório que a gente entrega."
+💡 "O pessoal da AWS costuma mandar documentação e falar 'segue aí'. A gente pega e faz junto com vocês."
+⚠️ "O nosso trabalho não é só apontar o que precisa melhorar — a gente resolve."
+💡 "Essa é a diferença de ter um parceiro vs fazer direto com a AWS."
+✅ "Posso te mostrar um exemplo do que a gente entrega."
 > Obs: Diferencial claro: execução, não só recomendação.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: benefícios práticos**
-💡 "O Well-Architected vai mostrar onde vocês estão vulneráveis e onde estão gastando demais."
-⚠️ "Geralmente a gente encontra problemas de segurança que o cliente nem sabia que tinha."
-💡 "E as otimizações de custo que saem do WAR geralmente pagam o projeto."
+💡 "Esse trabalho vai mostrar onde vocês tão vulneráveis e onde tão gastando demais."
+⚠️ "Geralmente a gente acha problemas de segurança que o cliente nem sabia que tinha."
+💡 "E as economias que saem desse trabalho geralmente pagam o investimento."
 ✅ "É um investimento que se paga sozinho."
-> Obs: WAR que se paga = argumento de ROI.
+> Obs: Trabalho que se paga = argumento de ROI.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: não-invasivo**
-💡 "A gente roda uma coleta automatizada que lê configurações — não mexe em nada."
-⚠️ "É não-invasivo — só lê, não altera."
-💡 "Com base nisso, a gente gera um relatório com findings e prioridades."
-✅ "Depois a gente executa as correções junto com vocês."
-> Obs: "Não-invasivo" = remove medo de mexer no ambiente.
+💡 "A gente roda uma coleta automática que lê as configurações — não mexe em nada."
+⚠️ "É só leitura — não altera nada no ambiente."
+💡 "Com base nisso, a gente gera um relatório com o que precisa melhorar e as prioridades."
+✅ "Depois a gente executa as melhorias junto com vocês."
+> Obs: "Não mexe em nada" = remove medo.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: compliance e auditoria**
-💡 "O relatório do Well-Architected serve como evidência de compliance."
-⚠️ "Se vocês passarem por auditoria, ter o WAR mostra que seguem boas práticas."
-💡 "A gente pode priorizar os pilares mais relevantes pro regulatório de vocês."
+💡 "O relatório que a gente gera serve como evidência de boas práticas."
+⚠️ "Se vocês passarem por auditoria, ter isso feito mostra que vocês seguem as melhores práticas."
+💡 "A gente pode priorizar os pontos mais relevantes pro regulatório de vocês."
 ✅ "Isso é documentação que protege vocês."
-> Obs: WAR como evidência de compliance = argumento pra clientes regulados.
+> Obs: Relatório como evidência = argumento pra clientes regulados.
 > ✏️ Selecionada: [ ]
 
 #### Situação 6.3
-**SITUAÇÃO:** Comercial menciona incentivos da AWS e o cliente não conhece ou quer entender melhor como funciona.
+**SITUAÇÃO:** Comercial menciona incentivos da AWS e o cliente não conhece ou quer entender melhor.
 
-**Abordagem 1 — Foco: explicar de forma simples**
-💡 "A AWS tem programas que ajudam a custear projetos — tipo um subsídio."
+**Abordagem 1 — Foco: explicar simples**
+💡 "A AWS tem programas que ajudam a bancar projetos — tipo um subsídio."
 ⚠️ "Se vocês vão fazer uma modernização ou projeto de IA, a AWS pode pagar parte do custo."
-💡 "Pra acessar esses incentivos, precisa passar por um parceiro — e a gente é parceiro Advanced."
-✅ "Me conta o que vocês estão planejando que eu vejo o que consigo."
+💡 "Pra acessar esses programas, precisa passar por um parceiro — e a gente é parceiro Advanced."
+✅ "Me conta o que vocês tão planejando que eu vejo o que consigo."
 > Obs: Cliente não conhece incentivos = oportunidade de mostrar valor da parceria.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: exemplos concretos**
-💡 "Por exemplo, se vocês vão migrar pra AWS ou fazer um projeto de IA, a AWS pode custear a consultoria."
-⚠️ "Já tivemos casos onde o incentivo cobriu 100% do custo do projeto."
-💡 "Também tem incentivos pra modernização, treinamento, e até campanhas específicas."
-✅ "Vou mapear quais incentivos se aplicam ao caso de vocês."
-> Obs: Exemplos concretos tangibilizam. "100% do custo" é argumento forte.
+**Abordagem 2 — Foco: exemplos reais**
+💡 "Por exemplo, se vocês vão migrar pra AWS ou fazer um projeto de IA, a AWS pode bancar a consultoria."
+⚠️ "Já tivemos casos onde o incentivo cobriu o projeto inteiro."
+💡 "Também tem incentivos pra modernização, treinamento, e campanhas específicas."
+✅ "Vou mapear quais se encaixam no caso de vocês."
+> Obs: Exemplos concretos tangibilizam. "Cobriu o projeto inteiro" é argumento forte.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: processo simples**
 💡 "A gente aplica o incentivo junto com a AWS — vocês não precisam fazer nada."
 ⚠️ "Tem um processo de aprovação, mas a gente cuida de tudo."
-💡 "Geralmente leva algumas semanas pra aprovar — por isso é bom aplicar cedo."
+💡 "Geralmente leva algumas semanas — por isso é bom aplicar cedo."
 ✅ "Posso já iniciar o processo enquanto vocês definem o escopo."
 > Obs: Processo = a Dati faz. Cliente não precisa se preocupar.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: janela de oportunidade**
-💡 "Os incentivos têm janelas — nem sempre estão disponíveis."
-⚠️ "Agora é um bom momento porque a AWS está investindo forte em IA e modernização."
+💡 "Esses incentivos têm janelas — nem sempre tão disponíveis."
+⚠️ "Agora é um bom momento porque a AWS tá investindo forte em IA e modernização."
 💡 "Se a gente aplicar agora, vocês garantem o incentivo mesmo que executem depois."
-✅ "Vou verificar o que está disponível agora."
-> Obs: Janela de incentivo = urgência natural sem forçar.
+✅ "Vou verificar o que tá disponível agora."
+> Obs: Janela = urgência natural sem forçar.
 > ✏️ Selecionada: [ ]
 
 #### Situação 6.4
-**SITUAÇÃO:** Comercial propõe assessment ou diagnóstico de ambiente e o cliente aceita mas quer fazer depois — tem outro projeto em andamento primeiro.
+**SITUAÇÃO:** Comercial propõe assessment ou diagnóstico e o cliente aceita mas quer fazer depois — tem outro projeto primeiro.
 
 **Abordagem 1 — Foco: aceitar o timing**
 💡 "Perfeito, [período]. Vou deixar agendado."
-💡 "Enquanto isso, se surgir alguma dúvida, pode me acionar."
+💡 "Enquanto isso, se surgir alguma dúvida no meio do caminho, pode me chamar."
 ⚠️ "Às vezes durante o projeto surgem decisões que a gente pode ajudar."
 ✅ "Vou te mandar meu contato direto — qualquer coisa, é só chamar."
 > Obs: Respeitar o timing — manter porta aberta sem pressionar.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: assessment antes é melhor**
-💡 "Na verdade, o assessment antes do projeto pode ser mais útil."
-⚠️ "Se a gente olhar o ambiente agora, vocês já fazem o projeto com as boas práticas desde o início."
+**Abordagem 2 — Foco: fazer antes é melhor**
+💡 "Na verdade, fazer a análise antes do projeto pode ser mais útil."
+⚠️ "Se a gente olhar o ambiente agora, vocês já fazem o projeto seguindo as boas práticas desde o início."
 💡 "É mais fácil fazer certo do começo do que corrigir depois."
-✅ "Posso fazer um assessment rápido agora — leva poucos dias."
-> Obs: Assessment antes > depois. Argumento técnico válido, mas sem forçar.
+✅ "Posso fazer uma análise rápida agora — leva poucos dias."
+> Obs: Assessment antes > depois. Argumento válido, mas sem forçar.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: billing como ponte**
-💡 "Enquanto o assessment fica pro [período], o billing já pode rodar agora."
+💡 "Enquanto a análise fica pro [período], o billing já pode rodar agora."
 ⚠️ "Vocês já começam a economizar e acumular horas de consultoria."
-💡 "Quando chegar o assessment, vocês já vão ter horas acumuladas."
+💡 "Quando chegar a hora, vocês já vão ter horas acumuladas."
 ✅ "Vamos encaminhar o billing agora?"
 > Obs: Billing como ação imediata — mantém parceria ativa.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: conteúdo e nurturing**
-💡 "A gente tem eventos e workshops ao longo do ano — posso te convidar?"
+**Abordagem 4 — Foco: manter relacionamento**
+💡 "A gente faz eventos e workshops ao longo do ano — posso te convidar?"
 💡 "Também tenho materiais que podem ajudar vocês no projeto atual."
 ⚠️ "É uma forma de vocês irem se preparando."
 ✅ "Vou te incluir na nossa lista e te mandar os materiais."
-> Obs: Nurturing = manter relacionamento sem pressão comercial.
+> Obs: Nurturing = manter relacionamento sem pressão.
 > ✏️ Selecionada: [ ]
 
 #### Situação 6.5
-**SITUAÇÃO:** Comercial propõe faseamento do projeto e o cliente concorda — quer dividir em etapas menores.
+**SITUAÇÃO:** Comercial propõe faseamento do projeto e o cliente concorda — quer dividir em etapas.
 
-**Abordagem 1 — Foco: validar e fechar escopo da fase 1**
+**Abordagem 1 — Foco: fechar escopo da fase 1**
 💡 "Perfeito, faz total sentido. Fase 1 [escopo mínimo], fase 2 [evolução]."
 ⚠️ "Assim vocês validam o resultado antes de investir na próxima fase."
 💡 "A fase 1 já vai gerar valor — [benefício concreto]."
 ✅ "Vou montar a proposta da fase 1 com escopo e custo."
-> Obs: Cliente concordou — fechar o escopo da fase 1 rápido.
+> Obs: Cliente concordou — fechar rápido.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: arquitetura preparada pra fase 2**
-💡 "Mesmo fazendo em fases, a gente já desenha pensando na fase 2."
-⚠️ "Assim quando chegar a hora, é só plugar — não precisa refazer nada."
-💡 "Nosso arquiteto vai desenhar pensando nas duas fases."
+**Abordagem 2 — Foco: já pensar na fase 2**
+💡 "Mesmo fazendo em fases, a gente já desenha pensando na próxima."
+⚠️ "Assim quando chegar a hora, é só encaixar — não precisa refazer nada."
+💡 "Nosso time já vai pensar nas duas fases desde o início."
 ✅ "Isso evita retrabalho e economiza no longo prazo."
-> Obs: Arquitetura forward-looking = mostra maturidade técnica.
+> Obs: Pensar à frente = mostra maturidade.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: piloto e métricas**
-💡 "Vocês têm um cliente ou área piloto pra testar a fase 1?"
+💡 "Vocês têm um cliente ou área pra ser o piloto da fase 1?"
 ⚠️ "Ter um piloto ajuda a validar rápido e ajustar antes de escalar."
-💡 "Como vocês vão medir se está funcionando? Qual a métrica de sucesso?"
-✅ "Posso incluir o piloto e as métricas no escopo da fase 1."
-> Obs: Piloto + métricas = resultado comprovável. Importante pra justificar fase 2.
+💡 "Como vocês vão medir se tá funcionando? Qual a métrica de sucesso?"
+✅ "Posso incluir o piloto e as métricas no escopo."
+> Obs: Piloto + métricas = resultado comprovável.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: timeline da fase 1**
-💡 "Pra fase 1, qual seria o prazo ideal? Quando vocês querem ter isso rodando?"
-💡 "Vocês têm algum deadline externo? Lançamento, contrato, auditoria?"
+**Abordagem 4 — Foco: prazo da fase 1**
+💡 "Pra fase 1, qual seria o prazo ideal? Quando vocês querem ver isso rodando?"
+💡 "Vocês têm algum prazo externo? Lançamento, contrato, auditoria?"
 ⚠️ "Saber o prazo ajuda a gente a dimensionar o time."
 ✅ "Vou montar o cronograma e te mando junto com a proposta."
-> Obs: Timeline = compromisso mútuo. Deadline externo cria urgência natural.
+> Obs: Timeline = compromisso mútuo.
 > ✏️ Selecionada: [ ]
 
 #### Situação 6.6
-**SITUAÇÃO:** Comercial identifica múltiplas frentes de trabalho possíveis e resume pro cliente — billing, estruturação, migração, IA, etc.
+**SITUAÇÃO:** Comercial identifica múltiplas frentes de trabalho e resume pro cliente.
 
 **Abordagem 1 — Foco: priorizar com o cliente**
 💡 "Dessas frentes, qual é a mais urgente pra vocês?"
-💡 "Tem alguma que a diretoria está cobrando mais?"
+💡 "Tem alguma que a diretoria tá cobrando mais?"
 ⚠️ "A gente pode tocar todas, mas começar pela mais urgente faz mais sentido."
 ✅ "Vamos definir a prioridade e eu trago a proposta da primeira."
 > Obs: Não tentar vender tudo de uma vez. Priorizar com o cliente.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: interdependência**
+**Abordagem 2 — Foco: conexão entre as frentes**
 💡 "Essas frentes se conectam — uma pode acelerar a outra."
 ⚠️ "Começar pela organização pode facilitar as outras."
-💡 "Vocês já têm os dados organizados ou está tudo espalhado?"
-✅ "Posso trazer o pré-vendas pra mapear a interdependência e definir a ordem."
+💡 "Vocês já têm os dados organizados ou tá tudo espalhado?"
+✅ "Posso trazer nosso pessoal pra mapear a conexão entre elas e definir a ordem."
 > Obs: Visão sistêmica = diferencial consultivo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: quick win primeiro**
+**Abordagem 3 — Foco: resultado rápido primeiro**
 💡 "Qual dessas frentes daria resultado mais rápido?"
-⚠️ "Começar pelo quick win gera confiança pra as outras."
-💡 "Geralmente billing ou assessment são os mais rápidos de entregar resultado."
+⚠️ "Começar pelo resultado rápido gera confiança pra as outras."
+💡 "Geralmente billing ou análise de ambiente são os mais rápidos."
 ✅ "Vamos começar pelo que dá resultado em semanas, não meses."
-> Obs: Quick win = confiança. Resultado rápido justifica investimento nas próximas.
+> Obs: Quick win = confiança pra investir nas próximas.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: proposta modular**
 💡 "Posso montar uma proposta com cada frente separada — escopo e custo independentes."
-⚠️ "Assim vocês podem aprovar uma de cada vez, no ritmo de vocês."
+⚠️ "Assim vocês aprovam uma de cada vez, no ritmo de vocês."
 💡 "E se tiver incentivo da AWS, pode cobrir parte de alguma."
 ✅ "Semana que vem te trago a proposta completa."
-> Obs: Proposta modular = flexibilidade pro cliente aprovar no ritmo dele.
+> Obs: Proposta modular = flexibilidade pro cliente.
 > ✏️ Selecionada: [ ]
 
 ### 7. Próximos passos / fechamento
 
 #### Situação 7.1
-**SITUAÇÃO:** Comercial propõe trazer o pré-vendas técnico ou especialista pra próxima reunião — precisa preparar o cliente e alinhar expectativas.
+**SITUAÇÃO:** Comercial propõe trazer o pré-vendas técnico ou especialista pra próxima reunião.
 
 **Abordagem 1 — Foco: preparar o cliente**
-💡 "Pra essa reunião técnica, seria bom ter alguém da infra de vocês junto."
-⚠️ "Quanto mais informação o técnico tiver antes, mais produtiva vai ser a reunião."
-💡 "Vocês conseguem me mandar um diagrama do ambiente? Mesmo que simples."
-✅ "Vou alinhar com o arquiteto e te mando os horários disponíveis."
-> Obs: Preparar a reunião técnica = mais produtiva. Pedir material mostra profissionalismo.
+💡 "Pra essa próxima conversa, seria bom ter alguém da parte técnica de vocês junto."
+⚠️ "Quanto mais informação a gente tiver antes, mais produtiva vai ser a reunião."
+💡 "Vocês conseguem me mandar algum material do ambiente? Mesmo que simples."
+✅ "Vou alinhar com o nosso pessoal e te mando os horários disponíveis."
+> Obs: Preparar a reunião = mais produtiva.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: definir expectativa**
-💡 "Nessa reunião técnica, o objetivo é entender a arquitetura e propor a solução."
+**Abordagem 2 — Foco: alinhar expectativa**
+💡 "Nessa próxima conversa, a ideia é entender melhor a parte técnica e propor a solução."
 ⚠️ "Não é pra fechar nada — é pra vocês terem clareza do que é possível."
-💡 "Depois dessa reunião, a gente monta a proposta formal."
+💡 "Depois dessa conversa, a gente monta a proposta formal."
 ✅ "Assim vocês têm tudo documentado pra apresentar internamente."
 > Obs: Sem pressão. Cliente sabe que não vai ser forçado a fechar.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: incluir decisor**
 💡 "Quem mais deveria participar? Alguém da diretoria, do financeiro?"
-⚠️ "Se o decisor participar, a gente já alinha expectativas e evita telefone sem fio."
-💡 "Mas se preferir só técnico primeiro, sem problema — a gente faz em etapas."
+⚠️ "Se o decisor participar, a gente já alinha tudo e evita telefone sem fio."
+💡 "Mas se preferir só a parte técnica primeiro, sem problema."
 ✅ "Me diz quem vai participar que eu ajusto a pauta."
 > Obs: Incluir decisor acelera. Mas não forçar.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: documentos prévios**
-💡 "Vocês têm algum documento de requisitos ou escopo que possam compartilhar antes?"
+**Abordagem 4 — Foco: pedir material antes**
+💡 "Vocês têm algum documento de requisitos ou escopo que possam mandar antes?"
 ⚠️ "Se tiver proposta de outro fornecedor, pode mandar também — a gente usa como referência."
-💡 "Quanto mais contexto o técnico tiver, melhor a proposta."
-✅ "Me manda o que tiver e eu repasso pro arquiteto antes da reunião."
-> Obs: Pedir documentos = interesse genuíno. Se tem proposta de concorrente, melhor saber antes.
+💡 "Quanto mais contexto a gente tiver, melhor a proposta."
+✅ "Me manda o que tiver que eu repasso pro nosso pessoal antes da reunião."
+> Obs: Pedir documentos = interesse genuíno.
 > ✏️ Selecionada: [ ]
 
 #### Situação 7.2
-**SITUAÇÃO:** Cliente vai mandar documentos, requisitos ou informações depois da reunião — precisa garantir que isso aconteça.
+**SITUAÇÃO:** Cliente vai mandar documentos ou informações depois da reunião.
 
-**Abordagem 1 — Foco: facilitar o envio**
+**Abordagem 1 — Foco: facilitar**
 💡 "Pode mandar por email ou WhatsApp — o importante é a gente ter a informação."
-⚠️ "Não precisa ser perfeito — qualquer informação já ajuda a montar a proposta."
+⚠️ "Não precisa ser perfeito — qualquer coisa já ajuda a gente a montar a proposta."
 💡 "Se preferir, eu crio um email do projeto e a gente centraliza tudo ali."
 ✅ "Vou te mandar meu contato direto pra facilitar."
-> Obs: Facilitar = reduzir fricção. Cliente ocupado pode desistir se for complicado.
+> Obs: Facilitar = reduzir fricção.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: guiar o que mandar**
-💡 "Se puder incluir os requisitos principais e o que vocês esperam como entrega, já é ótimo."
-⚠️ "Não precisa ser documento formal — bullet points já servem."
-💡 "Se tiver diagrama de arquitetura ou fluxo, melhor ainda."
+💡 "Se puder incluir os requisitos principais e o que vocês esperam, já é ótimo."
+⚠️ "Não precisa ser documento formal — tópicos já servem."
+💡 "Se tiver algum diagrama ou fluxo, melhor ainda."
 ✅ "Com isso a gente já consegue montar uma proposta inicial."
-> Obs: Guiar o que mandar = recebe informação útil.
+> Obs: Guiar = recebe informação útil.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: definir prazo**
-💡 "Consegue me mandar até quando? Pra eu já alinhar com o técnico."
+💡 "Consegue me mandar até quando? Pra eu já alinhar com o pessoal aqui."
 ⚠️ "Quanto antes a gente tiver, antes a gente volta com a proposta."
-💡 "Se precisar de mais tempo, sem problema — me avisa o prazo."
+💡 "Se precisar de mais tempo, sem problema — me avisa."
 ✅ "Vou aguardar e assim que receber, já encaminho."
-> Obs: Definir prazo = compromisso. Sem prazo, pode demorar semanas.
+> Obs: Definir prazo = compromisso.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: confidencialidade**
@@ -1353,42 +1351,42 @@ Emojis:
 ⚠️ "Se tiver informação sensível, a gente pode assinar um NDA antes."
 💡 "O importante é a gente ter o máximo de contexto."
 ✅ "Fica à vontade pra mandar o que puder."
-> Obs: Confidencialidade = respeito. Importante quando cliente tem proposta de concorrente.
+> Obs: Confidencialidade = respeito.
 > ✏️ Selecionada: [ ]
 
 #### Situação 7.3
-**SITUAÇÃO:** Comercial resume as frentes identificadas na reunião e confirma com o cliente antes de encerrar.
+**SITUAÇÃO:** Comercial resume as frentes identificadas e confirma com o cliente antes de encerrar.
 
 **Abordagem 1 — Foco: confirmar entendimento**
-💡 "Deixa eu confirmar: [frente 1], [frente 2], [frente 3]. Correto?"
+💡 "Deixa eu confirmar: [frente 1], [frente 2], [frente 3]. Tá certo?"
 💡 "Tem mais alguma coisa que a gente não cobriu?"
 ⚠️ "Quero ter certeza que não esqueci nada antes de montar a proposta."
 ✅ "Vou documentar tudo e te mando um resumo por email."
-> Obs: Confirmar = evita mal-entendido. Resumo por email = registro formal.
+> Obs: Confirmar = evita mal-entendido. Resumo por email = registro.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: prioridade e ordem**
-💡 "Dessas frentes, qual vocês gostariam de começar primeiro?"
+**Abordagem 2 — Foco: prioridade**
+💡 "Dessas frentes, qual vocês gostariam de começar?"
 ⚠️ "Billing é o mais rápido — pode rodar em paralelo com as outras."
-💡 "Algumas dessas frentes podem ser um projeto só."
-✅ "Vou montar a proposta com a ordem que fizer mais sentido pra vocês."
-> Obs: Agrupar projetos relacionados = simplifica. Billing em paralelo = ação imediata.
+💡 "Algumas dessas frentes podem virar um projeto só."
+✅ "Vou montar a proposta na ordem que fizer mais sentido pra vocês."
+> Obs: Agrupar projetos relacionados = simplifica.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: timeline geral**
+**Abordagem 3 — Foco: prazo geral**
 💡 "Pra quando vocês gostariam de ter tudo isso rodando?"
-💡 "Tem algum deadline externo? Auditoria, lançamento, contrato?"
-⚠️ "Saber o prazo ajuda a gente a dimensionar o time e os recursos."
+💡 "Tem algum prazo externo? Auditoria, lançamento, contrato?"
+⚠️ "Saber o prazo ajuda a gente a dimensionar o time."
 ✅ "Vou montar um cronograma e te apresento."
-> Obs: Timeline = compromisso mútuo. Deadline externo cria urgência natural.
+> Obs: Timeline = compromisso mútuo.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: investimento modular**
+**Abordagem 4 — Foco: custo modular**
 💡 "Vou trazer o custo de cada frente separado — assim vocês aprovam uma de cada vez."
-⚠️ "Algumas dessas frentes podem ter incentivo da AWS — vou verificar."
+⚠️ "Algumas podem ter incentivo da AWS — vou verificar."
 💡 "O billing não tem custo — já pode começar."
-✅ "Semana que vem te trago a proposta completa."
-> Obs: Custo separado = flexibilidade. Billing sem custo = ação imediata.
+✅ "Semana que vem te trago a proposta."
+> Obs: Custo separado = flexibilidade.
 > ✏️ Selecionada: [ ]
 
 #### Situação 7.4
@@ -1396,29 +1394,29 @@ Emojis:
 
 **Abordagem 1 — Foco: confirmar e preparar**
 ✅ "[Data e hora], fechado. Vou mandar o convite."
-💡 "Vou incluir o [especialista] — ele vai liderar a parte técnica."
-💡 "Se puder me mandar os documentos antes, ele já vem preparado."
+💡 "Vou incluir o [especialista] — ele vai conduzir a parte técnica."
+💡 "Se puder me mandar os materiais antes, ele já vem preparado."
 ✅ "Qualquer coisa antes disso, me chama."
-> Obs: Confirmar rápido = não dar chance de desmarcar. Pedir documentos antes.
+> Obs: Confirmar rápido. Pedir material antes.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 2 — Foco: pauta e profissionalismo**
+**Abordagem 2 — Foco: pauta**
 💡 "Vou montar uma pauta e te mando junto com o convite."
 ⚠️ "Assim todo mundo sabe o que esperar e a reunião rende mais."
 💡 "Se tiver algum ponto específico que vocês querem cobrir, me avisa."
 ✅ "Mando o convite com a pauta até amanhã."
-> Obs: Pauta = profissionalismo. Cliente sabe que a Dati é organizada.
+> Obs: Pauta = profissionalismo.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 3 — Foco: participantes**
 💡 "Do lado de vocês, quem mais deveria participar?"
-⚠️ "Se tiver alguém técnico, a conversa vai ser mais produtiva."
+⚠️ "Se tiver alguém técnico, a conversa vai render mais."
 💡 "Do nosso lado vai eu e o [especialista]."
-✅ "Me manda os emails dos participantes que eu incluo no convite."
-> Obs: Garantir que as pessoas certas estejam = evita repetir reunião.
+✅ "Me manda os emails que eu incluo no convite."
+> Obs: Pessoas certas = evita repetir reunião.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 4 — Foco: expectativa de entrega**
+**Abordagem 4 — Foco: o que vem depois**
 💡 "Depois dessa reunião, a gente monta a proposta formal."
 ⚠️ "Geralmente leva uma semana — depende da complexidade."
 💡 "Mas já saímos da reunião com um direcionamento claro."
@@ -1427,30 +1425,30 @@ Emojis:
 > ✏️ Selecionada: [ ]
 
 #### Situação 7.5
-**SITUAÇÃO:** Fechamento da reunião — rapport final, manter relacionamento, definir canal de comunicação.
+**SITUAÇÃO:** Fechamento da reunião — rapport final, manter relacionamento.
 
 **Abordagem 1 — Foco: reforçar parceria**
-💡 "Foi ótimo conhecer vocês. Qualquer dúvida antes da próxima reunião, pode me chamar."
+💡 "Foi ótimo conhecer vocês. Qualquer dúvida antes da próxima, pode me chamar."
 ⚠️ "Vou te mandar meu WhatsApp direto — é mais rápido."
 💡 "E quando vier pra [cidade], avisa que a gente marca um café."
 ✅ "Boa semana e até a próxima!"
-> Obs: Rapport no fechamento = relacionamento. WhatsApp = canal direto.
+> Obs: Rapport = relacionamento. WhatsApp = canal direto.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 2 — Foco: resumo por email**
-💡 "Vou te mandar um email com o resumo do que conversamos hoje."
+💡 "Vou te mandar um email com o resumo do que conversamos."
 ⚠️ "Assim fica documentado e vocês podem compartilhar internamente."
 💡 "Incluo os próximos passos e os prazos que combinamos."
 ✅ "Obrigado pelo tempo e até a próxima!"
-> Obs: Email de resumo = profissionalismo + registro. Cliente pode encaminhar pro decisor.
+> Obs: Email de resumo = profissionalismo. Cliente pode encaminhar pro decisor.
 > ✏️ Selecionada: [ ]
 
-**Abordagem 3 — Foco: nurturing**
+**Abordagem 3 — Foco: manter engajamento**
 💡 "Vou te incluir na nossa newsletter — a gente manda conteúdo relevante."
 💡 "E quando tiver evento, te convido."
 ⚠️ "É uma forma de vocês ficarem atualizados sem compromisso."
 ✅ "Obrigado e até breve!"
-> Obs: Newsletter + eventos = nurturing. Mantém relacionamento ativo.
+> Obs: Newsletter + eventos = nurturing.
 > ✏️ Selecionada: [ ]
 
 **Abordagem 4 — Foco: próximo passo claro**
@@ -1458,5 +1456,5 @@ Emojis:
 ⚠️ "Se precisar de alguma coisa antes, não hesita em me chamar."
 💡 "Vou acompanhar de perto pra não deixar esfriar."
 ✅ "Valeu, pessoal. Até a próxima!"
-> Obs: Próximo passo claro = compromisso mútuo. "Não deixar esfriar" = proatividade.
+> Obs: Próximo passo claro = compromisso mútuo.
 > ✏️ Selecionada: [ ]
