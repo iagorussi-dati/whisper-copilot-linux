@@ -285,20 +285,33 @@ class Api:
 
             # For technical template: classify if there's a question or just context
             if is_technical and context.strip():
-                classify_msg = f"A conversa abaixo contém uma PERGUNTA TÉCNICA direta do cliente? Uma pergunta técnica é quando o cliente PEDE informação, faz uma PERGUNTA explícita (com ? ou pedindo explicação), ou expressa uma DÚVIDA que precisa de resposta técnica (ex: 'não sei se vale a pena', 'não faço ideia de como', 'será que', 'tem como', 'não sei se é viável'). Se o cliente apenas DESCREVE algo, AFIRMA uma decisão já tomada, ou INFORMA algo sem pedir resposta, NÃO é pergunta. Responda APENAS: SIM ou NAO\n\nConversa: {context[:400]}"
-                has_question = self._bedrock.call_raw("Classifique.", classify_msg, max_tokens=5).strip().upper()
-                has_q = "SIM" in has_question
-                log.info(f"[SNAPSHOT] Has question: {has_question} -> {has_q}")
+                classify_msg = (
+                    f"Analise a transcrição abaixo e faça DUAS coisas:\n"
+                    f"1. CLASSIFICAÇÃO: SIM ou NAO — tem pergunta técnica? (pergunta = pede informação, expressa dúvida como 'não sei se', 'será que', 'tem como'. Afirmação/descrição = NAO)\n"
+                    f"2. PONTOS CRUCIAIS: Extraia os pontos mais importantes em 2-4 frases limpas e objetivas. Remova ruído (repetições, hesitações). Foque em: dúvidas, tecnologias mencionadas, problemas, decisões.\n\n"
+                    f"Formato EXATO (sem markdown):\n"
+                    f"CLASSIFICAÇÃO: SIM ou NAO\n"
+                    f"PONTOS: texto limpo\n\n"
+                    f"Transcrição: {context[:600]}"
+                )
+                classify_result = self._bedrock.call_raw("Classifique e extraia pontos cruciais.", classify_msg, max_tokens=150).strip()
+                has_q = "SIM" in classify_result.split("\n")[0].upper()
+                clean_ctx = context
+                for line in classify_result.split("\n"):
+                    if line.strip().upper().startswith("PONTOS:"):
+                        clean_ctx = line.split(":", 1)[1].strip()
+                        break
+                log.info(f"[SNAPSHOT] Classification: {'SIM' if has_q else 'NAO'} | Points: {clean_ctx[:120]}")
                 if not has_q:
                     user_msg = (
-                        f"Conversa:\n{context}\n\n"
+                        f"Pontos da conversa:\n{clean_ctx}\n\n"
                         f"Não há pergunta técnica direta. Reconheça o contexto em 1-2 frases e sugira 3 perguntas que o consultor deveria fazer pro cliente pra avançar a conversa.\n"
                         f"Formato:\n📌 [contexto em 1-2 frases]\n\n💬 Perguntas pra fazer:\n- \"pergunta 1\"\n- \"pergunta 2\"\n- \"pergunta 3\""
                         f"{search_context}"
                     )
                 else:
                     user_msg = (
-                        f"Conversa:\n{context}\n\n"
+                        f"Pontos da conversa:\n{clean_ctx}\n\n"
                         f"Responda a dúvida técnica de forma objetiva.{no_repeat_hint}"
                         f"{search_context}"
                     )
