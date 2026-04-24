@@ -256,7 +256,7 @@ class Api:
         try:
             context = self._build_full_context()
             system = self._raw_system_prompt or "Você é um copiloto."
-            mode_cfg = {"short": 150, "full": 300, "research": 600}
+            mode_cfg = {"short": 150, "full": 300, "research": 1200}
             max_tok = mode_cfg.get(self._response_mode, 150)
             # Dynamic: more transcript lines = more tokens to respond
             n_lines = len(self._transcript)

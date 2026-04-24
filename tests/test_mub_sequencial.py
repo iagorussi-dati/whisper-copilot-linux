@@ -95,7 +95,7 @@ def run_snapshot(title, ctx, prev_responses):
         msg = f"Pontos:\n{clean}\n\nSem pergunta. Contexto + 3 perguntas pro consultor.{no_repeat}{sc}"
     else:
         msg = f"Pontos:\n{clean}\n\nResponda TODOS os temas/dúvidas identificados de forma objetiva. Se tem mais de um assunto, responda cada um separadamente.{no_repeat}{sc}"
-    resp = client.call_raw(system, msg, max_tokens=400)
+    resp = client.call_raw(system, msg, max_tokens=1200)
     return cr, clean, resp
 
 results = []
