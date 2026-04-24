@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Discovery Dati — Seleção de Abordagens</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh;padding:20px}
+.container{max-width:720px;margin:0 auto}
+h1{font-size:1.4rem;color:#38bdf8;margin-bottom:4px}
+.subtitle{color:#94a3b8;font-size:.85rem;margin-bottom:24px}
+.progress{background:#1e293b;border-radius:8px;height:6px;margin-bottom:20px;overflow:hidden}
+.progress-bar{background:#38bdf8;height:100%;transition:width .3s}
+.counter{color:#94a3b8;font-size:.85rem;margin-bottom:12px}
+.sit-card{background:#1e293b;border-radius:12px;padding:20px;margin-bottom:16px}
+.sit-id{color:#38bdf8;font-size:.8rem;font-weight:600;margin-bottom:6px}
+.sit-text{font-size:1rem;line-height:1.5;color:#f1f5f9}
+.approaches{margin-top:16px;display:flex;flex-direction:column;gap:8px}
+.app{background:#0f172a;border:2px solid #334155;border-radius:10px;overflow:hidden;cursor:pointer;transition:border-color .2s}
+.app.selected{border-color:#38bdf8;background:#172554}
+.app-hdr{padding:12px 16px;display:flex;align-items:center;gap:10px}
+.app-radio{width:20px;height:20px;border-radius:50%;border:2px solid #475569;flex-shrink:0;display:flex;align-items:center;justify-content:center;transition:all .2s}
+.app.selected .app-radio{border-color:#38bdf8;background:#38bdf8}
+.app.selected .app-radio::after{content:'';width:8px;height:8px;background:#0f172a;border-radius:50%}
+.app-title{font-size:.9rem;font-weight:600;color:#cbd5e1;flex:1}
+.app.selected .app-title{color:#f1f5f9}
+.app-body{padding:0 16px 14px 46px;display:none}
+.app.selected .app-body,.app.expanded .app-body{display:block}
+.app-line{font-size:.85rem;color:#94a3b8;margin-bottom:4px;line-height:1.4}
+.app.selected .app-line{color:#cbd5e1}
+.app-obs{font-size:.78rem;color:#64748b;font-style:italic;margin-top:8px;padding-top:8px;border-top:1px solid #334155}
+.exp-btn{background:none;border:none;color:#64748b;font-size:.75rem;cursor:pointer;padding:2px 8px}
+.exp-btn:hover{color:#94a3b8}
+.obs-section{margin-top:16px}
+.obs-label{font-size:.85rem;color:#94a3b8;margin-bottom:6px}
+textarea{width:100%;background:#0f172a;border:1px solid #334155;border-radius:8px;color:#e2e8f0;padding:10px;font-size:.85rem;resize:vertical;min-height:60px;font-family:inherit}
+textarea:focus{outline:none;border-color:#38bdf8}
+.nav{display:flex;gap:12px;margin-top:20px}
+.nav button{flex:1;padding:12px;border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;transition:all .2s}
+.btn-prev{background:#334155;color:#e2e8f0}.btn-prev:hover{background:#475569}.btn-prev:disabled{opacity:.3;cursor:not-allowed}
+.btn-next{background:#38bdf8;color:#0f172a}.btn-next:hover{background:#7dd3fc}
+.btn-export{background:#22c55e;color:#0f172a}.btn-export:hover{background:#4ade80}
+.stats{display:flex;gap:16px;margin-bottom:16px}
+.stat{background:#1e293b;border-radius:8px;padding:10px 16px;flex:1;text-align:center}
+.stat-num{font-size:1.4rem;font-weight:700;color:#38bdf8}
+.stat-label{font-size:.75rem;color:#64748b}
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.8);z-index:100;padding:20px;overflow-y:auto}
+.result-box{max-width:720px;margin:0 auto;background:#1e293b;border-radius:12px;padding:24px}
+.result-box h2{color:#38bdf8;margin-bottom:16px}
+.result-text{background:#0f172a;border-radius:8px;padding:16px;font-family:monospace;font-size:.8rem;white-space:pre-wrap;color:#e2e8f0;max-height:60vh;overflow-y:auto;margin-bottom:16px}
+.result-actions{display:flex;gap:12px}
+.result-actions button{flex:1;padding:10px;border:none;border-radius:8px;font-weight:600;cursor:pointer}
+.btn-copy{background:#38bdf8;color:#0f172a}
+.btn-dl{background:#22c55e;color:#0f172a}
+.btn-close{background:#475569;color:#e2e8f0}
+</style>
+</head>
+<body>
+<div class="container">
+<h1>🎯 Discovery Dati — Seleção de Abordagens</h1>
+<p class="subtitle">Selecione a melhor abordagem para cada situação. Clique para expandir e ver os detalhes.</p>
+<div class="stats">
+<div class="stat"><div class="stat-num" id="ans">0</div><div class="stat-label">Respondidas</div></div>
+<div class="stat"><div class="stat-num" id="rem">40</div><div class="stat-label">Restantes</div></div>
+</div>
+<div class="progress"><div class="progress-bar" id="pbar"></div></div>
+<div class="counter" id="ctr"></div>
+<div id="content"></div>
+<div class="nav">
+<button class="btn-prev" id="bp" onclick="go(-1)">← Anterior</button>
+<button class="btn-next" id="bn" onclick="go(1)">Próximo →</button>
+</div>
+</div>
+<div class="overlay" id="ov">
+<div class="result-box">
+<h2>📋 Resultado da Seleção</h2>
+<div class="result-text" id="rt"></div>
+<div class="result-actions">
+<button class="btn-copy" onclick="cpRes()">📋 Copiar</button>
+<button class="btn-dl" onclick="dlRes()">💾 Baixar .md</button>
+<button class="btn-close" onclick="document.getElementById('ov').style.display='none'">Fechar</button>
+</div>
+</div>
+</div>
+<script>
+const D=PLACEHOLDER_DATA;
+let cur=0;const A={};
+function render(){const s=D[cur],a=A[s.id]||{};
+document.getElementById('ctr').textContent=`Situação ${cur+1} de ${D.length} — ${s.id}`;
+document.getElementById('pbar').style.width=((cur+1)/D.length*100)+'%';
+let h=`<div class="sit-card"><div class="sit-id">Situação ${s.id}</div><div class="sit-text">${s.text}</div></div><div class="approaches">`;
+s.approaches.forEach(ap=>{const sel=a.selected===ap.num;
+h+=`<div class="app ${sel?'selected':''}" onclick="sel_app(${ap.num},event)"><div class="app-hdr"><div class="app-radio"></div><div class="app-title">Abordagem ${ap.num} — ${ap.focus}</div><button class="exp-btn" onclick="tog(event,this)">▼ ver</button></div><div class="app-body">`;
+ap.lines.forEach(l=>{h+=`<div class="app-line">${l}</div>`;});
+if(ap.obs)h+=`<div class="app-obs">💡 ${ap.obs}</div>`;
+h+=`</div></div>`;});
+h+=`</div><div class="obs-section"><div class="obs-label">Observação (opcional):</div><textarea id="oi" placeholder="Alguma sugestão, ajuste ou comentário..." oninput="sObs()">${a.obs||''}</textarea></div>`;
+document.getElementById('content').innerHTML=h;
+document.getElementById('bp').disabled=cur===0;
+const bn=document.getElementById('bn');
+if(cur===D.length-1){bn.textContent='✅ Finalizar';bn.className='btn-export';bn.onclick=showRes;}
+else{bn.textContent='Próximo →';bn.className='btn-next';bn.onclick=()=>go(1);}
+uStats();}
+function sel_app(n,e){if(e.target.classList.contains('exp-btn'))return;const s=D[cur];if(!A[s.id])A[s.id]={};A[s.id].selected=n;render();}
+function tog(e,b){e.stopPropagation();const p=b.closest('.app');p.classList.toggle('expanded');b.textContent=p.classList.contains('expanded')?'▲ fechar':'▼ ver';}
+function sObs(){const s=D[cur];if(!A[s.id])A[s.id]={};A[s.id].obs=document.getElementById('oi').value;}
+function go(d){cur=Math.max(0,Math.min(D.length-1,cur+d));render();window.scrollTo(0,0);}
+function uStats(){const n=Object.values(A).filter(a=>a.selected).length;document.getElementById('ans').textContent=n;document.getElementById('rem').textContent=D.length-n;}
+function genRes(){let o='# Resultado — Seleção de Abordagens Discovery Dati\n\n';
+o+=`Data: ${new Date().toLocaleString('pt-BR')}\nRespondidas: ${Object.values(A).filter(a=>a.selected).length}/${D.length}\n\n---\n\n`;
+D.forEach(s=>{const a=A[s.id]||{};o+=`## Situação ${s.id}\n**${s.text}**\n\n`;
+if(a.selected){const ap=s.approaches.find(x=>x.num===a.selected);o+=`✅ **Abordagem ${ap.num} — ${ap.focus}**\n`;ap.lines.forEach(l=>{o+=`${l}\n`;});o+=`> ${ap.obs}\n`;}
+else o+=`⚠️ Não respondida\n`;
+if(a.obs)o+=`\n📝 **Observação:** ${a.obs}\n`;o+='\n---\n\n';});return o;}
+function showRes(){const u=D.length-Object.values(A).filter(a=>a.selected).length;
+if(u>0&&!confirm(`Ainda tem ${u} situação(ões) sem resposta. Finalizar mesmo assim?`))return;
+document.getElementById('rt').textContent=genRes();document.getElementById('ov').style.display='block';}
+function cpRes(){navigator.clipboard.writeText(genRes()).then(()=>{const b=document.querySelector('.btn-copy');b.textContent='✅ Copiado!';setTimeout(()=>b.textContent='📋 Copiar',2000);});}
+function dlRes(){const b=new Blob([genRes()],{type:'text/markdown'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='discovery-dati-respostas.md';a.click();}
+document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA')return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key>='1'&&e.key<='4')sel_app(parseInt(e.key),e);});
+render();
+</script>
+</body>
+</html>
