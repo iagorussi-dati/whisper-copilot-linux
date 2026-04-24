@@ -292,7 +292,7 @@ class Api:
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
             result = self._clean_md(result)
             result = self._trim_to_sentence(result)
-            log.info(f"[SNAPSHOT] Response: {result[:150]}")
+            log.info("[SNAPSHOT] Response (%d chars):\n%s" % (len(result), result))
             self._emit("copilot_response", {"response": result, "had_instruction": False})
         except Exception as e:
             log.error(f"[SNAPSHOT] Error: {e}", exc_info=True)
@@ -345,7 +345,7 @@ class Api:
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
             result = self._trim_to_sentence(result)
-            log.info(f"[FULL_CTX] Response: {result[:150]}")
+            log.info("[FULL_CTX] Response (%d chars):\n%s" % (len(result), result))
             self._emit("copilot_response", {"response": result, "had_instruction": False})
         except Exception as e:
             log.error(f"[FULL_CTX] Error: {e}", exc_info=True)
@@ -927,7 +927,7 @@ class Api:
                 return
             groq_time = _time.time() - t1
             log.info(f"[AUTO] Groq OK: {len(transcript_text)} chars em {groq_time:.2f}s")
-            log.info(f"[AUTO] Transcrição: {transcript_text[:200]}")
+            log.info("[AUTO] Transcrição (%d chars):\n%s" % (len(transcript_text), transcript_text))
 
             # Bedrock: identify speakers only
             earlier_ctx = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-20:])
