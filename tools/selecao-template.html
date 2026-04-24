@@ -106,7 +106,7 @@ function sel_app(n,e){if(e.target.classList.contains('exp-btn'))return;const s=D
 function tog(e,b){e.stopPropagation();const p=b.closest('.app');p.classList.toggle('expanded');b.textContent=p.classList.contains('expanded')?'▲ fechar':'▼ ver';}
 function sObs(){const s=D[cur];if(!A[s.id])A[s.id]={};A[s.id].obs=document.getElementById('oi').value;}
 function go(d){cur=Math.max(0,Math.min(D.length-1,cur+d));render();window.scrollTo(0,0);}
-function uStats(){const n=Object.values(A).filter(a=>a.selected).length;document.getElementById('ans').textContent=n;document.getElementById('rem').textContent=D.length-n;}
+function uStats(){const n=Object.keys(A).filter(k=>A[k]&&A[k].selected>0).length;document.getElementById('ans').textContent=n;document.getElementById('rem').textContent=D.length-n;}
 function genRes(){let o='# Resultado — Seleção de Abordagens Discovery Dati\n\n';
 o+=`Data: ${new Date().toLocaleString('pt-BR')}\nRespondidas: ${Object.values(A).filter(a=>a.selected).length}/${D.length}\n\n---\n\n`;
 D.forEach(s=>{const a=A[s.id]||{};o+=`## Situação ${s.id}\n**${s.text}**\n\n`;
@@ -118,7 +118,7 @@ if(u>0&&!confirm(`Ainda tem ${u} situação(ões) sem resposta. Finalizar mesmo 
 document.getElementById('rt').textContent=genRes();document.getElementById('ov').style.display='block';}
 function cpRes(){navigator.clipboard.writeText(genRes()).then(()=>{const b=document.querySelector('.btn-copy');b.textContent='✅ Copiado!';setTimeout(()=>b.textContent='📋 Copiar',2000);});}
 function dlRes(){const b=new Blob([genRes()],{type:'text/markdown'}),a=document.createElement('a');a.href=URL.createObjectURL(b);a.download='discovery-dati-respostas.md';a.click();}
-document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA')return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key>='1'&&e.key<='4')sel_app(parseInt(e.key),e);});
+document.addEventListener('keydown',e=>{if(e.target.tagName==='TEXTAREA')return;if(e.key==='ArrowRight')go(1);if(e.key==='ArrowLeft')go(-1);if(e.key>='1'&&e.key<='4'){e.preventDefault();const s=D[cur];if(!A[s.id])A[s.id]={};A[s.id].selected=parseInt(e.key);render();}});
 render();
 </script>
 </body>
