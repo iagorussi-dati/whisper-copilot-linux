@@ -56,7 +56,7 @@ Emojis:
 ⚠️ "Quanto mais a gente entender do negócio de vocês, melhor a gente consegue encaixar uma solução que faça sentido."
 ✅ "Me conta um pouco mais do dia a dia — como funciona a operação, onde vocês sentem que trava mais."
 > Obs: Deixar o cliente falar antes de oferecer qualquer coisa. Quanto mais contexto, melhor a proposta.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X]
 
 **Abordagem 2 — Foco: mapear escala e crescimento**
 💡 "Hoje vocês atendem quantos clientes mais ou menos? Tá crescendo bastante?"
@@ -115,7 +115,7 @@ Emojis:
 💡 "A gente pode centralizar essa gestão e simplificar o dia a dia de vocês."
 ✅ "Vou trazer uma proposta que cubra as duas empresas de forma organizada."
 > Obs: Equipe pequena gerenciando múltiplas empresas = dor operacional. Dati como braço extra.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 #### Situação 1.3
 **SITUAÇÃO:** Cliente explica que está em fase inicial, bootstrap ou validando produto — ainda sem clientes grandes ou receita consolidada.
@@ -134,7 +134,7 @@ Emojis:
 💡 "Dá pra começar bem enxuto e ir adicionando conforme a coisa cresce."
 ✅ "Posso montar uma estimativa de custo pra fase atual e pra quando escalar."
 > Obs: Bootstrap = cada real conta. Mostrar que entende a realidade financeira.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 3 — Foco: preparar pra escala futura**
 💡 "Vocês já pensaram no que muda quando vier o primeiro cliente grande?"
@@ -169,7 +169,7 @@ Emojis:
 💡 "A AWS lança coisa nova todo ano — às vezes tem serviço que resolve um problema que vocês têm e vocês nem sabem."
 ✅ "A gente pode montar um plano de evolução que respeite o ritmo de vocês."
 > Obs: Não criticar o que o cliente construiu — validar e propor evolução gradual.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 3 — Foco: segurança e boas práticas**
 💡 "E a parte de organização de contas, como tá? Tudo numa conta só ou já separaram?"
@@ -196,7 +196,7 @@ Emojis:
 ⚠️ "Entender o que já foi tentado ajuda a gente a não repetir o que não funcionou."
 ✅ "Me conta o que vocês já fizeram que a gente evolui a partir daí."
 > Obs: Muitos clientes já testaram IA e se frustraram. Entender o histórico antes de propor.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: dados disponíveis**
 💡 "Vocês já têm os dados organizados pra isso? Banco de dados, histórico, documentos?"
@@ -231,7 +231,7 @@ Emojis:
 💡 "Pra gente aproveitar bem esse tempo, me conta um pouco do cenário de vocês."
 ✅ "Quero entender primeiro o que vocês precisam antes de falar da Dati."
 > Obs: Indicação = credibilidade emprestada. Não desperdiçar falando só da Dati — focar no cliente.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: entender a expectativa**
 💡 "O que te motivou a aceitar essa reunião? Tem alguma necessidade específica ou é mais pra conhecer?"
@@ -268,7 +268,7 @@ Emojis:
 💡 "Vocês têm um ambiente separado pra testes ou tá tudo junto com produção?"
 ✅ "Vou anotar tudo isso aqui pra gente trazer uma proposta que faça sentido."
 > Obs: Comercial não precisa entender cada detalhe técnico — focar no gargalo principal.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X]
 
 **Abordagem 2 — Foco: riscos de ter tudo concentrado**
 ⚠️ "Se uma dessas máquinas parar, o que acontece? Tem algum backup, alguma redundância?"
@@ -327,7 +327,7 @@ Emojis:
 ⚠️ "Não precisa mudar tudo de uma vez — dá pra ir melhorando aos poucos."
 ✅ "A gente pode montar um plano de evolução que respeite o ritmo de vocês."
 > Obs: Respeitar o timing. Nem todo mundo quer modernizar agora.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 #### Situação 2.3
 **SITUAÇÃO:** Cliente é tecnicamente maduro — usa containers, automação de infra, ferramentas modernas — e já tem boa autonomia.
@@ -338,7 +338,7 @@ Emojis:
 ⚠️ "Muita empresa gasta mais do que precisa porque não tá dimensionando direito."
 ✅ "A gente pode fazer uma análise pra identificar onde dá pra otimizar."
 > Obs: Cliente maduro — não ensinar o óbvio, focar em otimização e gaps que ele não vê.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: otimização de custo avançada**
 💡 "Vocês usam máquinas spot pra coisas que podem ser interrompidas? Economiza bastante."
@@ -373,7 +373,7 @@ Emojis:
 ⚠️ "Nem tudo precisa ir pra nuvem — pode ser só uma parte, o que fizer mais sentido."
 ✅ "A gente pode avaliar junto o que vale a pena e o que fica onde tá."
 > Obs: Não forçar migração total. Muitos clientes têm razões legítimas pra ficar on-prem.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: backup e segurança**
 💡 "E backup, como vocês fazem hoje? É automático ou alguém tem que lembrar?"
@@ -424,7 +424,7 @@ Emojis:
 💡 "Nosso time já fez projetos parecidos — posso trazer alguém que entende bem dessa parte."
 ✅ "Vou conectar vocês com o especialista certo do nosso time."
 > Obs: Mostrar competência sem entrar em detalhes que o comercial não domina.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 4 — Foco: custo de ficar como está**
 💡 "Quanto tempo vocês perdem por semana lidando com esses problemas?"
@@ -443,7 +443,7 @@ Emojis:
 💡 "A gente pode ajudar a migrar só o core e manter essas ferramentas como tão."
 ✅ "Vou entender o que faz sentido mexer e o que fica."
 > Obs: Não forçar tudo pra AWS — cliente valoriza quando você respeita as escolhas dele.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: simplificar**
 💡 "Vocês têm bastante ferramenta rodando — isso tudo tá em quantos servidores?"
@@ -488,7 +488,7 @@ Emojis:
 💡 "Vocês compram capacidade reservada ou pagam tudo por uso?"
 ✅ "A gente pode dar uma olhada na conta sem compromisso — só pra vocês verem onde dá pra economizar."
 > Obs: Billing sem otimização = provavelmente tem desperdício.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 3 — Foco: reservas parceladas**
 💡 "Com esse volume, comprar capacidade reservada faz muito sentido — economia de 30-40%."
@@ -515,7 +515,7 @@ Emojis:
 ⚠️ "No cartão vocês pagam IOF mais o câmbio que varia — no boleto é tudo fixo em real."
 ✅ "Posso te mandar os detalhes por email pra vocês analisarem com calma."
 > Obs: IOF + câmbio = custo escondido do cartão.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: autonomia e simplicidade**
 💡 "A conta continua sendo toda de vocês — vocês fazem o que quiserem, total liberdade."
@@ -550,7 +550,7 @@ Emojis:
 💡 "Vocês têm mais de uma conta na AWS ou é só essa?"
 ✅ "Vou preparar tudo e te mando até amanhã."
 > Obs: Cliente já comprou a ideia — não ficar vendendo mais, fechar.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: expandir o escopo**
 💡 "Com o billing, a gente já começa a olhar a conta e trazer recomendações de economia."
@@ -585,7 +585,7 @@ Emojis:
 💡 "Mesmo com esse valor, o boleto já tira o IOF do cartão."
 ✅ "Quando vocês chegarem em 5 mil dólares, já ganham consultoria grátis."
 > Obs: Billing baixo = não é prioridade agora. Plantar semente pra quando crescer.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: incentivos como gancho**
 💡 "Além do billing, como parceiro vocês passam a ter acesso a incentivos da AWS."
@@ -620,7 +620,7 @@ Emojis:
 ⚠️ "É consultoria especializada em AWS — o mesmo time que atende empresas grandes."
 ✅ "Vocês podem ir acumulando e usar quando tiverem uma necessidade específica."
 > Obs: Calcular as horas concretas — tangibiliza o benefício.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: exemplos de uso**
 💡 "Outros clientes usam essas horas pra revisão anual de custos — só nisso já economizam bastante."
@@ -657,7 +657,7 @@ Emojis:
 💡 "Vocês preferem alguém que faça por vocês ou que oriente e vocês executam?"
 ✅ "Posso montar uma proposta que cubra essa lacuna."
 > Obs: Falta de braço = dor recorrente. Dati como extensão do time.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: priorizar**
 💡 "De tudo que tá parado, qual daria mais resultado se saísse primeiro?"
@@ -708,7 +708,7 @@ Emojis:
 💡 "A gente cuida da parte de infra e vocês focam no que gera receita."
 ✅ "Vamos conversar sobre como dividir essa responsabilidade."
 > Obs: Parceria como evolução natural, não como correção de erro.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 4 — Foco: conhecimento na cabeça de poucos**
 💡 "Hoje quem sabe como a infra funciona? É só vocês?"
@@ -743,7 +743,7 @@ Emojis:
 💡 "Vocês já sabem qual é o ponto mais crítico?"
 ✅ "A gente pode montar um plano por etapas — começa pelo que mais dói."
 > Obs: Faseamento = menos risco, menos custo inicial.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 4 — Foco: custo de ficar como está**
 💡 "Quanto tempo vocês perdem por semana lidando com esses travamentos?"
@@ -770,7 +770,7 @@ Emojis:
 💡 "A gente já fez isso pra vários clientes que tavam no mesmo estágio."
 ✅ "Vamos começar com uma análise pra ver onde tão os gaps."
 > Obs: Normalizar — não é culpa deles, é momento de evoluir.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 3 — Foco: segurança**
 🔴 "Sem organização de contas, como vocês controlam quem acessa o quê?"
@@ -797,7 +797,7 @@ Emojis:
 💡 "Vocês já tentaram automatizar alguma dessas tarefas?"
 ✅ "A gente pode mapear o que dá pra automatizar e priorizar pelo impacto."
 > Obs: Quantificar = justificar investimento. "X horas por semana" é argumento concreto.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: IA como solução**
 💡 "Esse tipo de tarefa repetitiva é exatamente onde IA faz diferença."
@@ -832,7 +832,7 @@ Emojis:
 💡 "Vocês já tentaram alguma coisa de IA antes? O que aconteceu?"
 ✅ "A gente tem um time de IA que faz exatamente esse mapeamento inicial."
 > Obs: Cliente sem clareza — ajudar a focar antes de propor solução.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: resultado rápido**
 💡 "Normalmente o primeiro passo é achar os quick wins — onde IA dá resultado em semanas, não meses."
@@ -875,7 +875,7 @@ Emojis:
 💡 "Na AWS dá pra separar tudo certinho — cada coisa no seu lugar."
 ✅ "A gente já fez isso pra outros clientes com exigências parecidas."
 > Obs: Estruturação + compliance = projeto de alto valor.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 3 — Foco: custo de não estar em conformidade**
 💡 "Vocês sabem qual é a penalidade se encontrarem uma não-conformidade?"
@@ -904,7 +904,7 @@ Emojis:
 ⚠️ "É normal não ter noção de custo nessa fase — a gente traz a estimativa."
 ✅ "Vou montar uma proposta com etapas e custos pra vocês terem uma base."
 > Obs: Quem apresenta números primeiro ancora a expectativa.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: dividir em etapas**
 💡 "Dá pra dividir em etapas — começar com o mínimo e ir evoluindo."
@@ -939,7 +939,7 @@ Emojis:
 ⚠️ "Se o diretor já demonstrou interesse, ele precisa do argumento certo pra aprovar."
 ✅ "Posso preparar um material focado no que o decisor precisa ver."
 > Obs: Budget fraco mas decisor envolvido = tem chance. Preparar material pro decisor.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: começar sem custo**
 💡 "A gente pode começar pelo billing — não tem custo nenhum pra vocês."
@@ -974,7 +974,7 @@ Emojis:
 💡 "Vocês têm algum evento ou prazo que pode acelerar? Lançamento, cliente grande?"
 ✅ "Vou preparar tudo e quando vocês estiverem prontos, a gente executa rápido."
 > Obs: Respeitar o timing — mas deixar tudo pronto.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: vantagem de sair na frente**
 💡 "Se é inevitável, começar a planejar agora dá vantagem."
@@ -1009,7 +1009,7 @@ Emojis:
 ⚠️ "Até lá, qualquer necessidade, a gente tá disponível."
 ✅ "Vou deixar agendado um follow-up."
 > Obs: Respeitar o timing — agendar e manter relacionamento.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: preparar o terreno**
 💡 "Até lá, vocês podem ir organizando os dados e processos."
@@ -1052,7 +1052,7 @@ Emojis:
 💡 "Quando soma hardware, energia, espaço, tempo de manutenção — geralmente empata ou fica mais barato."
 ✅ "A gente pode fazer essa conta completa pra vocês."
 > Obs: TCO muda a percepção.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 3 — Foco: não precisa migrar tudo**
 💡 "Não precisa levar tudo pra nuvem — pode ser só uma parte."
@@ -1081,7 +1081,7 @@ Emojis:
 💡 "Se um dia quiserem voltar pro cartão, é simples — sem amarração."
 ✅ "Nada muda na operação — só melhora o financeiro."
 > Obs: Medo de perder controle é a objeção #1. Reforçar autonomia.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: transparência**
 💡 "A gente só tem acesso de leitura do faturamento — não mexe em nada da conta."
@@ -1124,7 +1124,7 @@ Emojis:
 💡 "E as economias que saem desse trabalho geralmente pagam o investimento."
 ✅ "É um investimento que se paga sozinho."
 > Obs: Trabalho que se paga = argumento de ROI.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 3 — Foco: não-invasivo**
 💡 "A gente roda uma coleta automática que lê as configurações — não mexe em nada."
@@ -1159,7 +1159,7 @@ Emojis:
 💡 "Também tem incentivos pra modernização, treinamento, e campanhas específicas."
 ✅ "Vou mapear quais se encaixam no caso de vocês."
 > Obs: Exemplos concretos tangibilizam. "Cobriu o projeto inteiro" é argumento forte.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 3 — Foco: processo simples**
 💡 "A gente aplica o incentivo junto com a AWS — vocês não precisam fazer nada."
@@ -1194,7 +1194,7 @@ Emojis:
 💡 "É mais fácil fazer certo do começo do que corrigir depois."
 ✅ "Posso fazer uma análise rápida agora — leva poucos dias."
 > Obs: Assessment antes > depois. Argumento válido, mas sem forçar.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 3 — Foco: billing como ponte**
 💡 "Enquanto a análise fica pro [período], o billing já pode rodar agora."
@@ -1221,7 +1221,7 @@ Emojis:
 💡 "A fase 1 já vai gerar valor — [benefício concreto]."
 ✅ "Vou montar a proposta da fase 1 com escopo e custo."
 > Obs: Cliente concordou — fechar rápido.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: já pensar na fase 2**
 💡 "Mesmo fazendo em fases, a gente já desenha pensando na próxima."
@@ -1256,7 +1256,7 @@ Emojis:
 ⚠️ "A gente pode tocar todas, mas começar pela mais urgente faz mais sentido."
 ✅ "Vamos definir a prioridade e eu trago a proposta da primeira."
 > Obs: Não tentar vender tudo de uma vez. Priorizar com o cliente.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: conexão entre as frentes**
 💡 "Essas frentes se conectam — uma pode acelerar a outra."
@@ -1293,7 +1293,7 @@ Emojis:
 💡 "Vocês conseguem me mandar algum material do ambiente? Mesmo que simples."
 ✅ "Vou alinhar com o nosso pessoal e te mando os horários disponíveis."
 > Obs: Preparar a reunião = mais produtiva.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: alinhar expectativa**
 💡 "Nessa próxima conversa, a ideia é entender melhor a parte técnica e propor a solução."
@@ -1328,7 +1328,7 @@ Emojis:
 💡 "Se preferir, eu crio um email do projeto e a gente centraliza tudo ali."
 ✅ "Vou te mandar meu contato direto pra facilitar."
 > Obs: Facilitar = reduzir fricção.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: guiar o que mandar**
 💡 "Se puder incluir os requisitos principais e o que vocês esperam, já é ótimo."
@@ -1363,7 +1363,7 @@ Emojis:
 ⚠️ "Quero ter certeza que não esqueci nada antes de montar a proposta."
 ✅ "Vou documentar tudo e te mando um resumo por email."
 > Obs: Confirmar = evita mal-entendido. Resumo por email = registro.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: prioridade**
 💡 "Dessas frentes, qual vocês gostariam de começar?"
@@ -1398,7 +1398,7 @@ Emojis:
 💡 "Se puder me mandar os materiais antes, ele já vem preparado."
 ✅ "Qualquer coisa antes disso, me chama."
 > Obs: Confirmar rápido. Pedir material antes.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [X ]
 
 **Abordagem 2 — Foco: pauta**
 💡 "Vou montar uma pauta e te mando junto com o convite."
@@ -1433,7 +1433,7 @@ Emojis:
 💡 "E quando vier pra [cidade], avisa que a gente marca um café."
 ✅ "Boa semana e até a próxima!"
 > Obs: Rapport = relacionamento. WhatsApp = canal direto.
-> ✏️ Selecionada: [ ]
+> ✏️ Selecionada: [ X]
 
 **Abordagem 2 — Foco: resumo por email**
 💡 "Vou te mandar um email com o resumo do que conversamos."

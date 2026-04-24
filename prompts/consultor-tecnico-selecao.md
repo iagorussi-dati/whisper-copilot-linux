@@ -410,3 +410,48 @@ Regras:
 - "A gente configura tudo isso no projeto — criptografia, auditoria de acesso, detecção de ameaças."
 > Obs: Certificações da AWS = argumento forte pra compliance.
 > ✏️ Selecionada: [ ]
+
+### 9. Dúvidas sobre serviços AWS
+
+#### Situação 9.1
+**SITUAÇÃO:** Cliente pergunta se um serviço AWS suporta determinada funcionalidade — "suporta áudio?", "funciona com Python?", "aceita integração com Google Drive?"
+
+**Abordagem 1 — Foco: responder sim/não primeiro, depois detalhar**
+📌 Sim/Não primeiro. Depois explica brevemente o que faz, como funciona e as limitações. Exemplo: "Sim, o Amazon Q Business suporta upload de áudio e vídeo como fonte de conhecimento — ele transcreve e usa como base pra responder perguntas. Não tem chat por voz, a interação é por texto."
+
+💬 Como falar pro cliente:
+- "Sim, suporta. Vocês podem subir áudios de reuniões, treinamentos — ele transcreve e usa como base."
+- "A interação é por texto, mas tudo que vocês subirem de áudio e vídeo ele consegue processar."
+- "Se vocês gravam reuniões, por exemplo, dá pra jogar tudo lá e o time consulta depois só perguntando."
+> Obs: Sempre sim/não primeiro. Depois detalha. Se não tiver certeza, diz "vou confirmar esse ponto específico".
+> ✏️ Selecionada: [ ]
+
+**Abordagem 2 — Foco: explicar o serviço de forma simples quando o cliente não conhece**
+📌 Explicação em 2-3 frases do que o serviço faz, pra quem serve e como se usa. Sem jargão. Exemplo: "O Cognito é o serviço de login da AWS. Ele cuida de usuário, senha, MFA, tudo. Vocês podem usar ele completo ou só pra uma parte, tipo só o MFA."
+
+💬 Como falar pro cliente:
+- "Esse serviço basicamente faz [função principal]. Vocês podem usar ele pra [caso de uso do cliente]."
+- "Ele funciona assim: [explicação em 1 frase]. Na prática, pra vocês, isso significa [benefício]."
+- "A gente já usou ele em projetos parecidos com o de vocês e funcionou bem pra [resultado]."
+> Obs: Cliente geralmente não quer saber como funciona por dentro — quer saber o que resolve pra ele.
+> ✏️ Selecionada: [ ]
+
+**Abordagem 3 — Foco: responder sobre preço/custo de serviço**
+📌 Dar o preço se tiver certeza (com plano e exemplo). Se não tiver certeza do valor exato, dar um range e dizer que confirma. Sempre dar um exemplo prático com números do cenário do cliente.
+
+💬 Como falar pro cliente:
+- "O [serviço] custa [valor] por [unidade]. No cenário de vocês com [X usuários/dados], ficaria em torno de [valor estimado] por mês."
+- "Tem planos diferentes — o básico sai [valor] e o avançado [valor]. Pra vocês provavelmente o [plano] faz mais sentido."
+- "A gente pode simular com os números exatos de vocês — mas pra ter uma ideia, fica na faixa de [range]."
+> Obs: Se não souber o preço exato, dar range e confirmar depois. Nunca inventar número.
+> ✏️ Selecionada: [ ]
+
+**Abordagem 4 — Foco: comparar serviço AWS com alternativa que o cliente já usa**
+📌 Quando o cliente já usa algo parecido (Gemini, Azure, Heroku, etc.), explicar a diferença sem atacar. Focar em: segurança dos dados, integração nativa com AWS, suporte e custo. Exemplo: "O Q Business faz parecido com o que vocês já fazem no Gemini, mas com a diferença de que os dados não saem da conta de vocês e não são usados pra treinar modelos."
+
+💬 Como falar pro cliente:
+- "Funciona parecido com o que vocês já usam no [alternativa], mas com a diferença de [diferencial AWS]."
+- "A vantagem de usar o serviço da AWS é que [benefício específico] — e como vocês já tão na AWS, a integração é nativa."
+- "Não precisa trocar tudo de uma vez — dá pra testar o da AWS em paralelo e ver qual funciona melhor pra vocês."
+> Obs: Não atacar o concorrente. Diferenciar por fatos — segurança, integração, suporte.
+> ✏️ Selecionada: [ ]
