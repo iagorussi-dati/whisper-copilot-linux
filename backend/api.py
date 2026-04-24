@@ -263,9 +263,10 @@ class Api:
             if self._response_mode == "short" and n_lines > 6:
                 max_tok = min(250, 150 + (n_lines - 6) * 15)
 
-            # Web search: only for research mode + templates that need it
+            # Web search: for research mode + templates that need it, OR always for assistente (consultor técnico)
             search_context = ""
-            needs_search = self._response_mode == "research" and self._behavior_template in ("assistente", "pesquisa")
+            is_technical = self._behavior_template == "assistente"
+            needs_search = (self._response_mode == "research" and self._behavior_template in ("assistente", "pesquisa")) or is_technical
             if needs_search:
                 last_text = " ".join(e['text'] for e in self._transcript[-10:])
                 if last_text:
@@ -273,7 +274,7 @@ class Api:
                     query = last_text[:120] + " AWS pricing specs 2026"
                     log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
                     results = web_search(query, max_results=3)
-                    search_context = f"\n\nDados atualizados da web (use na resposta se relevante):\n{results}"
+                    search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, priorize informações atualizadas:\n{results}"
                     log.info(f"[SNAPSHOT] Search: {len(results)} chars")
 
             user_msg = (
@@ -298,6 +299,18 @@ class Api:
             system = self._raw_system_prompt or "Você é um copiloto."
             max_tok = 600
 
+            # Web search for technical template
+            search_context = ""
+            if self._behavior_template == "assistente":
+                last_text = " ".join(e['text'] for e in self._transcript[-15:])
+                if last_text:
+                    from .search import web_search
+                    query = last_text[:120] + " AWS pricing specs 2026"
+                    log.info(f"[FULL_CTX] Web search: '{query[:80]}'")
+                    results = web_search(query, max_results=5)
+                    search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta, priorize informações atualizadas:\n{results}"
+                    max_tok = 1200
+
             user_msg = (
                 f"Conversa completa:\n{context}\n\n"
                 f"Analise a conversa toda e identifique os principais temas que surgiram.\n"
@@ -316,6 +329,7 @@ class Api:
                 f"- As sugestões devem ser frases prontas que o comercial pode falar diretamente\n"
                 f"- Não narre a conversa, não diga 'o cliente falou X' nas sugestões\n"
                 f"- Tom natural e coloquial"
+                f"{search_context}"
             )
 
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
