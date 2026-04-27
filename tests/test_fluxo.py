@@ -44,7 +44,7 @@ def classify(ctx):
         f"Analise a transcrição e responda TRÊS linhas, sem explicação, sem markdown:\n"
         f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta direta do cliente?)\n"
         f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT?)\n"
-        f"PONTOS: 2-4 frases com os pontos cruciais limpos\n\n"
+        f"CONTEXTO: Resuma a situação do cliente em 2-3 frases. Foque na DOR — problema, necessidade, o que tenta resolver.\n\n"
         f"Transcrição: {ctx[:600]}"
     )
     return client.call_raw("Responda EXATAMENTE 3 linhas.", cm, max_tokens=120).strip()
@@ -69,8 +69,8 @@ test("Sem concorrente → NAO", not has_comp, r)
 
 # Pontos extraídos
 r = classify("Temos um Redis local que não está ativo. Talvez seria pra cache.")
-has_points = any(l.strip().upper().startswith("PONTOS:") and len(l.split(":",1)[1].strip()) > 10 for l in r.split("\n"))
-test("Pontos extraídos não vazios", has_points, r)
+has_points = any((l.strip().upper().startswith("CONTEXTO:") or l.strip().upper().startswith("PONTOS:")) and len(l.split(":",1)[1].strip()) > 10 for l in r.split("\n"))
+test("Contexto extraído não vazio", has_points, r)
 
 # ═══════════════════════════════════════════════════════════
 print("\n3. SNAPSHOT DISCOVERY")

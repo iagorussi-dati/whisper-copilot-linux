@@ -66,3 +66,8 @@ cd ~/whisper-copilot-lite-linux && python tests/test_fluxo.py
 | 2026-04-27 | Pre-warm com _raw_system_prompt | Seção 8 |
 | 2026-04-27 | cachePoint no Bedrock | Seção 8 |
 | 2026-04-27 | Tokens livres (5120 max) | Seção 3, 4, 6 |
+| 2026-04-27 | Chamada 1 extrai CONTEXTO com dor (não palavras soltas) | Seção 2, 3, 4 |
+| 2026-04-27 | Chamada 2 recebe contexto resumido focado na dor | Seção 3, 4 |
+| 2026-04-27 | Parser robusto (ignora markdown na extração) | Seção 2 |
+| 2026-04-27 | Logs salvos automaticamente em logs/ | — |
+| 2026-04-27 | UI simplificada: 3 modos (Sugestões, Discovery, Técnico) | — |
