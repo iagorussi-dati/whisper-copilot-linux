@@ -675,17 +675,6 @@ class Api:
             os.environ["AWS_BEARER_TOKEN_BEDROCK"] = cfg.bedrock_api_key
         self._bedrock = BedrockClient()
 
-        # Pre-warm prompt cache in background
-        if self._raw_system_prompt:
-            def prewarm():
-                log.info(f"Pre-warming prompt cache ({len(self._raw_system_prompt)} chars)...")
-                try:
-                    self._bedrock.call_raw(self._raw_system_prompt, "Aguarde.", max_tokens=10)
-                    log.info("Prompt cache warmed ✅")
-                except Exception as e:
-                    log.warning(f"Cache warm failed: {e}")
-            threading.Thread(target=prewarm, daemon=True).start()
-
         # Build participants context
         if cfg.participant_mode == "many":
             ctx = cfg.many_context or ""
@@ -724,6 +713,18 @@ class Api:
             parts.append(cfg.custom_system_prompt)
         self._raw_system_prompt = "\n\n".join(parts)
         self._custom_system_prompt = self._build_system_prompt(self._raw_system_prompt)
+
+        # Pre-warm prompt cache in background
+        if self._raw_system_prompt:
+            def prewarm():
+                log.info(f"Pre-warming prompt cache ({len(self._raw_system_prompt)} chars)...")
+                try:
+                    self._bedrock.call_raw(self._raw_system_prompt, "Aguarde.", max_tokens=10)
+                    log.info("Prompt cache warmed ✅")
+                except Exception as e:
+                    log.warning(f"Cache warm failed: {e}")
+            threading.Thread(target=prewarm, daemon=True).start()
+
         # Response mode: fixed per template, configurable only for sugestoes
         template_modes = {
             "assistente": "research",  # Consultor Técnico AWS: always detailed + web search
