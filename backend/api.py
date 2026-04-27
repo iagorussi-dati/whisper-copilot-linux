@@ -252,16 +252,20 @@ class Api:
         threading.Thread(target=process, daemon=True).start()
 
     def _generate_snapshot_response(self, no_repeat_hint: str = ""):
-        """Generate response for incremental snapshot — natural flow, no repeats."""
+        """Generate response for incremental snapshot — only interval since last snapshot."""
         try:
-            context = self._build_full_context()
+            # Build context from interval only (since last snapshot)
+            interval_entries = self._transcript[self._snapshot_checkpoint:]
+            if interval_entries:
+                context = "\n".join(f"[{e.get('speaker','?')}] {e['text']}" for e in interval_entries)
+            else:
+                context = self._build_full_context()
+            # Update checkpoint
+            self._snapshot_checkpoint = len(self._transcript)
+            log.info(f"[SNAPSHOT] Interval: {len(interval_entries)} entries (checkpoint at {self._snapshot_checkpoint})")
+
             system = self._raw_system_prompt or "Você é um copiloto."
-            mode_cfg = {"short": 5120, "full": 5120, "research": 5120}
-            max_tok = mode_cfg.get(self._response_mode, 5120)
-            # Dynamic: more transcript lines = more tokens to respond
-            n_lines = len(self._transcript)
-            if self._response_mode == "short" and n_lines > 6:
-                max_tok = min(250, 150 + (n_lines - 6) * 15)
+            max_tok = 5120
 
             # Web search: for research mode + non-technical templates
             search_context = ""
@@ -309,6 +313,7 @@ class Api:
                         clean_ctx = line.split(":", 1)[1].strip()
                         break
                 log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
+                log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
 
                 # Web search: when has question OR competitor
                 if (has_q or has_competitor) and not search_context:
@@ -360,6 +365,7 @@ class Api:
                         clean_ctx = line.split(":", 1)[1].strip()
                         break
                 log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
+                log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
 
                 # Web search if competitor
                 if has_competitor and not search_context:
@@ -398,6 +404,7 @@ class Api:
                     f"{search_context}"
                 )
 
+            log.info(f"[SNAPSHOT] Chamada 2 user_msg ({len(user_msg)} chars):\n{user_msg[:300]}")
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
             result = self._clean_md(result)
             result = self._trim_to_sentence(result)
