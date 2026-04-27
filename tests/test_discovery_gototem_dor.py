@@ -6,6 +6,9 @@ from backend.llm.bedrock import BedrockClient
 from dotenv import load_dotenv
 load_dotenv(os.path.expanduser("~/whisper-copilot-lite-linux/.env"))
 client = BedrockClient()
+# Pre-warm cache
+client.call_raw(system, "Aguarde.", max_tokens=10)
+print("Cache warmed ✅")
 with open(os.path.expanduser("~/whisper-copilot-lite-linux/prompts/discovery-dati.md")) as f:
     system = f.read()
 

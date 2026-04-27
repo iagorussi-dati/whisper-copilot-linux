@@ -7,6 +7,9 @@ from backend.search import web_search
 from dotenv import load_dotenv
 load_dotenv(os.path.expanduser("~/whisper-copilot-lite-linux/.env"))
 client = BedrockClient()
+# Pre-warm cache
+client.call_raw(system, "Aguarde.", max_tokens=10)
+print("Cache warmed ✅")
 with open(os.path.expanduser("~/whisper-copilot-lite-linux/prompts/assistente-objetivo.md")) as f:
     system = f.read()
 
