@@ -65,7 +65,7 @@ class BedrockClient:
             "inferenceConfig": {"maxTokens": max_tokens, "temperature": temperature, "topP": 0.5},
         }
         if system:
-            params["system"] = [{"text": system}]
+            params["system"] = [{"text": system, "cachePoint": {"type": "default"}}]
 
         response = self._client.converse(**params)
         text = ""
