@@ -309,12 +309,16 @@ class Api:
                         resp_size = line.split(":", 1)[1].strip().upper()
                         break
                 log.info(f"[SNAPSHOT] Response size estimate: {resp_size}")
-                clean_ctx = context
+                clean_ctx = context  # fallback
                 for line in classify_result.split("\n"):
-                    if line.strip().upper().startswith("PONTOS:"):
-                        clean_ctx = line.split(":", 1)[1].strip()
+                    stripped = line.strip().replace("*", "").replace("#", "").strip()
+                    if stripped.upper().startswith("PONTOS:") or stripped.upper().startswith("PONTOS "):
+                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[7:].strip()
                         break
-                log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
+                # If clean_ctx is still the full context, the parser failed — log warning
+                if clean_ctx == context:
+                    log.warning("[SNAPSHOT] Failed to extract points from chamada 1 — using full context as fallback")
+                log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Points ({len(clean_ctx)} chars): {clean_ctx[:120]}")
                 log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
 
                 # Web search: when has question OR competitor
@@ -362,12 +366,15 @@ class Api:
                 classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=300).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
-                clean_ctx = context
+                clean_ctx = context  # fallback
                 for line in classify_result.split("\n"):
-                    if line.strip().upper().startswith("PONTOS:"):
-                        clean_ctx = line.split(":", 1)[1].strip()
+                    stripped = line.strip().replace("*", "").replace("#", "").strip()
+                    if stripped.upper().startswith("PONTOS:") or stripped.upper().startswith("PONTOS "):
+                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[7:].strip()
                         break
-                log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
+                if clean_ctx == context:
+                    log.warning("[SNAPSHOT] Failed to extract points — using full context as fallback")
+                log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Points ({len(clean_ctx)} chars): {clean_ctx[:120]}")
                 log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
 
                 # Web search if competitor
