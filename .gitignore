@@ -16,3 +16,4 @@ tests/fixtures/
 installer/
 dist/
 build/
+logs/
