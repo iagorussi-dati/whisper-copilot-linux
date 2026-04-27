@@ -12,60 +12,42 @@ SNAP 1 — SSM, IAM, Security Group, deploy manual
 [Juliano] Interessante. Vi que tinha que criar outros recursos.
 [Gustavo] Sim, IAM rules, é tranquilo. Tudo reflete na forma de deploy, hoje bem manual. Teria que evoluir essa parte primeiro.
 
-⏱️ CHAMADA 1: 1.98s
+⏱️ CHAMADA 1: 4.60s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
 CONCORRENTE: NAO
-PONTOS: SSH, System Manager, Security Group, IAM rules, deploy manual.
+CONTEXTO: Cliente busca solução segura para acesso SSH sem abrir porta 22, mencionando alternativas como System Manager e necessidade de criar recursos IAM.
 RESPOSTA: CURTA
-✅ Pontos extraídos (62 chars): SSH, System Manager, Security Group, IAM rules, deploy manual.
+✅ Contexto extraído (146 chars): Cliente busca solução segura para acesso SSH sem abrir porta 22, mencionando alternativas como System Manager e necessidade de criar recursos IAM.
 
-⏱️ CHAMADA 2: 7.37s | Input: 62 chars
-⏱️ TOTAL: 9.35s
+⏱️ CHAMADA 2: 4.00s | Input: 146 chars
+⏱️ TOTAL: 8.61s
 
-📌 RESPOSTA (2192 chars):
-### SSH
-📌 Evite SSH direto nos servidores. Use **AWS Systems Manager (SSM) Session Manager** — acesso seguro via navegador ou CLI, sem abrir portas. Elimina necessidade de chaves SSH e reduz superfície de ataque.
+📌 RESPOSTA (983 chars):
+📌 **SSH seguro sem porta 22**  
+Use **AWS Systems Manager Session Manager**. Acesso total via console AWS ou CLI, sem expor portas. Tudo em HTTPS (443).
 
 💬 Como falar pro cliente:  
-- "Com o Session Manager, vocês acessam os servidores sem SSH — mais seguro e sem gerenciar chaves."  
-- "É tudo pelo navegador ou CLI, sem abrir portas na firewall."
+- "Vocês acessam servidores sem abrir porta 22 — só pelo console AWS."  
+- "É mais seguro e não precisa de firewall extra."
 
 ---
 
-### System Manager 
-📌 **AWS Systems Manager (SSM)** centraliza automação e gestão de infra. Use **SSM Automation** para tarefas repetitivas (ex: patch de segurança) e **Patch Manager** para atualizações automatizadas. Reduz trabalho manual e erros.
+📌 **Recursos IAM necessários**  
+Crie uma **IAM Role** para instâncias EC2 e uma **IAM Policy** com permissão `ssm:StartSession`. Atribua à instância e aos usuários que farão acesso.
 
 💬 Como falar pro cliente:  
-- "O SSM automatiza tarefas chatas — patch de segurança, por exemplo — e reduz erro humano."  
-- "Tudo centralizado, sem scripts espalhados por todo lado."
+- "Só precisa de uma Role na instância e uma Policy pra quem vai acessar."  
+- "Configura uma vez e pronto — sem dor de cabeça de firewall."
 
 ---
 
-### Security Group  
-📌 **Security Groups (SG)** são firewalls de estado na camada de instância. Configure regras mínimas necessárias — só portas e IPs essenciais. Evite regras amplas (ex: `0.0.0.0/0`). Atualize sempre que houver mudança de acesso.
+📌 **Vantagem sobre SSH tradicional**  
+Sem gerenciar chaves, sem risco de brute-force. Logs de sessão completos no CloudWatch. Atende compliance fácil.
 
 💬 Como falar pro cliente:  
-- "Security Groups são como firewalls — só liberamos o que é absolutamente necessário."  
-- "Isso fecha brechas de segurança e é fácil atualizar quando mudar acesso."
-
----
-
-### IAM rules  
-📌 **IAM** controla acesso com princípio do **mínimo privilégio**. Crie políticas específicas para cada função/cargo. Use **IAM Roles** para EC2/Fargate — credenciais temporárias e automáticas. Nunca use root ou credenciais fixas.
-
-💬 Como falar pro cliente:  
-- "IAM garante que cada um só acessa o que precisa — reduz riscos de vazamento."  
-- "Usamos roles pra instâncias, assim não tem credencial fixa guardada."
-
----
-
-### Deploy manual  
-📌 Elimine deploy manual. Use **AWS CodePipeline** + **CodeBuild** para deploy automatizado e consistente. Integra com GitHub, Bitbucket, etc. versiona tudo e permite rollback instantâneo. Garante que o que vai pro prod é igual ao testado.
-
-💬 Como falar pro cliente:  
-- "Deploy manual é fonte de erro — com Pipeline, é automático e idêntico ao ambiente de teste."  
-- "Se precisar voltar atrás, o rollback é instantâneo e seguro."
+- "Acaba com gerenciamento de chaves e risco de ataques por força bruta."  
+- "Tem log completo de tudo que foi feito nas sessões."
 
 
 ======================================================================
@@ -78,45 +60,28 @@ SNAP 2 — GitHub, deploy manual, git pull
 [Juliano] Deploy, acessam instância e sobem?
 [Gustavo] Hoje é git pull dentro da instância, baixa alterações, aplica migrações. Só pra teste.
 
-⏱️ CHAMADA 1: 1.24s
+⏱️ CHAMADA 1: 1.34s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
 CONCORRENTE: NAO
-PONTOS: Deploy manual, migrações, repositórios GitHub, instância de teste.
+CONTEXTO: O cliente realiza atualizações manuais via git pull na instância para testes, indicando um processo simples mas suscetível a erros e não automatizado.
 RESPOSTA: CURTA
-✅ Pontos extraídos (66 chars): Deploy manual, migrações, repositórios GitHub, instância de teste.
+✅ Contexto extraído (150 chars): O cliente realiza atualizações manuais via git pull na instância para testes, indicando um processo simples mas suscetível a erros e não automatizado.
 
-⏱️ CHAMADA 2: 6.45s | Input: 66 chars
-⏱️ TOTAL: 7.69s
+⏱️ CHAMADA 2: 2.97s | Input: 150 chars
+⏱️ TOTAL: 4.30s
 
-📌 RESPOSTA (1691 chars):
-### Deploy manual
-📌 Deploy manual gera risco de erro e lentidão. Com **CodePipeline + CodeBuild** (ambos serverless) você automatiza todo o fluxo em minutos. Reduz 80% do tempo de release e elimina falhas humanas.
+📌 RESPOSTA (573 chars):
+### Situação: Cliente faz atualizações manuais via git pull na instância de testes  
+**Abordagem: Automatizar com CodeDeploy ou Pipeline do CodePipeline**  
 
-💬 Como falar pro cliente:  
-- "Automatizar o deploy com Pipeline elimina os erros manuais e acelera seu release em até 5x."  
-- "Em 3 dias configuramos um fluxo que testa e sobe sua aplicação sozinho, sem você tocar."
-
-### Migrações
-📌 Para migração segura em 2026, use **AWS Application Migration Service (MGN)** para lift-and-shift em minutos. Ou **Database Migration Service (DMS)** para bancos com zero downtime. Ambos são gratuitos no tier inicial.
+📌 É possível automatizar totalmente o *deploy* de testes usando **CodePipeline + CodeDeploy**.  
+Isso elimina riscos de erro manual e versão inconsistente.  
+Gasta 5-10 min pra configurar a primeira vez.  
 
 💬 Como falar pro cliente:  
-- "Com MGN, migramos suas máquinas em horas sem reconfiguração complexa."  
-- "DMS transfere bancos com zero interrupção — seus clientes nem percebem."
-
-### Repositórios GitHub
-📌 **AWS CodeBuild** integra diretamente com GitHub via webhook. Build automático em cada push, sem servidor. Custo: **$0.005/min** (média $1/dia para apps pequenos). Suporta Node, Python, Java.
-
-💬 Como falar pro cliente:  
-- "Ligamos seu GitHub ao CodeBuild: toda alteração dispara teste automático, sem servidor."  
-- "Custa menos de R$30/mês e você detecta bugs antes mesmo de ir pro homologação."
-
-### Instância de teste
-📌 Use **EC2 Spot Instances** para testes: até **90% mais barato** que on-demand. Ou **Fargate Spot** para containers. Ideal para cargas intermitentes (ex: testes noturnos). Sem custo fixo.
-
-💬 Como falar pro cliente:  
-- "Instâncias Spot reduzem seu custo de teste em até 90% — perfeitas para ambientes não críticos."  
-- "Configuramos em 1 hora e você só paga quando realmente usar a máquina."
+- "Automatizar o *deploy* com CodePipeline elimina os riscos de erro manual que vocês têm hoje."  
+- "Em 10 minutos a gente configura e depois é só apertar um botão pra atualizar."
 
 
 ======================================================================
@@ -127,78 +92,39 @@ SNAP 3 — Next.js build estoura RAM, CodePipeline
 [Gustavo] Frontend Next.js, pesado no build. Instância pequena estoura RAM. Fazemos build local e upload. Ideal seria Docker multi-stage.
 [Juliano] CodePipeline conecta com GitHub, branch produção, faz build deploy teste. Se causar indisponibilidade reverte. Só paga tempo da máquina. Custo 1,5 dólar.
 
-⏱️ CHAMADA 1: 1.19s
+⏱️ CHAMADA 1: 1.54s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
 CONCORRENTE: NAO
-PONTOS: Build pesado estoura RAM, build local e upload, Docker multi-stage, CodePipeline com GitHub, deploy teste, reversão se falha, custo baixo.
-RESPOSTA: MÉDIA
-✅ Pontos extraídos (138 chars): Build pesado estoura RAM, build local e upload, Docker multi-stage, CodePipeline com GitHub, deploy teste, reversão se falha, custo baixo.
+CONTEXTO: O cliente enfrenta problemas com o build pesado do Next.js que estoura a RAM em instâncias pequenas, necessitando de uma solução mais eficiente e econômica. Busca otimizar o processo de build e deploy.
+RESPOSTA: CURTA
+✅ Contexto extraído (201 chars): O cliente enfrenta problemas com o build pesado do Next.js que estoura a RAM em instâncias pequenas, necessitando de uma solução mais eficiente e econômica. Busca otimizar o processo de build e deploy.
 
-⏱️ CHAMADA 2: 8.95s | Input: 138 chars
-⏱️ TOTAL: 10.14s
+⏱️ CHAMADA 2: 4.92s | Input: 201 chars
+⏱️ TOTAL: 6.46s
 
-📌 RESPOSTA (2668 chars):
-### Build pesado estoura RAM
-📌 Use **Docker multi-stage** pra separar build de produção. Reduz imagem final e evita estouro de RAM. Funciona com qualquer linguagem.
+📌 RESPOSTA (1275 chars):
+📌 **Solução para build pesado Next.js:** Use **EC2 com instâncias maiores** (ex: c5.2xlarge ou r5.xlarge) apenas durante o build via CodeBuild, ou **Fargate com mais CPU/RAM**. Isso resolve o estouro de RAM e é mais barato que manter instâncias grandes 24h.
 
 💬 Como falar pro cliente:  
-- "Com Docker multi-stage, a gente separa o que é só pra build do que vai pro production — isso evita estourar RAM."  
-- "A imagem final fica mais leve e o build local fica igual ao cloud."
+- "A gente pode configurar o CodeBuild pra rodar em instâncias maiores só no momento do build, economizando custos."  
+- "Outra opção é usar Fargate, que escala só o que precisa e você paga só pelo tempo de uso."
 
 ---
 
-### Build local e upload
-📌 **CodeBuild** executa builds na AWS, sem usar máquina local. Integra com GitHub e gera artefatos automaticamente. Custo por uso, só paga o que consumir.
+📌 **Otimização de custo:** Use **EC2 Spot** para builds não críticos (até 90% mais barato). Para deploys frequentes, **AWS Amplify Hosting** ou **CodePipeline com cache** reduzem tempo e custos.
 
 💬 Como falar pro cliente:  
-- "Vocês não precisam mais se preocupar com máquina local — o build roda na AWS, mesmo pro seu PC fraco."  
-- "O artefato sai pronto no S3 automaticamente, sem trabalho manual."
+- "Com EC2 Spot, seus builds ficam até 90% mais baratos, ideal para não críticos."  
+- "Amplify Hosting ou cache no CodePipeline aceleram deploys e reduzem custos de build."
 
 ---
 
-### Docker multi-stage
-📌 **Reduz tamanho da imagem** em até 70%. Separa dependências de build das de runtime. Essencial pra otimizar deploy e custo.
+📌 **Cache e otimização:** Ative **cache no Next.js** (`next build --incremental`) e no CodeBuild. Use **S3 para armazenar artefatos** e reduza dependências pesadas.
 
 💬 Como falar pro cliente:  
-- "Com multi-stage, a imagem de produção fica pequena — só o necessário, sem coisas do build."  
-- "Isso acelera o upload e diminui o custo de armazenamento e rede."
-
----
-
-### CodePipeline com GitHub
-📌 **Automação completa**: commit no GitHub dispara build, teste e deploy. Em caso de falha, **reversão automática** com approval manual. Configuração em 10 min.
-
-💬 Como falar pro cliente:  
-- "Um commit no GitHub já dispara todo o fluxo: build, teste e deploy — sem intervenção manual."  
-- "Se tiver erro, o pipeline reverte sozinho ou pede sua aprovação antes de ir pra produção."
-
----
-
-### Deploy teste
-📌 **Blue/Green com CodeDeploy** ou **canary** no ECS/EKS. Testa nova versão com tráfego parcial. Detecta falhas antes de afetar todos os usuários.
-
-💬 Como falar pro cliente:  
-- "A gente testa a nova versão com só 5% do tráfego — se tudo bem, libera pro resto."  
-- "Se der problema, voltamos imediatamente pro antigo, sem impacto ao cliente."
-
----
-
-### Reversão se falha
-📌 **CodePipeline + Approval** ou **rollback automático** no CodeDeploy. Mantém versões anteriores salvas. Reversão em menos de 5 minutos.
-
-💬 Como falar pro cliente:  
-- "Se o deploy falhar, o sistema volta automaticamente pra versão anterior em minutos."  
-- "Vocês também podem aprovar manualmente cada etapa — só libera se estiver tudo certo."
-
----
-
-### Custo baixo
-📌 **Serverless (Lambda, Fargate)** e **Spot Instances** reduzem custo em até 90%. Pagamento só no uso. Ideal pra builds intermitentes e carga variável.
-
-💬 Como falar pro cliente:  
-- "Usando serverless e spots, o custo fica perto de zero quando não tá rodando — só paga o que usar."  
-- "A gente otimiza tudo pra vocês gastarem menos, mesmo em pico de demanda."
+- "Ativar cache no Next.js e no CodeBuild reduz drasticamente tempo e consumo de RAM."  
+- "Armazenar artefatos no S3 e otimizar dependências também ajuda muito no custo."
 
 
 ======================================================================
@@ -212,62 +138,46 @@ SNAP 4 — VPN vs SSM, Bastion, segurança
 ⏱️ CHAMADA 1: 1.53s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
-CONCORRENTE: SIM
-PONTOS: Subnet, redução de área de ataque, acesso a banco e instâncias, VPN custo, System Manager uso, arquitetura.
+CONCORRENTE: NAO
+CONTEXTO: Cliente questiona sobre segurança de rede e acesso a bancos de dados, buscando alternativas eficientes. Necessita reduzir custos e simplificar acesso às instâncias.
 RESPOSTA: CURTA
-✅ Pontos extraídos (107 chars): Subnet, redução de área de ataque, acesso a banco e instâncias, VPN custo, System Manager uso, arquitetura.
+✅ Contexto extraído (164 chars): Cliente questiona sobre segurança de rede e acesso a bancos de dados, buscando alternativas eficientes. Necessita reduzir custos e simplificar acesso às instâncias.
 
-⏱️ CHAMADA 2: 7.98s | Input: 107 chars
-⏱️ TOTAL: 9.51s
+⏱️ CHAMADA 2: 5.13s | Input: 164 chars
+⏱️ TOTAL: 6.66s
 
-📌 RESPOSTA (2436 chars):
-### Ponto: Subnet
+📌 RESPOSTA (1589 chars):
+### Situação: Segurança de rede e acesso a bancos de dados  
 
-📌 Subnets devem ser segmentados por função (ex: público, privado, DB). Reduz exposição e permite políticas de segurança granulares via Network ACLs e SGs.
-
-💬 Como falar pro cliente:  
-- "Dividir subnets por função isola serviços críticos e reduz riscos de invasão."  
-- "Isso permite controlar tráfego fino e aplicar regras de segurança específicas por área."
-
-### Ponto: Redução de área de ataque
-
-📌 Minimize superfície de ataque removendo portas desnecessárias, usando Security Groups restritivos e desativando endpoints públicos não usados. AWS WAF e Shield protegem contra DDoS e explorações.
+📌 Use **Security Groups** e **Network ACLs** pra controlar tráfego de entrada/saída nas instâncias. Combine com **VPCs** pra isolar ambientes.  
 
 💬 Como falar pro cliente:  
-- "Fechar portas e endpoints inúteis reduz pontos de entrada para atacantes."  
-- "Com WAF e Shield, vocês bloqueiam ataques antes que cheguem na aplicação."
+- "Security Groups agem como firewall de instância, bloqueando o que não precisa."  
+- "VPC isola seu ambiente, reduzindo riscos de acesso externo não autorizado."  
 
-### Ponto: Acesso a banco e instâncias
+### Situação: Reduzir custos de infraestrutura  
 
-📌 Use IAM para acesso temporário e com least privilege. Para bancos, conecte via VPC ou PrivateLink, nunca exponha publicamente. Use Secrets Manager para credenciais.
-
-💬 Como falar pro cliente:  
-- "Acesso temporário via IAM e credenciais guardadas no Secrets Manager evitam vazamentos."  
-- "Manter banco dentro da VPC sem exposição pública é a prática mais segura."
-
-### Ponto: VPN custo
-
-📌 Custos de VPN variam conforme tráfego e gateways. AWS Site-to-Site VPN tem taxa fixa + tráfego. Alternativa mais barata: Direct Connect com commits de dados, ou usar AWS Client VPN para poucos usuários.
+📌 **EC2 Spot Instances** podem reduzir custos em até 90% para workloads flexíveis. Use **Reserved Instances** para workloads estáveis. Otimize com **Auto Scaling**.  
 
 💬 Como falar pro cliente:  
-- "O custo da VPN depende do tráfego; vamos calcular com base no volume de vocês."  
-- "Se for muitos dados, o Direct Connect pode sair mais barato com contrato anual."
+- "Spot Instances cortam custos drasticamente se seu sistema aguenta interrupções ocasionais."  
+- "Reserved Instances trazem economia para servidores que ficam sempre ligados."  
 
-### Ponto: System Manager uso
+### Situação: Simplificar acesso às instâncias  
 
-📌 AWS Systems Manager (SSM) centraliza gestão de instâncias: patch, configuração, comando remoto sem SSH. Ideal para automação e conformidade, com logs no CloudWatch.
-
-💬 Como falar pro cliente:  
-- "Com SSM vocês automatizam atualizações e comandos sem abrir SSH, reduzindo riscos."  
-- "Tudo é logado e monitorado, facilitando auditorias e conformidade."
-
-### Ponto: Arquitetura
-
-📌 Arquitetura bem planejada usa princípios Well-Architected: otimização de custo, performance, confiabilidade e segurança. Comece com pilotos pequenos e scale com dados reais.
+📌 **AWS Systems Manager Session Manager** elimina necessidade de SSH/RDP. Acesso via navegador ou CLI, com logs e auditoria integrados.  
 
 💬 Como falar pro cliente:  
-- "Seguir o Well-Architected Framework garante que a solução é segura, performática e de baixo custo."  
-- "Começamos com um piloto, medimos e depois escalamos com base nos dados."
+- "Session Manager acessa suas instâncias sem abrir portas na firewall."  
+- "Tudo é registrado, facilitando auditoria e aumentando a segurança."  
+
+### Situação: Acesso seguro a bancos de dados  
+
+📌 **RDS IAM Authentication** usa credenciais temporárias via IAM, eliminando senhas. Combine com **VPC Endpoints** pra evitar exposição na internet.  
+
+💬 Como falar pro cliente:  
+- "Autenticação IAM no RDS remove senhas, usando tokens temporários e seguros."  
+- "VPC Endpoints mantém seu banco de dados sem IP público, aumentando a proteção."
 
 
 ======================================================================
@@ -279,78 +189,31 @@ SNAP 5 — Topologia rede, CodePipeline, CloudWatch
 [Juliano] CI/CD com CodePipeline e CodeBuild. Observabilidade com CloudWatch. Vocês usam?
 [Gustavo] Eu uso em outra empresa.
 
-⏱️ CHAMADA 1: 1.24s
+⏱️ CHAMADA 1: 1.33s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
 CONCORRENTE: NAO
-PONTOS: Redes subnet públicas/privadas, Load Balancer, NAT, ECS/EC2, banco de dados, CI/CD CodePipeline, CodeBuild, CloudWatch observabilidade.
+CONTEXTO: Cliente descreve infraestrutura de rede com load balancer em subnet pública e serviços em privada. Pergunta sobre uso de ferramentas AWS de CI/CD e observabilidade.
 RESPOSTA: CURTA
-✅ Pontos extraídos (135 chars): Redes subnet públicas/privadas, Load Balancer, NAT, ECS/EC2, banco de dados, CI/CD CodePipeline, CodeBuild, CloudWatch observabilidade.
+✅ Contexto extraído (164 chars): Cliente descreve infraestrutura de rede com load balancer em subnet pública e serviços em privada. Pergunta sobre uso de ferramentas AWS de CI/CD e observabilidade.
 
-⏱️ CHAMADA 2: 11.67s | Input: 135 chars
-⏱️ TOTAL: 12.91s
+⏱️ CHAMADA 2: 4.00s | Input: 164 chars
+⏱️ TOTAL: 5.32s
 
-📌 RESPOSTA (3467 chars):
-### Ponto 1: Redes subnet públicas/privadas
-📌 Subnets públicas têm rota para um Internet Gateway (IGW), permitindo acesso direto à internet. Subnets privadas não têm IGW; usam NAT para saída à internet, mas não são acessíveis de fora. Ideal para separar recursos expostos (ex: load balancers) de internos (ex: bancos de dados).
+📌 RESPOSTA (873 chars):
+### Situação: Perguntas sobre CI/CD e observabilidade na infra descrita
 
-💬 Como falar pro cliente:  
-- "Subnets públicas expõem serviços como o load balancer; privadas protegem bancos e APIs internas."  
-- "Assim a gente isola o que precisa ficar visível da internet do que tem que ficar blindado."
-
----
-
-### Ponto 2: Load Balancer
-📌 Use **Application Load Balancer (ALB)** para HTTP/HTTPS com roteamento avançado por caminho ou host. Para TCP/UDP bruto, **Network Load Balancer (NLB)** tem latência menor. Ambos são totalmente gerenciados e escalam automaticamente.
+📌 **CI/CD**: Use **CodePipeline** com **CodeBuild** e **CodeDeploy**. Integra com GitHub, ACL no deploy em subnets privadas. Suporta rollback automático via CloudWatch Alarms.
 
 💬 Como falar pro cliente:  
-- "ALB é perfeito pra suas APIs e sites, roteando por URL; NLB é ideal pra tráfego puro de alta performance."  
-- "Eles escalam sozinhos, sem vocês precisarem gerenciar servidores."
+- "O CodePipeline orquestra todo o fluxo, desde o repositório até o deploy nos serviços em subnet privada."  
+- "Com CodeDeploy, vocês fazem deploy seguro em instâncias privadas, com rollback se algo der errado."
 
----
-
-### Ponto 3: NAT
-📌 **NAT Gateway** é gerenciado, altamente disponível e com alta largura de banda (recomendado para produção). **NAT Instance** é uma EC2 que você gerencia — mais barato, mas requer manutenção. NAT Gateway cobra por hora + tráfego de dados.
+📌 **Observabilidade**: **CloudWatch** para métricas e logs (até em subnets privadas). **X-Ray** para tracing de requisições entre ALB e serviços. Alerta via SNS em falhas.
 
 💬 Como falar pro cliente:  
-- "NAT Gateway é sem dor de cabeça — a AWS cuida de tudo, ideal pra produção."  
-- "Se quiser economizar em ambiente de teste, podemos usar NAT Instance, mas requer um pouco de manutenção."
-
----
-
-### Ponto 4: ECS/EC2
-📌 **ECS com Fargate** elimina a gestão de servidores — você só escala containers. **ECS com EC2** dá controle da máquina (ex: drivers específicos), mas exige gerenciamento. Custo: Fargate é pay-as-you-go; EC2 tem instâncias reservadas para economia.
-
-💬 Como falar pro cliente:  
-- "Com Fargate vocês ganham velocidade e não perdem tempo gerenciando máquinas."  
-- "Se precisarem de controle específico de hardware, EC2 é a opção, mas com mais gestão."
-
----
-
-### Ponto 5: Banco de dados
-📌 **RDS** (MySQL, PostgreSQL, etc.) é gerenciado com backups automáticos, fail-over e scaling read replicas. Para NoSQL, **DynamoDB** oferece escalabilidade horizontal e latência baixa em milissegundos, sem schema fixo.
-
-💬 Como falar pro cliente:  
-- "RDS é ideal se vocês já usam SQL; DynamoDB é perfeito para apps que precisam de escalar muito rápido com dados flexíveis."  
-- "Ambos são totalmente gerenciados — vocês focam na aplicação, não no banco."
-
----
-
-### Ponto 6: CI/CD CodePipeline + CodeBuild
-📌 **CodePipeline** orquestra o fluxo (Git → build → deploy). **CodeBuild** executa builds sem gerenciar servidores, com cache de dependências e integração a ECR. Custo: você paga por minuto de build e armazenamento de artefatos.
-
-💬 Como falar pro cliente:  
-- "CodePipeline automatiza todo o ciclo desde o Git até o deploy; CodeBuild faz builds rápidas sem servidor."  
-- "Isso reduz o tempo de release e elimina servidores de build parados."
-
----
-
-### Ponto 7: CloudWatch observabilidade
-📌 **CloudWatch** coleta métricas, logs e eventos de todos os serviços AWS. Configure alarmes (CPU, erros HTTP) e dashboards. Para logs detalhados (ex: rastreamento de requisições), ative **CloudWatch Logs Insights** ou integre com **X-Ray**.
-
-💬 Como falar pro cliente:  
-- "CloudWatch já vem pronto para monitorar tudo — em 5 minutos vocês têm alertas de falhas."  
-- "Com logs e dashboards, vocês veem exatamente onde está o gargalo ou erro."
+- "CloudWatch coleta tudo, mesmo nos serviços em privado, e já vem integrado ao ALB."  
+- "X-Ray mostra o caminho exato de cada requisição, ajudando a identificar gargalos rápido."
 
 
 ======================================================================
@@ -363,51 +226,27 @@ SNAP 6 — São Paulo vs Virginia, custo, latência
 [Gustavo] SP 35-50ms, Virginia 120ms.
 [Juliano] Migrar pra Virginia pra reduzir custo. RDS lá mais barato.
 
-⏱️ CHAMADA 1: 1.14s
+⏱️ CHAMADA 1: 1.53s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
 CONCORRENTE: NAO
-PONTOS: Latência SP vs Virginia, custo SP mais alto, migração para Virginia, custo RDS mais baixo.
+CONTEXTO: Juliano busca migrar de SP para Virginia para reduzir custos, pois SP é quase o dobro mais caro e oferece maior delay.
 RESPOSTA: CURTA
-✅ Pontos extraídos (90 chars): Latência SP vs Virginia, custo SP mais alto, migração para Virginia, custo RDS mais baixo.
+✅ Contexto extraído (118 chars): Juliano busca migrar de SP para Virginia para reduzir custos, pois SP é quase o dobro mais caro e oferece maior delay.
 
-⏱️ CHAMADA 2: 7.23s | Input: 90 chars
-⏱️ TOTAL: 8.37s
+⏱️ CHAMADA 2: 2.87s | Input: 118 chars
+⏱️ TOTAL: 4.40s
 
-📌 RESPOSTA (1682 chars):
-### 📌 Latência SP vs Virginia  
-A região **São Paulo (sa-east-1)** tem latência **<50ms** para usuários brasileiros, enquanto Virginia (us-east-1) tem **~100-150ms**. Para aplicações com usuários locais, SP é vantagem clara.
+📌 RESPOSTA (579 chars):
+### Migração SP (sa-east-1) para Virginia (us-east-1)
 
-💬 Como falar pro cliente:  
-- "Usuários no Brasil sentem latência quase 3x menor em SP — essencial pra apps críticas."  
-- "Se a aplicação for usada só internamente, Virginia pode até servir, mas SP melhora experiência final."
-
----
-
-### 📌 Custo SP mais alto  
-São Paulo tem custo **30-40% maior** que Virginia na maioria dos serviços (ex: EC2, RDS). Impacto direto no TCO, mas necessário para compliance ou latência.
+📌 **Custo:** Virginia tem preços ~40% mais baixos que SP em EC2, RDS e S3. Impacto direto na conta mensal.
+**Performance:** Latência maior para usuários BR, mas aceitável para backend e dados não críticos em tempo real.
+**Suporte:** Todos serviços principais disponíveis em Virginia sem perda de funcionalidade.
 
 💬 Como falar pro cliente:  
-- "Custo em SP é até 40% maior, mas se a necessidade for latência ou LGPD, vale o investimento."  
-- "Dá pra otimizar mantendo só dados sensíveis em SP e o restante em Virginia pra economizar."
-
----
-
-### 📌 Migração para Virginia  
-Migrar de SP para Virginia reduz custos significativamente. A Dati faz migração com **downtime <5 min** para bases até 100GB, usando AWS DMS ou DataSync.
-
-💬 Como falar pro cliente:  
-- "Migrar pra Virginia pode cortar até 40% dos custos de infra — em 2-3 semanas com planejamento."  
-- "Fazemos com mínimo downtime; para dados pequenos, é quase imperceptível."
-
----
-
-### 📌 Custo RDS mais baixo  
-O **RDS em Virginia** tem preço **~30% menor** que SP (ex: db.t3.micro sai de **R$ 33** em SP para **R$ 24** em Virginia). Ideal para bases grandes ou uso intenso.
-
-💬 Como falar pro cliente:  
-- "O RDS em Virginia sai 30% mais barato — economia direta se não precisar de dados no Brasil."  
-- "Se a base for grande, essa diferença de custo faz sentido rápido no seu orçamento anual."
+- "Virginia reduz custos em até 40% mantendo todos os serviços que vocês usam hoje."  
+- "A latência maior só afeta se sua aplicação precisa de resposta super rápida pra usuários BR."
 
 
 ======================================================================
@@ -419,75 +258,35 @@ SNAP 7 — Terraform, WAF, estimativa custo
 [Gustavo] Depende do cliente. Terraform ou CloudFormation. Adiciona horas. Adicionaria WAF pra ataques, SQL injection, regras gerenciadas AWS.
 [Juliano] Com esses recursos, estimativa de preço mensal. Reservar instâncias. Preciso volumetria. Projeto migração Virginia. Preciso billing atual.
 
-⏱️ CHAMADA 1: 1.29s
+⏱️ CHAMADA 1: 1.44s
 🔍 Classificação:
-CLASSIFICAÇÃO: SIM
-CONCORRENTE: SIM
-PONTOS: Terraform, CloudFormation, WAF, ataques, SQL injection, regras gerenciadas AWS, estimativa de preço mensal, reservação de instâncias, volumetria, migração Virginia, billing atual.
+CLASSIFICAÇÃO: SIM  
+CONCORRENTE: NAO  
+CONTEXTO: O cliente precisa de estimativa de custos mensais para migração para Virginia, incluindo recursos como WAF e reservação de instâncias, e requer dados de volumetria e billing atual.  
 RESPOSTA: MÉDIA
-✅ Pontos extraídos (179 chars): Terraform, CloudFormation, WAF, ataques, SQL injection, regras gerenciadas AWS, estimativa de preço mensal, reservação de instâncias, volumetria, migração Virginia, billing atual.
+✅ Contexto extraído (180 chars): O cliente precisa de estimativa de custos mensais para migração para Virginia, incluindo recursos como WAF e reservação de instâncias, e requer dados de volumetria e billing atual.
 
-⏱️ CHAMADA 2: 10.30s | Input: 179 chars
-⏱️ TOTAL: 11.59s
+⏱️ CHAMADA 2: 5.83s | Input: 180 chars
+⏱️ TOTAL: 7.26s
 
-📌 RESPOSTA (2519 chars):
-### Terraform vs CloudFormation
+📌 RESPOSTA (998 chars):
+### Situação: Estimativa de custos para migração para Virginia (us-east-1)
 
-📌 **Terraform** é multi-cloud (AWS + outros) e tem estado compartilhado externo. **CloudFormation** é nativo AWS, mais integrado e com drift detection automática — ideal pra ambientes 100% AWS.
+📌 **Custo dos recursos:**
+- WAF: USD 3.00 por regra de firewall gerenciada + USD 1.00 por regra personalizada por mês. Mínimo de USD 20/mês.
+- Instância reservada: até 72% de desconto vs on-demand. Preços variam por tipo (ex: t3.large: ~USD 220/mês reservado 1 ano).
 
-💬 Como falar pro cliente:  
-- "Se vocês querem multi-cloud, Terraform é a escolha. Se é só AWS, CloudFormation é mais simples e integrado."  
-- "CloudFormation detecta mudanças acidentais na infra — isso evita surpresas."
+📌 **Dados necessários para estimativa:**
+- Quantidade de regras WAF planejadas (gerenciadas e personalizadas).
+- Número e tipos de instâncias que serão reservadas (ex: 2 x t3.large, 1 x m5.xlarge).
 
----
-
-### WAF e ataques (SQL injection)
-
-📌 **WAF** bloqueia SQL injection com **regras gerenciadas da AWS** (atualizadas automaticamente). Custa **~ USD 1 por regra/mês + USD 0,60 por 1M de requisições**. Protege ALB, CloudFront e API Gateway.
-
-💬 Como falar pro cliente:  
-- "As regras gerenciadas da AWS já bloqueiam SQL injection — atualizam sozinhas e custam barato."  
-- "Vocês não precisam configurar nada manual — só ativar o conjunto de regras."
-
----
-
-### Estimativa de preço mensal
-
-📌 Preciso de **volumetria**: requisições/mês, GB armazenados, minutos de compute. Exemplo: EC2 t3.medium 24h = ~ USD 30/mês; S3 1TB = USD 23/mês. **Instâncias reservadas** podem economizar até 70%.
+📌 **Billing atual:**
+- Solicite o gasto mensal atual com cloud (provedor atual) e consumo de dados de tráfego.
+- Peça volume de armazenamento, requisições de API e pico de CPU para calcular preciso.
 
 💬 Como falar pro cliente:  
-- "Com os números de uso, em 10 min eu faço a estimativa real na calculadora da AWS."  
-- "Se vocês reservarem instâncias, o custo cai bastante — mostro como fazer."
-
----
-
-### Reservação de instâncias
-
-📌 **Reservas** (Reserved Instances) dão até **70% de desconto** pra EC2/RDS vs on-demand. Requer compromisso de **1 ou 3 anos**. São **flexíveis** por AZ ou região. 
-
-💬 Como falar pro cliente:  
-- "Reservar instâncias reduz o custo em até 70% — ideal se o uso é estável."  
-- "Podemos fazer reservas flexíveis, que se ajustam se o uso mudar um pouco."
-
----
-
-### Migração para Virginia (us-east-1)
-
-📌 **Virginia** (us-east-1) é a região **mais barata** da AWS (~30-40% menos que SP). Suporta **todos** os serviços. **R**ecomendado para não-regulatório (LGPD exige SP algumas vezes).
-
-💬 Como falar pro cliente:  
-- "Virginia é a região mais barata — ideal se não tem exigência de dados no Brasil."  
-- "Economia é clara: 30-40% mais barato que São Paulo."
-
----
-
-### Billing atual (entender consumo)
-
-📌 Pegar **bill atual** pelo **Cost Explorer** ou **AWS Billing Console**. Identificar **top 5 serviços** que mais consomem. Usar **tags** para ver custo por time/projeto.  
-
-💬 Como falar pro cliente:  
-- "Vamos ver o billing de vocês — em 15 min já temos os principais gastos."  
-- "Com tags, dá pra ver custo por time ou projeto — ajuda a otimizar." 
+- "O WAF custa USD 3 por regra gerenciada e USD 1 por regra personalizada — vamos definir quantas vocês precisam."  
+- "Instâncias reservadas reduzem o custo em até 72%, vou precisar saber os tipos e quantidades para calcular."
 
 
 ======================================================================
@@ -499,45 +298,33 @@ SNAP 8 — Incentivos AWS, subsídio, créditos
 [Gustavo] AWS pode subsidiar projeto, total ou parcial. Meu papel levar case pra AWS buscar incentivo. Pode ser pra pagar projeto ou créditos.
 [Juliano] Entendi. Caminho é esse. Estou mais confortável.
 
-⏱️ CHAMADA 1: 1.24s
+⏱️ CHAMADA 1: 1.44s
 🔍 Classificação:
 CLASSIFICAÇÃO: SIM
 CONCORRENTE: NAO
-PONTOS: Incentivo AWS, subsídio total ou parcial, caso para AWS, créditos.
+CONTEXTO: Cliente busca incentivo ou subsídio da AWS para custear projeto, precisa de apoio para reduzir gastos.
 RESPOSTA: CURTA
-✅ Pontos extraídos (66 chars): Incentivo AWS, subsídio total ou parcial, caso para AWS, créditos.
+✅ Contexto extraído (102 chars): Cliente busca incentivo ou subsídio da AWS para custear projeto, precisa de apoio para reduzir gastos.
 
-⏱️ CHAMADA 2: 5.84s | Input: 66 chars
-⏱️ TOTAL: 7.07s
+⏱️ CHAMADA 2: 4.39s | Input: 102 chars
+⏱️ TOTAL: 5.83s
 
-📌 RESPOSTA (1537 chars):
-### Incentivo AWS
-📌 A AWS tem programas de incentivo para novos clientes e expansões. Créditos podem chegar a R$ 50k-100k dependendo do caso e volume de uso. Validade geralmente de 12 meses.
+📌 RESPOSTA (938 chars):
+### Situação: Cliente busca incentivo ou subsídio da AWS para custear projeto
 
-💬 Como falar pro cliente:  
-- "A AWS pode oferecer créditos de até R$ 100k pra ajudar na migração ou expansão."  
-- "Isso cobre parte dos custos iniciais e vamos estruturar pra maximizar o benefício."
-
-### Subsídio total ou parcial
-📌 Subsídio total (100%) é raro e só em projetos estratégicos com alto impacto. Parcial (30-70%) é mais comum em migrações grandes ou adoção de serviços específicos como Bedrock.
+📌 AWS tem programas de crédito: AWS Activate (até USD 100k em créditos), AWS Marketplace Credits, e Support Plans com descontos. É necessário validar elegibilidade e ter conta corporativa.
 
 💬 Como falar pro cliente:  
-- "Subsídio total é difícil, mas parcial de 30-70% é viável em projetos relevantes."  
-- "Vamos mapear o caso pra ver o que se encaixa nos critérios da AWS."
+- "A AWS tem créditos de até USD 100k pelo Activate — vamos verificar se vocês se encaixam."  
+- "Com o Support Plan Enterprise, vocês ganham descontos e créditos extras, depende do tamanho do contrato."
 
-### Caso para AWS
-📌 Cases fortes são migração de sistemas críticos, adoção de IA/ML (Bedrock), ou multi-cloud com mais de 70% em AWS. Foco em redução de custo e compliance.
+### Situação: Cliente precisa de apoio para reduzir gastos
 
-💬 Como falar pro cliente:  
-- "Migrar sistemas críticos ou usar Bedrock são casos que atraem bons incentivos."  
-- "Precisamos mostrar o impacto — redução de custo e escalabilidade são chave."
-
-### Créditos
-📌 Créditos são concedidos via AWS Service Credits ou Savings Plans. Valores comuns: R$ 10k-100k. Usados para pagar instâncias, RDS, ou serviços de IA. Exigem contrato e comprovação de uso.
+📌 Começar pelo Rightsizing (EC2, RDS) e Reserved Instances (até 70% de desconto). Use Cost Explorer para identificar picos e o AWS Budgets para alertas de gasto.
 
 💬 Como falar pro cliente:  
-- "Créditos de R$ 10k-100k ajudam a iniciar sem custo inicial imediato."  
-- "Vamos garantir que o contrato e o uso se alinhem pra aproveitar tudo."
+- "Com Rightsizing e Reserved Instances, vocês reduzem até 70% do custo de infraestrutura."  
+- "Vamos configurar Budgets para alertar antes do gasto estourar — assim evitam surpresas."
 
 
 ======================================================================
@@ -547,47 +334,31 @@ SNAP 9 — Crescimento, volumetria, budget
 📝 TRANSCRIÇÃO (206 chars):
 [Juliano] Budget limitado. Plataforma vai ter 600 assinaturas início próximo ano, 4 mil final. Movimentação financeira grande. Conseguimos passar volume usuários, produtos, transações pra mensurar máquinas.
 
-⏱️ CHAMADA 1: 1.23s
+⏱️ CHAMADA 1: 1.54s
 🔍 Classificação:
-CLASSIFICAÇÃO: SIM
-CONCORRENTE: NAO
-PONTOS: Volume de usuários, produtos, transações, mensuração de máquinas, orçamento limitado, crescimento de assinaturas.
+CLASSIFICAÇÃO: SIM  
+CONCORRENTE: NAO  
+CONTEXTO: Cliente tem orçamento restrito mas prevê aumento significativo de assinaturas. Necessita medir infraestrutura para lidar com crescimento e transações financeiras.  
 RESPOSTA: CURTA
-✅ Pontos extraídos (113 chars): Volume de usuários, produtos, transações, mensuração de máquinas, orçamento limitado, crescimento de assinaturas.
+✅ Contexto extraído (162 chars): Cliente tem orçamento restrito mas prevê aumento significativo de assinaturas. Necessita medir infraestrutura para lidar com crescimento e transações financeiras.
 
-⏱️ CHAMADA 2: 6.65s | Input: 113 chars
-⏱️ TOTAL: 7.88s
+⏱️ CHAMADA 2: 4.92s | Input: 162 chars
+⏱️ TOTAL: 6.45s
 
-📌 RESPOSTA (2146 chars):
-### Situação: Volume de usuários, produtos, transações, mensuração de máquinas, orçamento limitado, crescimento de assinaturas
+📌 RESPOSTA (1193 chars):
+### Situação: Cliente com orçamento restrito e crescimento previsto
 
-📌 **Volume de usuários e produtos**
-A AWS oferece **Auto Scaling** para lidar com flutuações no número de usuários e produtos. Serviços como **DynamoDB** escalam automaticamente com o crescimento de dados e transações, sem intervenção manual. Isso garante desempenho consistente mesmo com picos de tráfego.
-
-💬 Como falar pro cliente:  
-- "O Auto Scaling na AWS ajusta automaticamente os recursos conforme o número de usuários e produtos crescer."
-- "DynamoDB escala sozinho com o aumento de transações, sem você precisar se preocupar com capacidade."
-
-
-📌 **Mensuração de máquinas**
-Use **Amazon CloudWatch** para monitorar métricas detalhadas de todas as máquinas (CPU, memória, disco, rede). **AWS Config** rastreia a configuração e o compliance dos recursos, dando visibilidade total. Alertas podem ser configurados para qualquer anomalia.
-
+📌 Comece com métricas no CloudWatch — é gratuito e essencial. Identifique gargalos antes de escalar. Use alarmes de CPU, memória e disco.
 💬 Como falar pro cliente:
-- “CloudWatch dá métricas em tempo real do desempenho das máquinas, com alertas automáticos.”
-- “AWS Config mostra todas as configurações e mudanças, garantindo conformidade contínua.”
+- "Vamos configurar alarmes básicos no CloudWatch pra identificar onde está o gargalo antes de qualquer investimento."
+- "Isso não custa nada e garante que qualquer otimização ou escala será direcionada exatamente onde precisa."
 
-
-📌 **Orçamento limitado**
-**AWS Cost Explorer** e **Budgets** ajudam a controlar gastos em tempo real. **Reserved Instances** e **Savings Plans** oferecem até **72% de desconto** para workloads estáveis. Comece com instâncias menores e escale conforme o crescimento justificar.
-
+📌 Use EC2 T3/T4g para começar — são baratos e escaláveis verticalmente. Quando atingir 80% de CPU constante, migre para instâncias maiores ou use Auto Scaling.
 💬 Como falar pro cliente:
-- “Com Cost Explorer e Budgets, você controla os custos e evita surpresas na fatura.”
-- “Reserved Instances dão até 72% de desconto, ideal para seu orçamento limitado.”
+- "Começamos com instâncias T3 baratas, que cabem no orçamento, e escalamos só quando realmente necessário."
+- "Assim vocês economizam agora e só pagam mais quando o crescimento exigir."
 
-
-📌 **Crescimento de assinaturas**
-**AWS Marketplace** e **API Gateway** facilitam a venda de assinaturas. **AWS Billing Conductor** permite cobrança personalizada por cliente ou produto. Integração com **Stripe** ou sistemas de pagamento existentes é simples e direta.
-
+📌 RDS Serverless (Aurora) para transações financeiras — paga só pelo que usa. Garante escalabilidade sem custo fixo alto. Atende LGPD na região SP.
 💬 Como falar pro cliente:
-- “Marketplace e API Gateway simplificam a venda de assinaturas, com cobrança automatizada.”
-- “Billing Conductor permite personalizar a fatura por cliente, facilitando o controle financeiro.”
+- "O Aurora Serverless é perfeito pra transações: vocês pagam só quando há pico, sem custo fixo alto."
+- "É seguro e atende LGPD, mantendo seus dados no Brasil com custo controlado."

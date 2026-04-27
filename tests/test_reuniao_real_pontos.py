@@ -46,7 +46,7 @@ for title, ctx in snaps:
     cm = (
         f"Analise a transcrição INTEIRA e responda QUATRO linhas, sem explicação, sem markdown:\n"
         f"CLASSIFICAÇÃO: SIM ou NAO\nCONCORRENTE: SIM ou NAO\n"
-        f"PONTOS: Liste TODOS os assuntos técnicos — problemas, dúvidas, decisões, tecnologias.\n"
+        f"CONTEXTO: Resuma a situação do cliente em 2-3 frases objetivas. Foque na DOR — qual o problema, o que precisa, o que tenta resolver. Não use palavras soltas.\n"
         f"RESPOSTA: CURTA/MÉDIA/LONGA\n\nTranscrição:\n{ctx}"
     )
     cr = client.call_raw("4 linhas exatas.", cm, max_tokens=300).strip()
@@ -56,7 +56,7 @@ for title, ctx in snaps:
     clean = ctx  # fallback
     for l in cr.split("\n"):
         stripped = l.strip().replace("*","").replace("#","").strip()
-        if stripped.upper().startswith("PONTOS:") or stripped.upper().startswith("PONTOS "):
+        if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS "):
             clean = stripped.split(":",1)[1].strip() if ":" in stripped else stripped[7:].strip()
             break
     fallback = clean == ctx
@@ -64,9 +64,9 @@ for title, ctx in snaps:
     # CHAMADA 2: resposta com SÓ os pontos
     t0 = time.time()
     if not has_q:
-        msg = f"Pontos da conversa:\n{clean}\n\nSem pergunta técnica. Contexto em 1-2 frases + 3 perguntas pro consultor. Seja curto e objetivo."
+        msg = f"Contexto do cliente:\n{clean}\n\nNão há pergunta direta. Reconheça a dor do cliente e sugira 3 perguntas pro consultor aprofundar."
     else:
-        msg = f"Pontos da conversa:\n{clean}\n\nResponda cada ponto de forma objetiva e curta. Máximo 3 linhas por ponto no 📌 e 2 frases no 💬. Foque nos pontos fortes. Sem resumo no final."
+        msg = f"Contexto do cliente:\n{clean}\n\nResponda cada ponto de forma objetiva e curta. Máximo 3 linhas por ponto no 📌 e 2 frases no 💬. Foque nos pontos fortes. Sem resumo no final."
     resp = client.call_raw(system, msg, max_tokens=5120)
     t_c2 = time.time() - t0
 
@@ -75,7 +75,7 @@ for title, ctx in snaps:
         f"📝 TRANSCRIÇÃO ({len(ctx)} chars):\n{ctx}\n\n"
         f"⏱️ CHAMADA 1: {t_c1:.2f}s\n"
         f"🔍 Classificação:\n{cr}\n"
-        f"{'⚠️ FALLBACK: pontos não extraídos, usando contexto inteiro' if fallback else f'✅ Pontos extraídos ({len(clean)} chars): {clean}'}\n\n"
+        f"{'⚠️ FALLBACK: contexto não extraído, usando contexto inteiro' if fallback else f'✅ Contexto extraído ({len(clean)} chars): {clean}'}\n\n"
         f"⏱️ CHAMADA 2: {t_c2:.2f}s | Input: {len(clean)} chars\n"
         f"⏱️ TOTAL: {t_c1+t_c2:.2f}s\n\n"
         f"📌 RESPOSTA ({len(resp)} chars):\n{resp}\n"
