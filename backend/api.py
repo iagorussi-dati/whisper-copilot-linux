@@ -263,8 +263,10 @@ class Api:
             # Update checkpoint
             self._snapshot_checkpoint = len(self._transcript)
             log.info(f"[SNAPSHOT] Interval: {len(interval_entries)} entries (checkpoint at {self._snapshot_checkpoint})")
+            log.info(f"[SNAPSHOT] Context ({len(context)} chars):\n{context}")
 
             system = self._raw_system_prompt or "Você é um copiloto."
+            log.info(f"[SNAPSHOT] System prompt: {len(system)} chars, starts with: {system[:80]}")
             max_tok = 5120
 
             # Web search: for research mode + non-technical templates
@@ -329,6 +331,7 @@ class Api:
                         results = web_search(query, max_results=3)
                         if len(results) > 50:
                             search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta:\n{results}"
+                            log.info(f"[SNAPSHOT] Tech search results: {len(results)} chars")
 
                 # Build user message based on classification
                 if not has_q:
