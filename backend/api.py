@@ -280,9 +280,12 @@ class Api:
                 context = "\n".join(f"[{e.get('speaker','?')}] {e['text']}" for e in interval_entries)
                 log.info(f"[SNAPSHOT] No pre-extracted points, extracting from {len(interval_entries)} entries...")
                 point = self._bedrock.call_raw(
-                    "UMA frase curta com a dor do cliente e tecnologias citadas. Sem markdown.",
-                    f"Trecho: {context}", max_tokens=80
-                ).strip().replace("*", "").replace("#", "").strip()
+                    "Resuma o trecho em 1 frase. Responda SOMENTE a frase, nada mais. Sem título, sem aspas, sem prefixo.",
+                    f"Qual é o ponto principal discutido aqui?\n\n{context}", max_tokens=80
+                ).strip().replace("*", "").replace("#", "").strip().strip('"').strip("'")
+                for prefix in ["Frase Curta", "Ponto Principal", "Resumo:", "Resposta:"]:
+                    if point.lower().startswith(prefix.lower()):
+                        point = point[len(prefix):].strip().lstrip(":").strip()
                 if point:
                     interval_points = [point]
                     self._incremental_points.append(point)
@@ -1039,10 +1042,14 @@ class Api:
             if not chunk_text.strip():
                 return
             point = self._bedrock.call_raw(
-                "UMA frase curta com a dor do cliente e tecnologias citadas. Sem markdown.",
-                f"Trecho: {chunk_text}",
+                "Resuma o trecho em 1 frase. Responda SOMENTE a frase, nada mais. Sem título, sem aspas, sem prefixo.",
+                f"Qual é o ponto principal discutido aqui?\n\n{chunk_text}",
                 max_tokens=80
-            ).strip().replace("*", "").replace("#", "").strip()
+            ).strip().replace("*", "").replace("#", "").strip().strip('"').strip("'")
+            # Remove common prefixes the model adds
+            for prefix in ["Frase Curta", "Ponto Principal", "Resumo:", "Resposta:"]:
+                if point.lower().startswith(prefix.lower()):
+                    point = point[len(prefix):].strip().lstrip(":").strip()
             if point:
                 self._incremental_points.append(point)
                 log.info(f"[INCREMENTAL] Point #{len(self._incremental_points)}: {point[:100]}")
