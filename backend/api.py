@@ -292,14 +292,14 @@ class Api:
             # For technical template: classify if there's a question or just context
             if is_technical and context.strip():
                 classify_msg = (
-                    f"Analise a transcrição e responda QUATRO linhas, sem explicação, sem markdown:\n"
+                    f"Analise a transcrição INTEIRA e responda QUATRO linhas, sem explicação, sem markdown:\n"
                     f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta técnica ou dúvida que precisa resposta?)\n"
                     f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
-                    f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n"
+                    f"PONTOS: Liste TODOS os assuntos técnicos discutidos, especialmente problemas, dúvidas e decisões. Foque no que é mais recente e relevante.\n"
                     f"RESPOSTA: CURTA se tem 1 assunto, MÉDIA se tem 2, LONGA se tem 3+\n\n"
-                    f"Transcrição: {context[:600]}"
+                    f"Transcrição:\n{context}"
                 )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=150).strip()
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=300).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
                 # Estimate response size
@@ -357,9 +357,9 @@ class Api:
                     f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta direta do cliente que precisa de resposta?)\n"
                     f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
                     f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n\n"
-                    f"Transcrição: {context[:600]}"
+                    f"Transcrição:\n{context}"
                 )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=120).strip()
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=300).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
                 clean_ctx = context
