@@ -342,6 +342,55 @@ class Api:
                         f"Responda a dúvida técnica de forma objetiva. Tamanho: {resp_size}. Se LONGA, seja mais conciso em cada tema (máx 4-5 linhas por tema no 📌 e 2 frases no 💬). NÃO adicione resumo ou conclusão no final — termine na última sugestão 💬.{extra_instruction}{no_repeat_hint}"
                         f"{search_context}"
                     )
+            elif self._behavior_template in ("sugestoes", "discovery") and context.strip():
+                # Sugestões/Discovery: classify + extract points + detect questions
+                classify_msg = (
+                    f"Analise a transcrição e responda TRÊS linhas, sem explicação, sem markdown:\n"
+                    f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta direta do cliente que precisa de resposta?)\n"
+                    f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
+                    f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n\n"
+                    f"Transcrição: {context[:600]}"
+                )
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=120).strip()
+                has_q = "SIM" in classify_result.split("\n")[0].upper()
+                has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
+                clean_ctx = context
+                for line in classify_result.split("\n"):
+                    if line.strip().upper().startswith("PONTOS:"):
+                        clean_ctx = line.split(":", 1)[1].strip()
+                        break
+                log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Points: {clean_ctx[:120]}")
+
+                # Web search if competitor
+                if has_competitor and not search_context:
+                    from .search import web_search
+                    qp = f"Responda APENAS query de busca em inglês, 8 palavras. Só a query.\n\nConversa: {clean_ctx[:300]}"
+                    query = self._bedrock.call_raw("Query.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
+                    if query and "NONE" not in query.upper():
+                        query += " vs AWS privacy security 2026"
+                        log.info(f"[SNAPSHOT] Competitor search: '{query[:80]}'")
+                        results = web_search(query, max_results=3)
+                        if len(results) > 50:
+                            search_context = f"\n\nDados atualizados da web (2026) — USE na resposta sobre diferenças com concorrentes:\n{results}"
+
+                question_instruction = ""
+                if has_q:
+                    question_instruction = (
+                        "\n\nALÉM das sugestões, o cliente fez uma PERGUNTA direta. "
+                        "Depois das sugestões, adicione um bloco separado:\n"
+                        "📌 Sobre [tema da pergunta]:\n"
+                        "[resposta objetiva em 2-3 frases]\n"
+                        "💬 \"frase pronta de como falar pro cliente\""
+                    )
+                competitor_instruction = ""
+                if has_competitor:
+                    competitor_instruction = " O cliente mencionou um concorrente — nas sugestões, diferencie a AWS com fatos, sem atacar."
+
+                user_msg = (
+                    f"Pontos da conversa:\n{clean_ctx}\n\n"
+                    f"Contribua com sugestões úteis. Não narre quem falou.{competitor_instruction}{question_instruction}{no_repeat_hint}"
+                    f"{search_context}"
+                )
             else:
                 user_msg = (
                     f"Conversa:\n{context}\n\n"
