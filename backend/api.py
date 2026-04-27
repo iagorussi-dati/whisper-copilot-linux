@@ -299,7 +299,7 @@ class Api:
                     f"RESPOSTA: CURTA se tem 1 assunto, MÉDIA se tem 2, LONGA se tem 3+\n\n"
                     f"Transcrição:\n{context}"
                 )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=300).strip()
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=5120).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
                 resp_size = "MÉDIA"
@@ -309,15 +309,24 @@ class Api:
                         break
                 log.info(f"[SNAPSHOT] Response size estimate: {resp_size}")
                 clean_ctx = context  # fallback
-                for line in classify_result.split("\n"):
+                lines = classify_result.split("\n")
+                for i, line in enumerate(lines):
                     stripped = line.strip().replace("*", "").replace("#", "").strip()
                     if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS:"):
-                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[9:].strip()
+                        rest = stripped.split(":", 1)[1].strip() if ":" in stripped else ""
+                        if rest:
+                            clean_ctx = rest
+                        else:
+                            parts = []
+                            for j in range(i+1, len(lines)):
+                                sl = lines[j].strip()
+                                if sl.upper().startswith("RESPOSTA:") or sl.upper().startswith("CLASSIFICAÇÃO:"): break
+                                if sl: parts.append(sl.replace("*","").replace("#","").strip())
+                            clean_ctx = " ".join(parts) if parts else context
                         break
-                # If clean_ctx is still the full context, the parser failed — log warning
                 if clean_ctx == context:
-                    log.warning("[SNAPSHOT] Failed to extract points from chamada 1 — using full context as fallback")
-                log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Points ({len(clean_ctx)} chars): {clean_ctx[:120]}")
+                    log.warning("[SNAPSHOT] Failed to extract context — using full context as fallback")
+                log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Context ({len(clean_ctx)} chars): {clean_ctx[:120]}")
                 log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
 
                 # Web search: when has question OR competitor
@@ -361,14 +370,24 @@ class Api:
                     f"CONTEXTO: Resuma a situação do cliente em 2-3 frases objetivas. Foque na DOR — qual o problema, o que precisa, o que está tentando resolver.\n\n"
                     f"Transcrição:\n{context}"
                 )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=300).strip()
+                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=5120).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
                 clean_ctx = context  # fallback
-                for line in classify_result.split("\n"):
+                lines = classify_result.split("\n")
+                for i, line in enumerate(lines):
                     stripped = line.strip().replace("*", "").replace("#", "").strip()
                     if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS:"):
-                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[9:].strip()
+                        rest = stripped.split(":", 1)[1].strip() if ":" in stripped else ""
+                        if rest:
+                            clean_ctx = rest
+                        else:
+                            parts = []
+                            for j in range(i+1, len(lines)):
+                                sl = lines[j].strip()
+                                if sl.upper().startswith("RESPOSTA:") or sl.upper().startswith("CLASSIFICAÇÃO:"): break
+                                if sl: parts.append(sl.replace("*","").replace("#","").strip())
+                            clean_ctx = " ".join(parts) if parts else context
                         break
                 if clean_ctx == context:
                     log.warning("[SNAPSHOT] Failed to extract context — using full context as fallback")
