@@ -51,6 +51,8 @@ class Api:
         self._pending_instruction = ""
         self._chat_history: list[dict] = []
         self._snapshot_checkpoint: int = 0  # index in _chat_history where last snapshot was
+        self._incremental_points: list[str] = []  # points extracted from each auto chunk
+        self._points_checkpoint: int = 0  # index in _incremental_points where last snapshot was
         self._hotkey_stop = threading.Event()
         self._start_hotkey_watcher()
 
@@ -252,186 +254,88 @@ class Api:
         threading.Thread(target=process, daemon=True).start()
 
     def _generate_snapshot_response(self, no_repeat_hint: str = ""):
-        """Generate response for incremental snapshot — only interval since last snapshot."""
+        """Generate response for incremental snapshot using pre-extracted points."""
         try:
-            # Build context from interval only (since last snapshot)
-            interval_entries = self._transcript[self._snapshot_checkpoint:]
-            if interval_entries:
-                context = "\n".join(f"[{e.get('speaker','?')}] {e['text']}" for e in interval_entries)
-            else:
-                context = self._build_full_context()
-            # Update checkpoint
-            self._snapshot_checkpoint = len(self._transcript)
-            log.info(f"[SNAPSHOT] Interval: {len(interval_entries)} entries (checkpoint at {self._snapshot_checkpoint})")
-            log.info(f"[SNAPSHOT] Context ({len(context)} chars):\n{context}")
-
             system = self._raw_system_prompt or "Você é um copiloto."
-            log.info(f"[SNAPSHOT] System prompt: {len(system)} chars, starts with: {system[:80]}")
             max_tok = 5120
 
-            # Web search: for research mode + non-technical templates
-            search_context = ""
-            is_technical = self._behavior_template == "assistente"
-            needs_search = not is_technical and (self._response_mode == "research" and self._behavior_template in ("pesquisa",))
-            if needs_search:
-                last_text = " ".join(e['text'] for e in self._transcript[-10:])
-                if last_text and len(last_text.strip()) > 30:
-                    query_prompt = f"Responda APENAS com uma query de busca em inglês, máximo 8 palavras. Sem explicação, sem markdown, sem análise. Só a query.\nSe não houver tema técnico, responda: NONE\n\nConversa: {last_text[:300]}"
-                    query = self._bedrock.call_raw("Responda APENAS a query de busca, nada mais.", query_prompt, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
-                    if query and "NONE" not in query.upper():
-                        query += " AWS 2026"
-                        from .search import web_search
-                        log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
-                        results = web_search(query, max_results=3)
-                        if len(results) > 50:
-                            search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta APENAS se forem relevantes:\n{results}"
-                            log.info(f"[SNAPSHOT] Search: {len(results)} chars")
-                        else:
-                            log.info("[SNAPSHOT] Search: no useful results, skipping")
+            # Get incremental points since last snapshot
+            interval_points = self._incremental_points[self._points_checkpoint:]
+            # Also get transcript interval for fallback
+            interval_entries = self._transcript[self._snapshot_checkpoint:]
 
-            # For technical template: classify if there's a question or just context
-            if is_technical and context.strip():
-                classify_msg = (
-                    f"Analise a transcrição INTEIRA e responda QUATRO linhas, sem explicação, sem markdown:\n"
-                    f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta técnica ou dúvida que precisa resposta?)\n"
-                    f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
-                    f"CONTEXTO: Resuma a situação do cliente em 2-3 frases objetivas. Foque na DOR do cliente — qual o problema, o que ele precisa, o que está tentando resolver. Não use palavras soltas.\n"
-                    f"RESPOSTA: CURTA se tem 1 assunto, MÉDIA se tem 2, LONGA se tem 3+\n\n"
-                    f"Transcrição:\n{context}"
-                )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=5120).strip()
-                has_q = "SIM" in classify_result.split("\n")[0].upper()
-                has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
-                resp_size = "MÉDIA"
-                for line in classify_result.split("\n"):
-                    if line.strip().upper().startswith("RESPOSTA:"):
-                        resp_size = line.split(":", 1)[1].strip().upper()
-                        break
-                log.info(f"[SNAPSHOT] Response size estimate: {resp_size}")
-                clean_ctx = context  # fallback
-                lines = classify_result.split("\n")
-                for i, line in enumerate(lines):
-                    stripped = line.strip().replace("*", "").replace("#", "").strip()
-                    if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS:"):
-                        rest = stripped.split(":", 1)[1].strip() if ":" in stripped else ""
-                        if rest:
-                            clean_ctx = rest
-                        else:
-                            parts = []
-                            for j in range(i+1, len(lines)):
-                                sl = lines[j].strip()
-                                if sl.upper().startswith("RESPOSTA:") or sl.upper().startswith("CLASSIFICAÇÃO:"): break
-                                if sl: parts.append(sl.replace("*","").replace("#","").strip())
-                            clean_ctx = " ".join(parts) if parts else context
-                        break
-                if clean_ctx == context:
-                    log.warning("[SNAPSHOT] Failed to extract context — using full context as fallback")
-                log.info(f"[SNAPSHOT] Classification: Q={'SIM' if has_q else 'NAO'} Competitor={'SIM' if has_competitor else 'NAO'} | Context ({len(clean_ctx)} chars): {clean_ctx[:120]}")
-                log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
+            # Update checkpoints
+            self._points_checkpoint = len(self._incremental_points)
+            self._snapshot_checkpoint = len(self._transcript)
+            log.info(f"[SNAPSHOT] Points: {len(interval_points)} | Entries: {len(interval_entries)} | Checkpoints: pts={self._points_checkpoint} tr={self._snapshot_checkpoint}")
 
-                # Web search: when has question OR competitor
-                if (has_q or has_competitor) and not search_context:
-                    from .search import web_search
-                    qp = f"Responda APENAS com uma query de busca em inglês, máximo 8 palavras. Só a query.\n\nConversa: {clean_ctx[:300]}"
-                    query = self._bedrock.call_raw("Query de busca.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
-                    if query and "NONE" not in query.upper():
-                        if has_competitor:
-                            query += " vs AWS privacy security 2026"
-                        else:
-                            query += " AWS 2026"
-                        log.info(f"[SNAPSHOT] Tech search: '{query[:80]}'")
-                        results = web_search(query, max_results=3)
-                        if len(results) > 50:
-                            search_context = f"\n\nDados atualizados da web (2026) — USE esses dados na resposta:\n{results}"
-                            log.info(f"[SNAPSHOT] Tech search results: {len(results)} chars")
+            # Edge case: nothing new
+            if not interval_points and not interval_entries:
+                log.info("[SNAPSHOT] No new content — skipping")
+                self._emit("copilot_response", {"response": "⏸️ Nenhum conteúdo novo desde o último snapshot.", "had_instruction": False})
+                return
 
-                # Build user message based on classification
-                if not has_q:
-                    user_msg = (
-                        f"Contexto do cliente:\n{clean_ctx}\n\n"
-                        f"Não há pergunta direta. Dê uma resposta curta reconhecendo a dor do cliente e sugira 3 perguntas que o consultor deveria fazer pra aprofundar."
-                        f"{search_context}"
-                    )
+            # If no pre-extracted points but have transcript, extract on the fly
+            if not interval_points and interval_entries:
+                context = "\n".join(f"[{e.get('speaker','?')}] {e['text']}" for e in interval_entries)
+                log.info(f"[SNAPSHOT] No pre-extracted points, extracting from {len(interval_entries)} entries...")
+                point = self._bedrock.call_raw(
+                    "UMA frase curta com a dor do cliente e tecnologias citadas. Sem markdown.",
+                    f"Trecho: {context}", max_tokens=80
+                ).strip().replace("*", "").replace("#", "").strip()
+                if point:
+                    interval_points = [point]
+                    self._incremental_points.append(point)
+                    self._points_checkpoint = len(self._incremental_points)
                 else:
-                    extra_instruction = ""
-                    if has_competitor:
-                        extra_instruction = " IMPORTANTE: mencionou concorrente — diferencie AWS com fatos, sem atacar."
-                    user_msg = (
-                        f"Contexto do cliente:\n{clean_ctx}\n\n"
-                        f"Dê uma resposta curta e objetiva focada na dor do cliente. Use 📌 pra resposta técnica e 💬 pra como falar pro cliente. Sem resumo no final.{extra_instruction}{no_repeat_hint}"
-                        f"{search_context}"
-                    )
-            elif self._behavior_template in ("sugestoes", "discovery") and context.strip():
-                # Sugestões/Discovery: classify + extract points + detect questions
-                classify_msg = (
-                    f"Analise a transcrição e responda TRÊS linhas, sem explicação, sem markdown:\n"
-                    f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta direta do cliente?)\n"
-                    f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT?)\n"
-                    f"CONTEXTO: Resuma a situação do cliente em 2-3 frases objetivas. Foque na DOR — qual o problema, o que precisa, o que está tentando resolver.\n\n"
-                    f"Transcrição:\n{context}"
-                )
-                classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=5120).strip()
-                has_q = "SIM" in classify_result.split("\n")[0].upper()
-                has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
-                clean_ctx = context  # fallback
-                lines = classify_result.split("\n")
-                for i, line in enumerate(lines):
-                    stripped = line.strip().replace("*", "").replace("#", "").strip()
-                    if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS:"):
-                        rest = stripped.split(":", 1)[1].strip() if ":" in stripped else ""
-                        if rest:
-                            clean_ctx = rest
-                        else:
-                            parts = []
-                            for j in range(i+1, len(lines)):
-                                sl = lines[j].strip()
-                                if sl.upper().startswith("RESPOSTA:") or sl.upper().startswith("CLASSIFICAÇÃO:"): break
-                                if sl: parts.append(sl.replace("*","").replace("#","").strip())
-                            clean_ctx = " ".join(parts) if parts else context
-                        break
-                if clean_ctx == context:
-                    log.warning("[SNAPSHOT] Failed to extract context — using full context as fallback")
-                log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Context ({len(clean_ctx)} chars): {clean_ctx[:120]}")
-                log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
+                    self._emit("copilot_response", {"response": "⏸️ Não consegui extrair pontos do trecho.", "had_instruction": False})
+                    return
 
-                # Web search if competitor
-                if has_competitor and not search_context:
-                    from .search import web_search
-                    qp = f"Responda APENAS query de busca em inglês, 8 palavras. Só a query.\n\nConversa: {clean_ctx[:300]}"
-                    query = self._bedrock.call_raw("Query.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
-                    if query and "NONE" not in query.upper():
-                        query += " vs AWS privacy security 2026"
-                        log.info(f"[SNAPSHOT] Competitor search: '{query[:80]}'")
-                        results = web_search(query, max_results=3)
-                        if len(results) > 50:
-                            search_context = f"\n\nDados atualizados da web (2026) — USE na resposta sobre diferenças com concorrentes:\n{results}"
+            # Previous points for context (up to last 5)
+            prev_points = self._incremental_points[:self._points_checkpoint - len(interval_points)]
+            prev_ctx = ""
+            if prev_points:
+                prev_ctx = "\nContexto anterior da reunião:\n" + "\n".join(f"- {p[:80]}" for p in prev_points[-5:])
 
-                question_instruction = ""
-                if has_q:
-                    question_instruction = (
-                        "\n\nALÉM das sugestões, o cliente fez uma PERGUNTA direta. "
-                        "Depois das sugestões, adicione um bloco separado:\n"
-                        "📌 Sobre [tema da pergunta]:\n"
-                        "[resposta objetiva em 2-3 frases]\n"
-                        "💬 \"frase pronta de como falar pro cliente\""
-                    )
-                competitor_instruction = ""
-                if has_competitor:
-                    competitor_instruction = " O cliente mencionou um concorrente — nas sugestões, diferencie a AWS com fatos, sem atacar."
+            log.info(f"[SNAPSHOT] Interval points ({len(interval_points)}): {[p[:60] for p in interval_points]}")
+            log.info(f"[SNAPSHOT] Previous points: {len(prev_points)}")
 
-                user_msg = (
-                    f"Pontos da conversa:\n{clean_ctx}\n\n"
-                    f"Contribua com sugestões úteis. Não narre quem falou.{competitor_instruction}{question_instruction}{no_repeat_hint}"
-                    f"{search_context}"
-                )
+            # Detect competitor in points
+            competitor_keywords = ["google", "gemini", "azure", "heroku", "oracle", "chatgpt", "openai", "gcp"]
+            all_points_text = " ".join(interval_points).lower()
+            has_competitor = any(kw in all_points_text for kw in competitor_keywords)
+
+            # Web search if competitor detected
+            search_context = ""
+            if has_competitor:
+                from .search import web_search
+                qp = f"Responda APENAS query de busca em inglês, 8 palavras. Só a query.\n\nConversa: {all_points_text[:300]}"
+                query = self._bedrock.call_raw("Query.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
+                if query and "NONE" not in query.upper():
+                    query += " vs AWS privacy security 2026"
+                    log.info(f"[SNAPSHOT] Competitor search: '{query[:80]}'")
+                    results = web_search(query, max_results=3)
+                    if len(results) > 50:
+                        search_context = f"\n\nDados da web sobre concorrentes:\n{results}"
+
+            competitor_hint = " O cliente mencionou concorrente — diferencie AWS com fatos." if has_competitor else ""
+            v5_instruction = "Responda APENAS:\n📌 [máximo 2 linhas]\n💬 \"[máximo 1 frase]\"\nPARE AQUI. Não adicione mais nada."
+
+            if len(interval_points) <= 2:
+                # FAST PATH: 1-2 points → direct response with v5
+                dor = "\n".join(interval_points)
+                user_msg = f"Dor do cliente:\n{dor}{prev_ctx}\n\n{v5_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
             else:
-                user_msg = (
-                    f"Conversa:\n{context}\n\n"
-                    f"Contribua com algo útil sobre o que foi dito. Não narre quem falou o quê. Não diga 'Pessoa 1 falou' ou 'Foi mencionado que'. Apenas responda.{no_repeat_hint}"
-                    f"{search_context}"
-                )
+                # 3+ points → group into categories first, then respond
+                lista = "\n".join(f"- {p}" for p in interval_points)
+                agrupado = self._bedrock.call_raw(
+                    "Agrupe em 2-3 categorias. Cada uma: nome + 1 frase curta com todos os pontos. Sem markdown. Não perca nenhum ponto.",
+                    f"Pontos:\n{lista}", max_tokens=300
+                ).strip().replace("*", "").replace("#", "").strip()
+                log.info(f"[SNAPSHOT] Grouped ({len(agrupado)} chars): {agrupado[:200]}")
+                user_msg = f"Dores agrupadas:\n{agrupado}{prev_ctx}\n\nPra cada categoria {v5_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
 
-            log.info(f"[SNAPSHOT] Chamada 2 user_msg ({len(user_msg)} chars):\n{user_msg[:300]}")
+            log.info(f"[SNAPSHOT] User msg ({len(user_msg)} chars):\n{user_msg[:300]}")
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
             result = self._clean_md(result)
             result = self._trim_to_sentence(result)
@@ -1113,6 +1017,7 @@ class Api:
                                 if txt:
                                     self._emit_transcript(sp, txt)
                             log.info(f"[AUTO] {len(entries)} entradas | Groq={groq_time:.2f}s Bedrock={bedrock_time:.2f}s Total={_time.time()-t0:.2f}s")
+                            self._extract_incremental_point(entries)
                             return
                         except json.JSONDecodeError:
                             start = None
@@ -1126,6 +1031,23 @@ class Api:
 
         except Exception as e:
             log.error(f"[AUTO] Error: {e}", exc_info=True)
+
+    def _extract_incremental_point(self, entries: list[dict]):
+        """Extract a single pain-point sentence from the latest chunk (runs in background)."""
+        try:
+            chunk_text = "\n".join(f"[{e.get('speaker','?')}] {e.get('text','')}" for e in entries)
+            if not chunk_text.strip():
+                return
+            point = self._bedrock.call_raw(
+                "UMA frase curta com a dor do cliente e tecnologias citadas. Sem markdown.",
+                f"Trecho: {chunk_text}",
+                max_tokens=80
+            ).strip().replace("*", "").replace("#", "").strip()
+            if point:
+                self._incremental_points.append(point)
+                log.info(f"[INCREMENTAL] Point #{len(self._incremental_points)}: {point[:100]}")
+        except Exception as e:
+            log.error(f"[INCREMENTAL] Error extracting point: {e}", exc_info=True)
 
     def _process_monitor_chunk(self, wav_bytes: bytes):
         import time

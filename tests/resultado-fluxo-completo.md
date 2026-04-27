@@ -1,52 +1,52 @@
 # Teste Completo Fluxo Incremental
 
-SNAP A (1pt): 6.7s | SNAP B (2pt): 7.7s | SNAP C (4pt): 8.9s | SNAP D (2pt): 32.2s | SNAP E (0pt): edge case
+SNAP A (1pt): 4.6s | SNAP B (2pt): 7.1s | SNAP C (4pt): 7.4s | SNAP D (2pt): 5.3s | SNAP E (0pt): edge case
 
 
 ============================================================
 SNAP A — 1 ponto (System Manager) [DIRETO]
 ============================================================
 Intervalo: 1 pontos | Anteriores: 0
-⏱️ 6.7s | 1948 chars
-Pontos intervalo: ['Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Com a dor de garantir segurança e acesso remoto eficiente, o cliente pode utilizar o AWS System Manager para gerenciamento sem necessidade de liberar a porta 22, combinando Conexão Privada com Autenticação AWS IAM, simplificando operações e reduzindo riscos de segurança." \n\n Explicação Det']
-Resposta: ### Resposta para a Dor do Cliente: Segurança e Acesso Remoto Eficiente
+⏱️ 4.6s | 1445 chars
+Pontos intervalo: ['Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Com a dor de garantir segurança e acesso remoto eficiente, o cliente pode utilizar o AWS System Manager para gerenciamento sem necessidade de liberar a porta 22, combinando Conexão Privada com Autenticação AWS IAM, simplificando operations e aumentando a segurança." \n\n Explicação Detalhada']
+Resposta: ### 📌 Resposta Técnica
 
-📌 **Solução Técnica:**  
-Para garantir **segurança** e **acesso remoto eficiente**, utilize o **AWS Systems Manager (SSM)**. El...
+Para garantir **segurança** e **acesso remoto eficiente**, o **AWS System Manager (SSM)** é a solução ideal, pois permite o gerenciamento de servidores **sem a necessidade de l...
 
 
 ============================================================
 SNAP B — 2 pontos (deploy + Next.js) [DIRETO]
 ============================================================
 Intervalo: 2 pontos | Anteriores: 1
-⏱️ 7.7s | 2405 chars
-Pontos intervalo: ['Frase Curta com a Dor do Cliente e Tecnologias\n\n"Juliano enfrenta a dor de realizar deploys manuais tediosos: precisa fazer git pull dentro de cada instância sempre que há atualização no código dos dois repositórios do GitHub, aumentando o risco de erros e atrasos."\n\n Explicação da Frase\n\n1.', 'Frase Curta sobre a Dor do Cliente com Tecnologias\n\n"Gustavo enfrenta dor de cabeça com o build pesado em Next.js: instância pequena estoura a RAM, travando o deploy."\n\n Explicação da Frase\n\n1. Contexto do Problema:\n    - Gustavo está trabalhando com Next.js, um framework React popular para']
-Resposta: ### Resposta para a Dor do Cliente: Deploys Manuais Tediosos
+⏱️ 7.1s | 2231 chars
+Pontos intervalo: ['Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Juliano enfrenta a dor de gerenciar deploys manuais e simplórios directly na instância EC2 via `git pull`, expondo riscos de inconsistência, lentidão e falhas humanas — tudo isso com repositórios no GitHub que poderiam brilhar com automação e segurança."\n\n---\n\n Expl', 'Frase Curta sobre a Dor do Cliente com Tecnologias\n\n"Gustavo enfrenta dor de cabeça com o build pesado do Next.js; em instâncias pequenas, a RAM estoura, travando o deploy."\n\n Explicação da Frase\n\n1. Contexto do Problema:\n    - Gustavo: Nome do cliente ou responsável que está enfrentando o']
+Resposta: ### 📌 Resposta Técnica
 
-📌 **Problema:** Juliano realiza deploys manuais tediosos: precisa fazer `git pull` dentro de cada instância sempre que há atualização no c...
+Juliano está enfrentando problemas com **deploys manuais** direto em instâncias EC2 usando `git pull`. Isso traz vários riscos:
+
+1. **Inconsistência**: Cada deploy pode ser dif...
 
 
 ============================================================
-SNAP C — 4 pontos (médio) [AGRUPADO (2.5s+6.4s)]
+SNAP C — 4 pontos (médio) [AGRUPADO (3.1s+4.3s)]
 ============================================================
 Intervalo: 4 pontos | Anteriores: 3
-⏱️ 8.9s | 1582 chars
-Pontos intervalo: ['Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Com o CodePipeline, resolvi a dor do cliente de gerenciar manualmente o build, deploy e teste do código. Agora, com integração direta com o GitHub, o fluxo é totalmente automatizado: qualquer atualização no repositório dispara imediatamente o pipeline. Além disso,', 'Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Com o alto custo e complexidade de manter uma VPN para separar subnets e garantir segurança, os clientes buscam soluções mais eficientes e econômicas, como o AWS Systems Manager (SSM), que oferece gerenciamento simplificado e redução de despesas, eliminando a necessidade de infraestrutura', 'Frase Curta com a Dor do Cliente e Tecnologias\n\n"Gustavo enfrenta desafios ao rotear o tráfego para o Load Balancer em subnet pública, enquanto mantém o ECS/EC2 e o banco de dados em subnet privada, tudo isso monitorado pelo CloudWatch."\n\n---\n\n Explicação Detalhada\n\nVamos detalhar cada componente mencionado na', 'Frase Curta com a Dor do Cliente e Tecnologias\n\n"Devido à alta latência de 120ms ao conectar-se de Virginia em comparação com os 35-50ms de SP, nossos clientes enfrentam experiências mais lentas e problemas de desempenho em aplicações críticas, impactando diretamente a produtividade e satisfação']
-Resposta: ### Resposta para a Dor do Cliente: Automação de DevOps
+⏱️ 7.4s | 1038 chars
+Pontos intervalo: ['Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Com o CodePipeline da AWS, simplificamos nosso fluxo de CI/CD: conectamos diretamente ao GitHub, realizamos build, deploy e testes automatizados, com a segurança de uma reversão automática caso algo dê errado, reduzindo nossa preocupação com falhas e aceler', 'Frase Curta sobre a Dor do Cliente e Tecnologias\n\n"Com o alto custo e complexidade de manter uma VPN para separar subnets, muitos clientes preferem utilizar o AWS Systems Manager (SSM) para gerenciamento remoto eficiente e econômico."\n\n Explicação da Frase\n\n1. Dor do Cliente:\n    - Alto Custo da', 'Frase Curta com a Dor do Cliente e Tecnologias\n\n"Gustavo enfrenta desafios ao rotear o tráfego para o Load Balancer em subnet pública, enquanto mantém o ECS/EC2 e o banco de dados em subnet privada, tudo isso monitorado pelo CloudWatch."\n\n---\n\n Explicação Detalhada\n\nVamos detalhar cada componente mencionado na', 'Frase Curta com a Dor do Cliente e Tecnologias\n\n"Devido à alta latência de 120ms ao conectar-se de Virginia em comparação com os 35-50ms de SP, nossos clientes enfrentam experiências mais lentas e atrasos críticos em aplicações em tempo real. Implementamos tecnologias de ot']
+Resposta: ### 1. Eficiência e Segurança no DevOps
+📌 **CodePipeline** automatiza CI/CD com integração GitHub, testes e reversão automática. Reduz riscos de falhas e acelera releases.
 
-📌 **CodePipeline** automatiza build, teste e deploy com integração direta ao GitHub, reduzindo erros manuais e acelerando o tempo de entrega. E...
+💬 Como falar pro cliente:  ...
 
 
 ============================================================
 SNAP D — 2 pontos (WAF + budget) [DIRETO]
 ============================================================
 Intervalo: 2 pontos | Anteriores: 7
-⏱️ 32.2s | 9864 chars
-Pontos intervalo: ['Frase Curta com a Dor do Cliente e Tecnologias\n\n"Com ataques frequentes e custos imprevisíveis, Juliano precisa de Terraform ou CloudFormation para automatizar infraestrutura, WAF para mitigar riscos, e análise de volumetria e billing para controle financeiro."  \n\n Explicação Detalhada\n\n1.', 'Frase Curta com a Dor do Cliente e Tecnologias\n\n"Com um budget limitado, precisamos escalar de 600 para 4.000 assinaturas, mas a dor do cliente é real; contamos com incentivos da AWS para tornar isso possível."\n\n Explicação da Frase\n\n1. `Budget limitado`: Destaque para a restrição financeira,']
-Resposta: ### Resposta para a Dor do Cliente: Ataques Frequentes e Custos Imprevisíveis
-
-📌 **Automatização de Infraestrutura:**
-- **Terraform** e **CloudFormation** são suportados pela AWS para automação de inf...
+⏱️ 5.3s | 1353 chars
+Pontos intervalo: ['Frase Curta com a Dor do Cliente e Tecnologias\n\n"Juliano, para proteger seu ambiente contra ataques e gerenciar custos de forma eficiente, utilize Terraform ou CloudFormation para automação de infraestrutura e WAF para defesa robusta, assegurando precisão na volumetria e no billing."\n\n Explicação Detalhada', 'Frase Curta com a Dor do Cliente e Tecnologias\n\n"Com um budget limitado, precisamos escalar de 600 para 4.000 assinaturas, mas a dor do cliente é real. Com o incentivo da AWS, podemos usar tecnologias como AWS Lambda, Amazon DynamoDB, e Amazon S3 para otimizar custos e escalar de']
+Resposta: ### 📌 Resposta Técnica  
+Para proteger contra ataques e gerenciar custos com precisão, use **Terraform/CloudFormation** para automação de infraestrutura (garante consistência e versionamento) e **AWS ...
 
 
 ============================================================
