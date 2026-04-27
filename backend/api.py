@@ -295,14 +295,13 @@ class Api:
                     f"Analise a transcrição INTEIRA e responda QUATRO linhas, sem explicação, sem markdown:\n"
                     f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta técnica ou dúvida que precisa resposta?)\n"
                     f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
-                    f"PONTOS: Liste TODOS os assuntos técnicos discutidos, especialmente problemas, dúvidas e decisões. Foque no que é mais recente e relevante.\n"
+                    f"CONTEXTO: Resuma a situação do cliente em 2-3 frases objetivas. Foque na DOR do cliente — qual o problema, o que ele precisa, o que está tentando resolver. Não use palavras soltas.\n"
                     f"RESPOSTA: CURTA se tem 1 assunto, MÉDIA se tem 2, LONGA se tem 3+\n\n"
                     f"Transcrição:\n{context}"
                 )
                 classify_result = self._bedrock.call_raw("Responda EXATAMENTE 4 linhas no formato pedido. Sem markdown.", classify_msg, max_tokens=300).strip()
                 has_q = "SIM" in classify_result.split("\n")[0].upper()
                 has_competitor = any("CONCORRENTE: SIM" in line.upper() or "CONCORRENTE:SIM" in line.upper() for line in classify_result.split("\n"))
-                # Estimate response size
                 resp_size = "MÉDIA"
                 for line in classify_result.split("\n"):
                     if line.strip().upper().startswith("RESPOSTA:"):
@@ -312,8 +311,8 @@ class Api:
                 clean_ctx = context  # fallback
                 for line in classify_result.split("\n"):
                     stripped = line.strip().replace("*", "").replace("#", "").strip()
-                    if stripped.upper().startswith("PONTOS:") or stripped.upper().startswith("PONTOS "):
-                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[7:].strip()
+                    if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS:"):
+                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[9:].strip()
                         break
                 # If clean_ctx is still the full context, the parser failed — log warning
                 if clean_ctx == context:
@@ -340,27 +339,26 @@ class Api:
                 # Build user message based on classification
                 if not has_q:
                     user_msg = (
-                        f"Pontos da conversa:\n{clean_ctx}\n\n"
-                        f"Não há pergunta técnica direta. Reconheça o contexto em 1-2 frases e sugira 3 perguntas que o consultor deveria fazer pro cliente pra avançar a conversa.\n"
-                        f"Formato:\n📌 [contexto em 1-2 frases]\n\n💬 Perguntas pra fazer:\n- \"pergunta 1\"\n- \"pergunta 2\"\n- \"pergunta 3\""
+                        f"Contexto do cliente:\n{clean_ctx}\n\n"
+                        f"Não há pergunta direta. Dê uma resposta curta reconhecendo a dor do cliente e sugira 3 perguntas que o consultor deveria fazer pra aprofundar."
                         f"{search_context}"
                     )
                 else:
                     extra_instruction = ""
                     if has_competitor:
-                        extra_instruction = " IMPORTANTE: o cliente mencionou um concorrente — diferencie a AWS com FATOS baseados nos dados da web, sem atacar o concorrente. Foque em segurança, privacidade e controle dos dados."
+                        extra_instruction = " IMPORTANTE: mencionou concorrente — diferencie AWS com fatos, sem atacar."
                     user_msg = (
-                        f"Pontos da conversa:\n{clean_ctx}\n\n"
-                        f"Responda a dúvida técnica de forma objetiva. Tamanho: {resp_size}. Se LONGA, seja mais conciso em cada tema (máx 4-5 linhas por tema no 📌 e 2 frases no 💬). NÃO adicione resumo ou conclusão no final — termine na última sugestão 💬.{extra_instruction}{no_repeat_hint}"
+                        f"Contexto do cliente:\n{clean_ctx}\n\n"
+                        f"Dê uma resposta curta e objetiva focada na dor do cliente. Use 📌 pra resposta técnica e 💬 pra como falar pro cliente. Sem resumo no final.{extra_instruction}{no_repeat_hint}"
                         f"{search_context}"
                     )
             elif self._behavior_template in ("sugestoes", "discovery") and context.strip():
                 # Sugestões/Discovery: classify + extract points + detect questions
                 classify_msg = (
                     f"Analise a transcrição e responda TRÊS linhas, sem explicação, sem markdown:\n"
-                    f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta direta do cliente que precisa de resposta?)\n"
-                    f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT ou qualquer serviço que NÃO seja AWS?)\n"
-                    f"PONTOS: 2-4 frases com os pontos cruciais limpos (sem ruído de transcrição)\n\n"
+                    f"CLASSIFICAÇÃO: SIM ou NAO (tem pergunta direta do cliente?)\n"
+                    f"CONCORRENTE: SIM ou NAO (menciona Google, Gemini, Azure, Heroku, Oracle, ChatGPT?)\n"
+                    f"CONTEXTO: Resuma a situação do cliente em 2-3 frases objetivas. Foque na DOR — qual o problema, o que precisa, o que está tentando resolver.\n\n"
                     f"Transcrição:\n{context}"
                 )
                 classify_result = self._bedrock.call_raw("Responda EXATAMENTE 3 linhas.", classify_msg, max_tokens=300).strip()
@@ -369,12 +367,12 @@ class Api:
                 clean_ctx = context  # fallback
                 for line in classify_result.split("\n"):
                     stripped = line.strip().replace("*", "").replace("#", "").strip()
-                    if stripped.upper().startswith("PONTOS:") or stripped.upper().startswith("PONTOS "):
-                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[7:].strip()
+                    if stripped.upper().startswith("CONTEXTO:") or stripped.upper().startswith("PONTOS:"):
+                        clean_ctx = stripped.split(":", 1)[1].strip() if ":" in stripped else stripped[9:].strip()
                         break
                 if clean_ctx == context:
-                    log.warning("[SNAPSHOT] Failed to extract points — using full context as fallback")
-                log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Points ({len(clean_ctx)} chars): {clean_ctx[:120]}")
+                    log.warning("[SNAPSHOT] Failed to extract context — using full context as fallback")
+                log.info(f"[SNAPSHOT] Suggestions classify: Q={'SIM' if has_q else 'NAO'} Comp={'SIM' if has_competitor else 'NAO'} | Context ({len(clean_ctx)} chars): {clean_ctx[:120]}")
                 log.info(f"[SNAPSHOT] Chamada 1 raw:\n{classify_result}")
 
                 # Web search if competitor
