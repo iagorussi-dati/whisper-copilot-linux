@@ -673,12 +673,12 @@ class Api:
         self._bedrock = BedrockClient()
 
         # Pre-warm prompt cache in background
-        if self._custom_system_prompt:
+        if self._raw_system_prompt:
             def prewarm():
-                log.info("Pre-warming prompt cache...")
+                log.info(f"Pre-warming prompt cache ({len(self._raw_system_prompt)} chars)...")
                 try:
-                    self._bedrock.call_raw(self._custom_system_prompt, "Aguarde.", max_tokens=10)
-                    log.info("Prompt cache warmed")
+                    self._bedrock.call_raw(self._raw_system_prompt, "Aguarde.", max_tokens=10)
+                    log.info("Prompt cache warmed ✅")
                 except Exception as e:
                     log.warning(f"Cache warm failed: {e}")
             threading.Thread(target=prewarm, daemon=True).start()
