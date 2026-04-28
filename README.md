@@ -13,7 +13,34 @@ Desenvolvido pela **Dati** (AWS Advanced Partner, Blumenau/SC).
 | **Transcrição** | Groq Whisper API (whisper-large-v3-turbo) |
 | **IA** | Amazon Bedrock (Nova Pro) — long-term API key |
 | **Web Search** | DuckDuckGo (via primp) |
-| **Áudio** | sounddevice (mic) + parec/pw-cat (monitor Linux) |
+| **Áudio** | sounddevice (mic) + parec/pw-cat (Linux) / WASAPI loopback (Windows) |
+
+## Setup (Windows)
+
+```powershell
+# Instalar Python 3.11+ do python.org (marcar "Add to PATH")
+
+# Clonar o projeto
+git clone https://github.com/iagorussi-dati/whisper-copilot-linux.git
+cd whisper-copilot-linux
+git checkout windows
+
+# Instalar dependências
+pip install -r requirements.txt
+
+# Configurar .env
+copy .env.example .env
+# Editar .env com notepad: GROQ_API_KEY e AWS_BEARER_TOKEN_BEDROCK
+
+# Rodar (como Administrador — necessário para hotkeys globais)
+python main.py
+```
+
+**Observações Windows:**
+- Rodar como **Administrador** — a lib `keyboard` precisa de permissão pra capturar hotkeys globais
+- O áudio do sistema (monitor) usa **WASAPI loopback** via PyAudioWPatch
+- Hotkeys: `Win+Space` (gravar), `Win+D` (snapshot), `Win+H` (fullcontext)
+- Se o áudio não aparecer na lista, verifique se o dispositivo de saída está ativo
 
 ## Setup (Linux)
 
