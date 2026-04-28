@@ -1,0 +1,421 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<title>Whisper Copilot</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { background: #0f172a; color: #e2e8f0; font-family: system-ui, sans-serif; height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+  #messages { flex: 1; overflow-y: auto; padding: 12px; }
+
+  /* Modern scrollbar */
+  ::-webkit-scrollbar { width: 6px; height: 6px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: #334155; border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  * { scrollbar-width: thin; scrollbar-color: #334155 transparent; }
+  .msg { margin-bottom: 8px; font-size: 14px; line-height: 1.5; }
+  .msg-user .label { color: #a78bfa; font-weight: 600; }
+  .msg-bot .label { color: #fbbf24; font-weight: 600; }
+  .msg-bot .text { background: #1e293b; border-radius: 8px; padding: 10px 14px; margin-top: 4px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; }
+  .msg-system { color: #64748b; font-style: italic; font-size: 13px; }
+  .msg-transcript { color: #64748b; font-size: 12px; opacity: 0.5; line-height: 1.4; }
+  .transcript-stream { overflow: hidden; max-height: 0; animation: streamIn 0.4s ease forwards; }
+  @keyframes streamIn { from { max-height: 0; opacity: 0; } to { max-height: 60px; opacity: 1; } }
+  .transcript-counter { color: #475569; font-size: 11px; padding: 2px 8px; background: #1e293b; border-radius: 4px; display: inline-block; margin-bottom: 4px; }
+  .msg-action { color: #a78bfa; font-size: 13px; font-weight: 500; }
+  .msg-status { display: flex; align-items: center; gap: 6px; padding: 6px 10px; border-radius: 6px; font-size: 12px; margin-bottom: 8px; }
+  .status-recording { background: #7f1d1d30; color: #fca5a5; }
+  .status-ready { background: #14532d30; color: #86efac; }
+  .status-thinking { background: #1e1b4b30; color: #c4b5fd; }
+  #input-bar { display: flex; gap: 8px; padding: 10px 12px; border-top: 1px solid #1e293b; background: #0f172a; }
+  #chat-input { flex: 1; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 8px 12px; color: #e2e8f0; font-size: 14px; outline: none; }
+  #chat-input:focus { border-color: #8b5cf6; }
+  #chat-input::placeholder { color: #64748b; }
+  #chat-input:disabled { opacity: 0.5; }
+  #send-btn { background: #7c3aed; color: white; border: none; border-radius: 6px; padding: 8px 16px; font-size: 14px; cursor: pointer; }
+  #send-btn:hover { background: #6d28d9; }
+  #send-btn:disabled { background: #334155; cursor: not-allowed; }
+  #end-session-bar { display: flex; align-items: center; justify-content: center; padding: 6px 12px; border-bottom: 1px solid #1e293b; background: #0f172a; }
+  #end-session-btn { background: transparent; border: 1px solid #334155; color: #94a3b8; border-radius: 6px; padding: 5px 14px; font-size: 12px; cursor: pointer; transition: all .2s; display: flex; align-items: center; gap: 6px; }
+  #end-session-btn:hover { border-color: #ef4444; color: #fca5a5; background: #7f1d1d20; }
+  #end-session-btn.loading { pointer-events: none; opacity: 0.7; }
+
+  #summary-screen { display: none; flex: 1; flex-direction: column; padding: 16px; overflow-y: auto; }
+  #summary-screen h2 { font-size: 16px; font-weight: 600; margin-bottom: 12px; color: #e2e8f0; }
+  #summary-screen textarea { width: 100%; background: #1e293b; border: 1px solid #334155; border-radius: 6px; padding: 10px; color: #e2e8f0; font-size: 13px; outline: none; resize: vertical; min-height: 60px; }
+  #summary-screen textarea:focus { border-color: #8b5cf6; }
+  #summary-result { background: #1e293b; border-radius: 8px; padding: 12px; margin-top: 12px; font-size: 13px; line-height: 1.6; white-space: pre-wrap; word-wrap: break-word; flex: 1; overflow-y: auto; }
+  .summary-btn { padding: 8px 16px; border-radius: 6px; font-size: 13px; cursor: pointer; border: none; transition: all .2s; }
+  .summary-btn-primary { background: #7c3aed; color: white; }
+  .summary-btn-primary:hover { background: #6d28d9; }
+  .summary-btn-secondary { background: #334155; color: #e2e8f0; }
+  .summary-btn-secondary:hover { background: #475569; }
+  .pulse { animation: pulse 1.5s infinite; }
+  @keyframes pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
+</style>
+</head>
+<body>
+<div id="end-session-bar">
+  <button id="end-session-btn" onclick="endSession()">
+    <svg width="12" height="12" viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="1" y="1" width="10" height="10" rx="1"/><line x1="4" y1="4" x2="8" y2="8"/><line x1="8" y1="4" x2="4" y2="8"/></svg>
+    Encerrar Sessão
+  </button>
+</div>
+<div id="messages">
+  <div class="msg msg-system">Copiloto pronto. Aperte Espaço para gravar.</div>
+</div>
+<div id="input-bar" style="display:none;">
+  <input id="chat-input" type="text" placeholder="Pergunte algo ou dê uma instrução (Enter = enviar)" autofocus />
+  <button id="send-btn">Enviar</button>
+</div>
+
+<div id="summary-screen">
+  <h2>📋 Resumo da Sessão</h2>
+  <p style="font-size:12px;color:#64748b;margin-bottom:8px;">Descreva o que deseja no resumo (ata, action items, pontos-chave...)</p>
+  <textarea id="summary-instruction" rows="2" placeholder="Ex: Gere um resumo executivo com action items e próximos passos"></textarea>
+  <div style="display:flex;gap:8px;margin-top:8px;">
+    <button class="summary-btn summary-btn-primary" onclick="generateSummary()">Gerar Resumo</button>
+    <button class="summary-btn summary-btn-secondary" onclick="copyResult()">📋 Copiar</button>
+    <button class="summary-btn summary-btn-secondary" onclick="newSession()">🔄 Nova Sessão</button>
+  </div>
+  <div id="summary-result" style="display:none;"></div>
+</div>
+<script>
+  function getApi() { return window.pywebview ? window.pywebview.api : null; }
+
+  async function endSession() {
+    const btn = document.getElementById('end-session-btn');
+    btn.classList.add('loading');
+    btn.innerHTML = '<span class="pulse">⏳</span> Encerrando...';
+    try {
+      const a = getApi();
+      if (a) await a.close_session();
+    } catch(e) { console.error(e); }
+  }
+
+  async function generateSummary() {
+    const instruction = document.getElementById('summary-instruction').value.trim() || 'Gere um resumo completo da sessão.';
+    const result = document.getElementById('summary-result');
+    result.style.display = 'block';
+    result.innerHTML = '<span class="pulse" style="color:#94a3b8;">⏳ Gerando resumo...</span>';
+    try {
+      const a = getApi();
+      if (a) {
+        const text = await a.generate_final_report(instruction);
+        result.textContent = text;
+      }
+    } catch(e) {
+      result.textContent = 'Erro: ' + e;
+    }
+  }
+
+  function copyResult() {
+    const text = document.getElementById('summary-result').textContent;
+    if (text) navigator.clipboard.writeText(text);
+  }
+
+  async function newSession() {
+    try {
+      const a = getApi();
+      if (a) await a.new_session();
+    } catch(e) { console.error(e); }
+  }
+  window.__emit = function(event, data) {
+    window.dispatchEvent(new CustomEvent('backend:' + event, { detail: data }));
+  };
+
+  const msgs = document.getElementById('messages');
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('send-btn');
+  const inputBar = document.getElementById('input-bar');
+  let isRecording = false;
+  let hasTranscript = false;
+  let transcriptCount = 0;
+  let autoResponse = true;
+  let transcriptionDone = true;
+  let pendingSend = null;
+  let recStartTime = null;
+  let recTimerInterval = null;
+
+  function updateRecTimer() {
+    const el = document.getElementById('rec-timer');
+    if (!el || !recStartTime) return;
+    const s = Math.floor((Date.now() - recStartTime) / 1000);
+    const m = String(Math.floor(s / 60)).padStart(2, '0');
+    const sec = String(s % 60).padStart(2, '0');
+    el.textContent = `${m}:${sec}`;
+  }
+
+  function addMsg(cls, html) {
+    const div = document.createElement('div');
+    div.className = 'msg ' + cls;
+    div.innerHTML = html;
+    msgs.appendChild(div);
+    msgs.scrollTop = msgs.scrollHeight;
+  }
+
+  function setStatus(cls, text) {
+    // Always keep recording indicator if recording
+    if (isRecording && cls !== 'status-recording') {
+      // Show recording + secondary status
+      msgs.querySelectorAll('.msg-status').forEach(el => el.remove());
+      const recDiv = document.createElement('div');
+      recDiv.className = 'msg-status status-recording';
+      recDiv.innerHTML = '🔴 <span class="pulse">Gravando</span> <span id="rec-timer">--:--</span>';
+      msgs.appendChild(recDiv);
+      if (recStartTime) updateRecTimer();
+      if (text && cls !== 'status-recording') {
+        const subDiv = document.createElement('div');
+        subDiv.className = 'msg-status ' + cls;
+        subDiv.innerHTML = text;
+        msgs.appendChild(subDiv);
+      }
+      msgs.scrollTop = msgs.scrollHeight;
+      return;
+    }
+    // Remove previous status
+    msgs.querySelectorAll('.msg-status').forEach(el => el.remove());
+    if (text) {
+      const div = document.createElement('div');
+      div.className = 'msg-status ' + cls;
+      div.innerHTML = text;
+      msgs.appendChild(div);
+      msgs.scrollTop = msgs.scrollHeight;
+    }
+  }
+
+  function clearProcessing() {
+    const last = msgs.querySelector('.status-thinking');
+    if (last) last.remove();
+  }
+
+  function enableInput(placeholder) {
+    if (autoResponse) { inputBar.style.display = 'none'; return; }
+    inputBar.style.display = 'flex';
+    input.disabled = false;
+    btn.disabled = false;
+    if (placeholder) input.placeholder = placeholder;
+    setTimeout(() => { input.focus(); input.click(); }, 100);
+    setTimeout(() => { input.focus(); }, 500);
+  }
+
+  function disableInput() {
+    input.disabled = true;
+    btn.disabled = true;
+  }
+
+  function showInputBar() {
+    if (!autoResponse) inputBar.style.display = 'flex';
+  }
+
+  // Restore history
+  async function restoreHistory() {
+    const a = getApi();
+    if (!a) return;
+    try {
+      const history = await a.get_chat_history();
+      if (!history || !history.length) return;
+      for (const entry of history) processEvent(entry.event, entry.data);
+    } catch(e) { console.error('restore:', e); }
+  }
+
+  function processEvent(event, data) {
+    switch(event) {
+      case 'recording_state':
+        isRecording = data.recording;
+        if (data.recording) {
+          transcriptionDone = false;
+          recStartTime = Date.now();
+          recTimerInterval = setInterval(updateRecTimer, 1000);
+          setStatus('status-recording', '🔴 <span class="pulse">Gravando</span> <span id="rec-timer">00:00</span>');
+          disableInput();
+        } else {
+          if (recTimerInterval) { clearInterval(recTimerInterval); recTimerInterval = null; }
+          setStatus('', '');
+        }
+        break;
+      case 'recording_stopped':
+        if (data.had_audio) {
+          if (autoResponse) {
+            setStatus('status-thinking', '⏳ <span class="pulse">Processando...</span>');
+          } else {
+            setStatus('status-ready', '⏳ Transcrevendo... digite sua instrução');
+            transcriptionDone = false;
+            enableInput('Instrução (Enter envia após transcrição)');
+          }
+        } else {
+          if (autoResponse) {
+            setStatus('status-ready', '');
+          } else {
+            transcriptionDone = true;
+            setStatus('status-ready', '🎤 Sem áudio — digite sua mensagem');
+            enableInput('Pergunte algo ao copiloto');
+          }
+        }
+        break;
+      case 'transcript':
+        hasTranscript = true;
+        transcriptCount++;
+        // Remove old transcripts, keep last 2
+        const transcripts = msgs.querySelectorAll('.msg-transcript');
+        if (transcripts.length >= 2) {
+          transcripts[0].remove();
+        }
+        // Update or create counter badge
+        let counter = msgs.querySelector('.transcript-counter');
+        if (!counter) {
+          counter = document.createElement('div');
+          counter.className = 'transcript-counter';
+          // Insert before first transcript or at end
+          const firstT = msgs.querySelector('.msg-transcript');
+          if (firstT) msgs.insertBefore(counter, firstT);
+          else msgs.appendChild(counter);
+        }
+        counter.textContent = '📝 ' + transcriptCount + (transcriptCount === 1 ? ' linha transcrita' : ' linhas transcritas');
+        // Ensure counter stays above transcripts
+        const firstAfter = msgs.querySelector('.msg-transcript');
+        if (firstAfter && counter.nextSibling !== firstAfter) {
+          msgs.insertBefore(counter, firstAfter);
+        }
+        // Add new transcript line (no speaker)
+        const div = document.createElement('div');
+        div.className = 'msg msg-transcript transcript-stream';
+        div.textContent = data.text;
+        msgs.appendChild(div);
+        msgs.scrollTop = msgs.scrollHeight;
+        break;
+      case 'copilot_response':
+        clearProcessing();
+        if (data.response) {
+          addMsg('msg-bot', '<span class="label">Copiloto:</span><div class="text">' + data.response + '</div>');
+        }
+        if (!isRecording) {
+          setStatus('status-ready', '✅ Pronto — grave mais ou digite outra instrução');
+          enableInput('Instrução (Enter vazio = copiloto responde sozinho)');
+        }
+        break;
+      case 'user_instruction':
+        addMsg('msg-user', '<span class="label">Você:</span> ' + data.text);
+        break;
+    }
+  }
+
+  async function send() {
+    const msg = input.value.trim();
+    input.value = '';
+
+    if (!transcriptionDone) {
+      pendingSend = msg;
+      if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
+      setStatus('status-thinking', '⏳ <span class="pulse">Aguardando transcrição...</span>');
+      disableInput();
+      return;
+    }
+
+    doSend(msg);
+  }
+
+  async function doSend(msg) {
+    disableInput();
+    if (msg) addMsg('msg-user', '<span class="label">Você:</span> ' + msg);
+    setStatus('status-thinking', '⏳ <span class="pulse">Copiloto pensando...</span>');
+    try {
+      const a = getApi();
+      if (a) await a.submit_recording(msg);
+    } catch(e) {
+      addMsg('msg-system', 'Erro: ' + e);
+      enableInput();
+    }
+  }
+
+  input.addEventListener('keydown', (e) => { if (e.key === 'Enter') send(); });
+  btn.addEventListener('click', send);
+
+  // Live events
+  window.addEventListener('backend:transcript', (e) => processEvent('transcript', e.detail));
+  window.addEventListener('backend:copilot_response', (e) => processEvent('copilot_response', e.detail));
+  window.addEventListener('backend:recording_state', (e) => processEvent('recording_state', e.detail));
+  window.addEventListener('backend:recording_stopped', (e) => processEvent('recording_stopped', e.detail));
+  window.addEventListener('backend:chat_thinking', () => {
+    setStatus('status-thinking', '⏳ <span class="pulse">Copiloto pensando...</span>');
+    disableInput();
+  });
+
+  window.addEventListener('backend:snapshot_started', () => {
+    setStatus('status-ready', '📸 Snapshot — transcrevendo...');
+    transcriptionDone = false;
+    showInputBar();
+    enableInput('Instrução (Enter envia após transcrição)');
+  });
+
+  window.addEventListener('backend:fullcontext_started', () => {
+    setStatus('status-thinking', '🔍 <span class="pulse">Analisando contexto inteiro...</span>');
+  });
+
+  window.addEventListener('backend:session_reset', () => {
+    msgs.innerHTML = '<div class="msg msg-system">Copiloto pronto. Aperte Espaço para gravar.</div>';
+    hasTranscript = false;
+    transcriptCount = 0;
+    disableInput();
+  });
+
+  window.addEventListener('backend:show_summary', () => {
+    document.getElementById('end-session-bar').style.display = 'none';
+    document.getElementById('messages').style.display = 'none';
+    document.getElementById('input-bar').style.display = 'none';
+    document.getElementById('summary-screen').style.display = 'flex';
+  });
+
+  window.addEventListener('backend:focus_input', () => {
+    transcriptionDone = true;
+    setStatus('status-ready', '✅ Transcrição pronta');
+    if (pendingSend !== null) {
+      const msg = pendingSend;
+      pendingSend = null;
+      doSend(msg);
+    } else {
+      enableInput('Pergunte algo ao copiloto');
+    }
+  });
+
+  // Init
+  let popupReady = false;
+  async function markReady() {
+    popupReady = true;
+    console.log('[POPUP] Ready at ' + Date.now());
+    const a = getApi();
+    if (a) {
+      try { autoResponse = await a.get_auto_response(); } catch(e) {}
+    }
+    if (!autoResponse) inputBar.style.display = 'flex';
+    restoreHistory();
+  }
+  if (window.pywebview) markReady();
+  else window.addEventListener('pywebviewready', markReady);
+
+  // Log all incoming events
+  ['transcript', 'copilot_response', 'recording_state', 'recording_stopped', 'chat_thinking'].forEach(evt => {
+    window.addEventListener('backend:' + evt, (e) => {
+      console.log('[POPUP] Event: ' + evt + ' ready=' + popupReady + ' inputDisabled=' + input.disabled);
+    });
+  });
+
+  // Force focus on click anywhere in the window
+  document.body.addEventListener('click', () => {
+    if (!input.disabled) {
+      input.focus();
+    }
+  });
+
+  // Also try focus on any key press
+  document.addEventListener('keydown', (e) => {
+    if (!input.disabled && document.activeElement !== input) {
+      input.focus();
+    }
+  });
+  // Manual drag on titlebar only
+  // (native window frame handles drag/resize)
+</script>
+</body>
+</html>
