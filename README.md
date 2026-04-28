@@ -42,23 +42,6 @@ python main.py
 - Hotkeys: `Win+Space` (gravar), `Win+D` (snapshot), `Win+H` (fullcontext)
 - Se o áudio não aparecer na lista, verifique se o dispositivo de saída está ativo
 
-### Build Windows (executável + instalador)
-
-```powershell
-# Instalar PyInstaller
-pip install pyinstaller
-
-# Gerar executável
-pyinstaller whisper-copilot.spec
-
-# O executável fica em dist/WhisperCopilot/WhisperCopilot.exe
-# Copiar .env pra dentro de dist/WhisperCopilot/ antes de rodar
-
-# (Opcional) Gerar instalador com Inno Setup
-# Abrir installer.iss no Inno Setup Compiler e compilar
-# Gera installer/WhisperCopilot-Setup.exe
-```
-
 ## Setup (Linux)
 
 ```bash
