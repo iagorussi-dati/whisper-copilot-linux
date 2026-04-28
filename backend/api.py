@@ -330,28 +330,47 @@ class Api:
                         log.info(f"[SNAPSHOT] Search results: {len(results)} chars")
 
             competitor_hint = " O cliente mencionou concorrente — diferencie AWS com fatos." if has_competitor else ""
-            snap_instruction = (
-                "Responda neste formato EXATO:\n"
-                "📌 [dados técnicos em 3-5 linhas: serviços AWS, comparações, números concretos]\n"
-                "💬 [2-3 formas diferentes de falar isso pro cliente, cada uma em 1 frase]\n"
-                "PARE após o 💬. Sem resumo, sem título, sem introdução."
-            )
+            is_suggestions = self._behavior_template in ("sugestoes", "discovery")
+
+            # OBS block for web search results
+            obs_instruction = ""
+            if search_context and (has_competitor or has_question):
+                obs_instruction = (
+                    "\n\nSe os dados da web forem relevantes, adicione no FINAL:\n"
+                    "📎 OBS: [informação factual da pesquisa em 1-2 frases]\n"
+                )
+
+            if is_suggestions:
+                # SUGESTÕES / DISCOVERY: frases prontas com emojis
+                snap_instruction = (
+                    "Gere 3-4 sugestões como FRASES PRONTAS que o comercial pode falar.\n"
+                    "Formato: [EMOJI] \"Frase pronta\"\n"
+                    "Emojis: 🔴 urgente, ⚠️ atenção, 💡 oportunidade, ✅ próximo passo\n"
+                    "NUNCA diga 'Pergunte X' — escreva a frase direta.\n"
+                    "PARE após as sugestões."
+                )
+            else:
+                # CONSULTOR TÉCNICO: dados técnicos + como falar
+                snap_instruction = (
+                    "Responda neste formato EXATO:\n"
+                    "📌 [dados técnicos em 3-5 linhas: serviços AWS, comparações, números concretos]\n"
+                    "💬 [2-3 formas diferentes de falar isso pro cliente, cada uma em 1 frase]\n"
+                    "PARE após o 💬. Sem resumo, sem título, sem introdução."
+                )
 
             if len(interval_points) <= 2:
-                # FAST PATH: 1-2 points → direct response
                 dor = "\n".join(interval_points)
-                user_msg = f"Dor do cliente:\n{dor}{prev_ctx}\n\n{snap_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
+                user_msg = f"Dor do cliente:\n{dor}{prev_ctx}\n\n{snap_instruction}{competitor_hint}{obs_instruction}{no_repeat_hint}{search_context}"
             else:
-                # 3+ points → group into categories first, then respond
                 lista = "\n".join(f"- {p}" for p in interval_points)
                 agrupado = self._bedrock.call_raw(
                     "Agrupe em 2-3 categorias. Cada uma: nome + 1 frase curta com todos os pontos. Sem markdown. Não perca nenhum ponto.",
                     f"Pontos:\n{lista}", max_tokens=300
                 ).strip().replace("*", "").replace("#", "").strip()
                 log.info(f"[SNAPSHOT] Grouped ({len(agrupado)} chars): {agrupado[:200]}")
-                user_msg = f"Dores agrupadas:\n{agrupado}{prev_ctx}\n\nPra cada categoria {snap_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
+                user_msg = f"Dores agrupadas:\n{agrupado}{prev_ctx}\n\nPra cada categoria {snap_instruction}{competitor_hint}{obs_instruction}{no_repeat_hint}{search_context}"
 
-            log.info(f"[SNAPSHOT] User msg ({len(user_msg)} chars):\n{user_msg[:300]}")
+            log.info(f"[SNAPSHOT] Mode={'suggestions' if is_suggestions else 'technical'} | User msg ({len(user_msg)} chars):\n{user_msg[:300]}")
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
             result = self._clean_md(result)
             result = self._trim_to_sentence(result)

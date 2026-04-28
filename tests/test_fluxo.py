@@ -77,10 +77,14 @@ print("\n3. SNAPSHOT DISCOVERY")
 # ═══════════════════════════════════════════════════════════
 
 # Com pergunta
-msg = "Pontos:\nCliente pergunta sobre custo do Amazon Q Business após 60 dias.\n\nContribua com sugestões úteis.\n\nO cliente fez uma PERGUNTA direta. Depois das sugestões, adicione:\n📌 Sobre [tema]:\n[resposta]\n💬 \"frase\""
+msg = ("Dor do cliente:\nCliente pergunta sobre custo do Amazon Q Business após 60 dias.\n\n"
+       "Gere 3-4 sugestões como FRASES PRONTAS que o comercial pode falar.\n"
+       "Formato: [EMOJI] \"Frase pronta\"\n"
+       "Emojis: 🔴 urgente, ⚠️ atenção, 💡 oportunidade, ✅ próximo passo\n"
+       "PARE após as sugestões.")
 resp = client.call_raw(discovery, msg, max_tokens=5120)
-test("Discovery com pergunta → tem 📌", "📌" in resp, resp[:100])
-test("Discovery com pergunta → tem 💬", "💬" in resp, resp[:100])
+test("Discovery com pergunta → tem emoji", any(e in resp for e in ["💡", "⚠️", "🔴", "✅"]), resp[:100])
+test("Discovery com pergunta → tem frase pronta", '"' in resp, resp[:100])
 
 # Sem pergunta
 msg = "Pontos:\nMineradora de Curitiba, usa AWS, iniciando em IA.\n\nContribua com sugestões úteis. Não narre quem falou."
