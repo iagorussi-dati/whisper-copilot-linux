@@ -2,18 +2,21 @@ __pycache__/
 *.pyc
 .env
 *.egg-info/
-dist/
-build/
 .venv/
 venv/
-pretrained_models/
 
+# IDE
 .kiro/
-.qdrant-initialized
 .vscode/
-test_onset.py
-tests/fixtures/
-installer/
+
+# Build/dist
 dist/
 build/
+installer/
+
+# Runtime
 logs/
+snapshots/
+
+# OS
+*.ico
