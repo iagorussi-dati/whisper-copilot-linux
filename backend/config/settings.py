@@ -37,6 +37,7 @@ class AppConfig:
     role_prompt: str = ""
     global_hotkey: str = ""  # tecla para SUPER+tecla global (ex: "F9")
     snapshot_hotkey: str = "D"  # tecla para SUPER+tecla snapshot
+    fullcontext_hotkey: str = "H"  # tecla para SUPER+tecla análise completa
     response_mode: str = "short"  # "short", "full", "research"
     auto_response: bool = True  # True = responde sozinho, False = espera instrução
     many_context: str = ""  # contexto para modo 'muitas pessoas'
