@@ -308,26 +308,39 @@ class Api:
             all_points_text = " ".join(interval_points).lower()
             has_competitor = any(kw in all_points_text for kw in competitor_keywords)
 
-            # Web search if competitor detected
+            # Detect question in points
+            question_keywords = ["?", "como ", "qual ", "quanto ", "quando ", "por que ", "o que é", "diferença entre", "comparar", "melhor opção"]
+            has_question = any(kw in all_points_text for kw in question_keywords)
+
+            # Web search if competitor or question detected
             search_context = ""
-            if has_competitor:
+            if has_competitor or has_question:
                 from .search import web_search
                 qp = f"Responda APENAS query de busca em inglês, 8 palavras. Só a query.\n\nConversa: {all_points_text[:300]}"
                 query = self._bedrock.call_raw("Query.", qp, max_tokens=20).strip().strip('"').strip("'").strip("`").split("\n")[0]
                 if query and "NONE" not in query.upper():
-                    query += " vs AWS privacy security 2026"
-                    log.info(f"[SNAPSHOT] Competitor search: '{query[:80]}'")
+                    if has_competitor:
+                        query += " vs AWS privacy security 2026"
+                    else:
+                        query += " AWS 2026"
+                    log.info(f"[SNAPSHOT] Web search: '{query[:80]}'")
                     results = web_search(query, max_results=3)
                     if len(results) > 50:
-                        search_context = f"\n\nDados da web sobre concorrentes:\n{results}"
+                        search_context = f"\n\nDados da web:\n{results}"
+                        log.info(f"[SNAPSHOT] Search results: {len(results)} chars")
 
             competitor_hint = " O cliente mencionou concorrente — diferencie AWS com fatos." if has_competitor else ""
-            v5_instruction = "Responda APENAS:\n📌 [máximo 2 linhas]\n💬 \"[máximo 1 frase]\"\nPARE AQUI. Não adicione mais nada."
+            snap_instruction = (
+                "Responda neste formato EXATO:\n"
+                "📌 [dados técnicos em 3-5 linhas: serviços AWS, comparações, números concretos]\n"
+                "💬 [2-3 formas diferentes de falar isso pro cliente, cada uma em 1 frase]\n"
+                "PARE após o 💬. Sem resumo, sem título, sem introdução."
+            )
 
             if len(interval_points) <= 2:
-                # FAST PATH: 1-2 points → direct response with v5
+                # FAST PATH: 1-2 points → direct response
                 dor = "\n".join(interval_points)
-                user_msg = f"Dor do cliente:\n{dor}{prev_ctx}\n\n{v5_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
+                user_msg = f"Dor do cliente:\n{dor}{prev_ctx}\n\n{snap_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
             else:
                 # 3+ points → group into categories first, then respond
                 lista = "\n".join(f"- {p}" for p in interval_points)
@@ -336,7 +349,7 @@ class Api:
                     f"Pontos:\n{lista}", max_tokens=300
                 ).strip().replace("*", "").replace("#", "").strip()
                 log.info(f"[SNAPSHOT] Grouped ({len(agrupado)} chars): {agrupado[:200]}")
-                user_msg = f"Dores agrupadas:\n{agrupado}{prev_ctx}\n\nPra cada categoria {v5_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
+                user_msg = f"Dores agrupadas:\n{agrupado}{prev_ctx}\n\nPra cada categoria {snap_instruction}{competitor_hint}{no_repeat_hint}{search_context}"
 
             log.info(f"[SNAPSHOT] User msg ({len(user_msg)} chars):\n{user_msg[:300]}")
             result = self._bedrock.call_raw(system, user_msg, max_tokens=max_tok)
