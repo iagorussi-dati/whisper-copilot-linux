@@ -63,7 +63,7 @@
   </button>
 </div>
 <div id="messages">
-  <div class="msg msg-system">Copiloto pronto. Aperte Espaço para gravar.</div>
+  <div class="msg msg-system">Carregando atalhos...</div>
 </div>
 <div id="input-bar" style="display:none;">
   <input id="chat-input" type="text" placeholder="Pergunte algo ou dê uma instrução (Enter = enviar)" autofocus />
@@ -229,6 +229,9 @@
           recStartTime = Date.now();
           recTimerInterval = setInterval(updateRecTimer, 1000);
           setStatus('status-recording', '🔴 <span class="pulse">Gravando</span> <span id="rec-timer">00:00</span>');
+          // Update system message with snapshot hotkeys
+          const sysMsg = msgs.querySelector('.msg-system');
+          if (sysMsg) sysMsg.innerHTML = '<b>' + hotkeys.snapshot + '</b> = sugestão rápida &nbsp;|&nbsp; <b>' + hotkeys.fullcontext + '</b> = análise completa';
           disableInput();
         } else {
           if (recTimerInterval) { clearInterval(recTimerInterval); recTimerInterval = null; }
@@ -354,7 +357,7 @@
   });
 
   window.addEventListener('backend:session_reset', () => {
-    msgs.innerHTML = '<div class="msg msg-system">Copiloto pronto. Aperte Espaço para gravar.</div>';
+    msgs.innerHTML = `<div class="msg msg-system">Copiloto pronto. Aperte <b>${hotkeys.record}</b> para gravar.</div>`;
     hasTranscript = false;
     transcriptCount = 0;
     disableInput();
@@ -381,14 +384,19 @@
 
   // Init
   let popupReady = false;
+  let hotkeys = { record: 'SUPER + Espaço', snapshot: 'SUPER + D', fullcontext: 'SUPER + H' };
+
   async function markReady() {
     popupReady = true;
     console.log('[POPUP] Ready at ' + Date.now());
     const a = getApi();
     if (a) {
       try { autoResponse = await a.get_auto_response(); } catch(e) {}
+      try { hotkeys = await a.get_hotkeys(); } catch(e) {}
     }
     if (!autoResponse) inputBar.style.display = 'flex';
+    // Show initial message with hotkeys
+    msgs.innerHTML = `<div class="msg msg-system">Copiloto pronto. Aperte <b>${hotkeys.record}</b> para gravar.</div>`;
     restoreHistory();
   }
   if (window.pywebview) markReady();

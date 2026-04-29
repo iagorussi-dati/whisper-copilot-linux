@@ -461,6 +461,15 @@ class Api:
         """Return whether auto_response is enabled."""
         return self._auto_response
 
+    def get_hotkeys(self) -> dict:
+        """Return configured hotkey labels."""
+        cfg = self._last_config if hasattr(self, '_last_config') and self._last_config else None
+        rec = cfg.global_hotkey if cfg and hasattr(cfg, 'global_hotkey') else 'space'
+        snap = cfg.snapshot_hotkey if cfg and hasattr(cfg, 'snapshot_hotkey') else 'D'
+        full = cfg.fullcontext_hotkey if cfg and hasattr(cfg, 'fullcontext_hotkey') else 'H'
+        fmt = lambda k: f"SUPER + {'Espaço' if k == 'space' else k}" if k else 'Desativado'
+        return {"record": fmt(rec), "snapshot": fmt(snap), "fullcontext": fmt(full)}
+
     def get_suggestion_format(self) -> str:
         """Return the suggestion format instruction (read-only preview)."""
         return self.APP_FORMAT_SUGGESTION
@@ -628,6 +637,7 @@ class Api:
 
     def start_meeting(self, config_dict: dict):
         cfg = AppConfig.from_dict(config_dict)
+        self._last_config = cfg
 
         # Init Groq
         api_key = cfg.groq_api_key or os.getenv("GROQ_API_KEY", "")
@@ -645,10 +655,8 @@ class Api:
                 f"Contexto: {ctx}\n" if ctx else ""
             ) + "Várias pessoas falando. Identifique pelos nomes mencionados na conversa."
         elif cfg.participant_mode == "none":
-            identity = cfg.user_identity or ""
-            self._participants_context = (
-                f"Sobre o usuário: {identity}\n" if identity else ""
-            ) + "Identifique os participantes pelos nomes mencionados na conversa. Ajude o usuário diretamente."
+            self._participants_context = "Identifique os participantes pelos nomes mencionados na conversa."
+            self._user_identity = cfg.user_identity or ""
         else:
             ctx_parts = []
             for p in cfg.participants:
@@ -666,6 +674,8 @@ class Api:
         self._suggestions_target = cfg.suggestions_target or self._my_label
         # Build system prompt with hierarchy: extra_context (priority) > role > behavior
         parts = []
+        if getattr(self, '_user_identity', ''):
+            parts.append(f"[Sobre o usuário]\n{self._user_identity}")
         if cfg.extra_context:
             parts.append(f"[PRIORIDADE MÁXIMA - Contexto Adicional]\n{cfg.extra_context}")
         if cfg.role_prompt:
