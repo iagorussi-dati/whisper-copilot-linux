@@ -135,7 +135,7 @@ const state = {
     suggestions_target: '', custom_system_prompt: '', behavior_template: '', behavior_prompt: '', role_template: '', role_prompt: '', global_hotkey: '',
     snapshot_hotkey: 'D',
     fullcontext_hotkey: 'H',
-    response_mode: 'short', auto_response: true, extra_context: '',
+    response_mode: 'short', auto_response: true, copilot_mode: 'manual', extra_context: '',
     participant_mode: 'named', many_context: '',
     user_identity: '',
   },
@@ -354,16 +354,20 @@ function renderSetup() {
         <h3>Configurações</h3>
       </div>
 
-    <!-- Auto vs instruction -->
+    <!-- Copilot mode -->
     <label class="text-xs text-slate-400">Modo do copiloto</label>
     <div class="flex gap-2 mt-1 mb-4">
-      <button data-action="setAutoResponse" data-val="true" class="flex-1 py-2 px-2 rounded border transition-colors ${c.auto_response ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
-        <div class="text-xs font-medium">🤖 Automático</div>
-        <div class="text-xs text-slate-500">Responde sozinho ao parar</div>
+      <button data-action="setCopilotMode" data-val="manual" class="flex-1 py-2 px-2 rounded border transition-colors ${c.copilot_mode === 'manual' ? 'border-emerald-500 bg-emerald-500/10 text-emerald-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        <div class="text-xs font-medium">📌 Manual</div>
+        <div class="text-xs text-slate-500">Win+D pra sugestão</div>
       </button>
-      <button data-action="setAutoResponse" data-val="false" class="flex-1 py-2 px-2 rounded border transition-colors ${!c.auto_response ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
-        <div class="text-xs font-medium">💬 Com instrução</div>
-        <div class="text-xs text-slate-500">Espera você digitar</div>
+      <button data-action="setCopilotMode" data-val="instruction" class="flex-1 py-2 px-2 rounded border transition-colors ${c.copilot_mode === 'instruction' ? 'border-violet-500 bg-violet-500/10 text-violet-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        <div class="text-xs font-medium">💬 Com Instrução</div>
+        <div class="text-xs text-slate-500">Você digita o que quer</div>
+      </button>
+      <button data-action="setCopilotMode" data-val="smart" class="flex-1 py-2 px-2 rounded border transition-colors ${c.copilot_mode === 'smart' ? 'border-amber-500 bg-amber-500/10 text-amber-400' : 'border-slate-700 text-slate-400 hover:border-slate-500'}">
+        <div class="text-xs font-medium">🧠 Inteligente</div>
+        <div class="text-xs text-slate-500">Sugere sozinho</div>
       </button>
     </div>
 
@@ -785,6 +789,12 @@ function bindEvents() {
           break;
         case 'setAutoResponse':
           state.config.auto_response = el.dataset.val === 'true';
+          render();
+          break;
+        case 'setCopilotMode':
+          state.config.copilot_mode = el.dataset.val;
+          state.config.auto_response = el.dataset.val === 'manual';
+          callApi('set_copilot_mode', el.dataset.val);
           render();
           break;
         case 'setParticipantMode':

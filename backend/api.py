@@ -46,6 +46,7 @@ class Api:
         self._monitor_threads: dict[str, threading.Event] = {}
         self._recording = False
         self._auto_response = True
+        self._copilot_mode = "manual"  # manual | instruction | smart
         self._behavior_template = ""
         self._pending_wav = None
         self._pending_instruction = ""
@@ -53,6 +54,8 @@ class Api:
         self._snapshot_checkpoint: int = 0  # index in _chat_history where last snapshot was
         self._incremental_points: list[str] = []  # points extracted from each auto chunk
         self._points_checkpoint: int = 0  # index in _incremental_points where last snapshot was
+        self._vad = None  # VoiceActivityDetector (lazy init for smart mode)
+        self._smart_suggestions: list[dict] = []  # {"tema", "ponto", "minuto"} for smart mode
         self._hotkey_stop = threading.Event()
         self._start_hotkey_watcher()
 
@@ -461,6 +464,13 @@ class Api:
         """Return whether auto_response is enabled."""
         return self._auto_response
 
+    def set_copilot_mode(self, mode: str):
+        """Set copilot mode: manual, instruction, smart."""
+        self._copilot_mode = mode
+        self._auto_response = mode == "manual"
+        log.info(f"[MODE] Copilot mode set to: {mode}")
+        return True
+
     def get_hotkeys(self) -> dict:
         """Return configured hotkey labels."""
         cfg = self._last_config if hasattr(self, '_last_config') and self._last_config else None
@@ -706,6 +716,7 @@ class Api:
         self._response_mode = template_modes.get(cfg.behavior_template or "", cfg.response_mode or "short")
         self._behavior_template = cfg.behavior_template or ""
         self._auto_response = bool(cfg.auto_response) if not isinstance(cfg.auto_response, str) else cfg.auto_response.lower() == 'true'
+        self._copilot_mode = getattr(cfg, 'copilot_mode', None) or ('manual' if self._auto_response else 'instruction')
         self._transcript = []
         self._suggestions = []
         self._chat_history = []
@@ -718,6 +729,7 @@ class Api:
         log.info(f"[START] response_mode={self._response_mode}")
         log.info(f"[START] behavior={self._behavior_template}")
         log.info(f"[START] auto_response={self._auto_response}")
+        log.info(f"[START] copilot_mode={self._copilot_mode}")
         log.info(f"[START] target={self._suggestions_target}")
         log.info(f"[START] system_prompt={len(self._raw_system_prompt)} chars: {self._raw_system_prompt[:80]}")
         log.info(f"[START] participants={self._participants_context[:100]}")
@@ -727,6 +739,14 @@ class Api:
         log.info(f"[START] hotkey={cfg.global_hotkey}")
 
         chunk_dur = max(cfg.chunk_seconds, 60)  # min 60s chunks for auto-transcribe
+
+        # Smart mode: use small chunks for VAD feeding
+        if self._copilot_mode == "smart":
+            chunk_dur = 2  # 2s chunks to feed VAD in near-real-time
+            from .audio.vad import VoiceActivityDetector
+            self._vad = VoiceActivityDetector()
+            self._smart_suggestions = []
+            log.info("[START] Smart mode: VAD enabled, 2s chunks")
 
         if cfg.mic_device_id and cfg.mic_device_id != "none":
             self._mic_capture = AudioCapture(
@@ -806,17 +826,29 @@ class Api:
             while not getattr(self, '_chat_window_ready', True) and time.time() - start_wait < 5:
                 time.sleep(0.1)
             log.info(f"[REC] Popup ready={getattr(self, '_chat_window_ready', '?')} (waited {time.time()-start_wait:.1f}s)")
-            log.info(f"[REC] auto_response={self._auto_response}")
+            log.info(f"[REC] copilot_mode={self._copilot_mode}")
 
             # Focus popup via hyprctl (Wayland)
             time.sleep(0.5)
             self._focus_popup()
 
-            if self._auto_response:
-                log.info("[REC] Auto-response: generating response...")
+            if self._copilot_mode == "manual":
+                log.info("[REC] Manual mode: generating response...")
                 self.submit_recording('')
+            elif self._copilot_mode == "smart":
+                log.info("[REC] Smart mode: VAD handles responses automatically")
+                # Flush remaining VAD buffer
+                if self._vad:
+                    remaining = self._vad.flush()
+                    if remaining:
+                        import io, wave as _wave
+                        wav_buf = io.BytesIO()
+                        with _wave.open(wav_buf, "wb") as wf:
+                            wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(16000)
+                            wf.writeframes(remaining)
+                        self._process_smart_chunk(wav_buf.getvalue())
             else:
-                log.info("[REC] Waiting for user instruction (auto_response=False)")
+                log.info("[REC] Instruction mode: waiting for user input")
                 self._request_user_input()
 
         threading.Thread(target=flush_and_respond, daemon=True).start()
@@ -1003,7 +1035,10 @@ class Api:
 
     def _on_monitor_chunk(self, wav_bytes: bytes, source: str):
         """Process monitor chunk."""
-        threading.Thread(target=self._process_auto_chunk, args=(wav_bytes,), daemon=True).start()
+        if self._copilot_mode == "smart" and self._vad:
+            threading.Thread(target=self._process_smart_chunk, args=(wav_bytes,), daemon=True).start()
+        else:
+            threading.Thread(target=self._process_auto_chunk, args=(wav_bytes,), daemon=True).start()
 
     def _process_auto_chunk(self, wav_bytes: bytes):
         """Auto mode: Groq transcribes + Bedrock identifies speakers only (no response)."""
@@ -1097,6 +1132,214 @@ class Api:
                 log.info(f"[INCREMENTAL] Point #{len(self._incremental_points)}: {point[:100]}")
         except Exception as e:
             log.error(f"[INCREMENTAL] Error extracting point: {e}", exc_info=True)
+
+    def _process_smart_chunk(self, wav_bytes: bytes):
+        """Smart mode: feed audio to VAD, process complete utterances."""
+        import time as _time, io, wave as _wave
+        try:
+            # Extract raw PCM from WAV
+            buf = io.BytesIO(wav_bytes)
+            with _wave.open(buf, "rb") as wf:
+                pcm = wf.readframes(wf.getnframes())
+
+            utterances = self._vad.feed(pcm)
+            for utt_pcm in utterances:
+                dur = len(utt_pcm) // 2 / 16000
+                log.info(f"[SMART] Utterance detected: {dur:.1f}s")
+
+                # Make WAV from PCM
+                wav_buf = io.BytesIO()
+                with _wave.open(wav_buf, "wb") as wf:
+                    wf.setnchannels(1); wf.setsampwidth(2); wf.setframerate(16000)
+                    wf.writeframes(utt_pcm)
+                utt_wav = wav_buf.getvalue()
+
+                # 1. Groq transcribe
+                t0 = _time.time()
+                try:
+                    segments = self._groq.transcribe_verbose(utt_wav)
+                except Exception as e:
+                    log.error(f"[SMART] Groq error: {e}")
+                    continue
+                transcript = " ".join(s.text.strip() for s in segments if s.text.strip()) if segments else ""
+                t_groq = _time.time() - t0
+                if not transcript or len(transcript) < 15:
+                    log.debug(f"[SMART] Transcript too short ({len(transcript)} chars), skipping")
+                    continue
+                log.info(f"[SMART] Groq ({t_groq:.1f}s): {transcript[:100]}...")
+
+                # Also do diarization for transcript display
+                self._diarize_and_emit(transcript)
+
+                # 2. Triagem + relevância + conexão
+                hist = ""
+                if self._smart_suggestions:
+                    hist = "Sugestões já dadas:\n"
+                    for s in self._smart_suggestions[-8:]:
+                        hist += f"- [{s['m']}min] {s['t']}: {s['p']}\n"
+
+                t0 = _time.time()
+                analise = self._bedrock.call_raw(
+                    "Responda EXATAMENTE 5 linhas:\n"
+                    "AÇÃO: SUGERIR ou ACUMULAR ou PULAR\n"
+                    "TEMA: [2-4 palavras]\n"
+                    "PONTO: [1 frase dor/necessidade]\n"
+                    "CONECTA_COM: [tema anterior relacionado, ou NENHUMA]\n"
+                    "MOMENTO: AGORA ou ESPERAR",
+                    f"Filtro inteligente de copiloto de vendas.\n\n"
+                    f"SUGERIR: dor clara, pergunta técnica, oportunidade, concorrente. Info NOVA e RELEVANTE.\n"
+                    f"ACUMULAR: conteúdo útil mas conversa parece continuar no mesmo assunto.\n"
+                    f"PULAR: social, apresentação, genérico, já coberto.\n\n"
+                    f"MOMENTO=AGORA: pergunta direta, dor urgente, concorrente, mudança de assunto.\n"
+                    f"MOMENTO=ESPERAR: assunto se desenvolvendo, melhor esperar mais contexto.\n\n"
+                    f"CONECTA_COM: OBRIGATÓRIO conectar com sugestão anterior quando há relação. "
+                    f"Numa reunião de vendas TUDO se relaciona. Só NENHUMA se primeira sugestão.\n\n"
+                    f"{hist}\nTrecho: {transcript[:500]}",
+                    max_tokens=150
+                ).strip()
+                t_triagem = _time.time() - t0
+
+                acao = "PULAR"; ponto = ""; tema = ""; conecta = "NENHUMA"; momento = "ESPERAR"
+                for line in analise.split("\n"):
+                    s = line.strip().replace("*", "").replace("#", "")
+                    u = s.upper()
+                    if u.startswith("AÇÃO:") or u.startswith("ACAO:"):
+                        if "SUGERIR" in u: acao = "SUGERIR"
+                        elif "ACUMULAR" in u: acao = "ACUMULAR"
+                        else: acao = "PULAR"
+                    elif u.startswith("PONTO:"): ponto = s.split(":", 1)[1].strip()
+                    elif u.startswith("TEMA:"): tema = s.split(":", 1)[1].strip()
+                    elif u.startswith("CONECTA"): conecta = s.split(":", 1)[1].strip()
+                    elif u.startswith("MOMENTO"): momento = "AGORA" if "AGORA" in u else "ESPERAR"
+
+                log.info(f"[SMART] Triagem ({t_triagem:.1f}s): {acao} | {tema} | {momento} | conecta={conecta}")
+
+                if acao == "PULAR":
+                    log.info(f"[SMART] Pulou: {tema}")
+                    continue
+                if acao == "ACUMULAR" or momento == "ESPERAR":
+                    self._incremental_points.append(ponto)
+                    log.info(f"[SMART] Acumulou: {ponto[:60]} (total: {len(self._incremental_points)})")
+                    if len(self._incremental_points) >= 3:
+                        ponto = " + ".join(self._incremental_points)
+                        self._incremental_points = []
+                        log.info(f"[SMART] Flush forçado: {ponto[:80]}")
+                    else:
+                        continue
+
+                # Include pending accumulated points
+                if self._incremental_points:
+                    ponto = " + ".join(self._incremental_points) + " + " + ponto
+                    self._incremental_points = []
+
+                # 3. Generate suggestion
+                self._generate_smart_suggestion(ponto, tema, conecta, transcript)
+
+        except Exception as e:
+            log.error(f"[SMART] Error: {e}", exc_info=True)
+
+    def _diarize_and_emit(self, transcript_text: str):
+        """Quick diarization and emit to frontend."""
+        try:
+            earlier_ctx = "\n".join(f"[{e['speaker']}] {e['text'][:80]}" for e in self._transcript[-10:])
+            participants_str = self._participants_context or "Participantes não informados."
+            earlier_block = f"\nContexto anterior:\n{earlier_ctx}\n" if earlier_ctx else ""
+            system = ("Você identifica quem fala. Use nomes da conversa. "
+                      "Responda SOMENTE JSON: {\"transcript\": [{\"speaker\": \"Nome\", \"text\": \"fala\"}]}")
+            user_msg = f"{participants_str}{earlier_block}\nTranscrição:\n{transcript_text}"
+            result = self._bedrock.call_raw(system, user_msg, max_tokens=2048)
+            import json
+            depth = 0; start = None
+            for i, c in enumerate(result):
+                if c == '{':
+                    if depth == 0: start = i
+                    depth += 1
+                elif c == '}':
+                    depth -= 1
+                    if depth == 0 and start is not None:
+                        try:
+                            parsed = json.loads(result[start:i+1])
+                            for item in parsed.get("transcript", []):
+                                sp = item.get("speaker", "OUTROS")
+                                txt = item.get("text", "").strip()
+                                if txt: self._emit_transcript(sp, txt)
+                            return
+                        except json.JSONDecodeError:
+                            start = None
+            # Fallback
+            for line in transcript_text.split("\n"):
+                if line.strip(): self._emit_transcript("CONVERSA", line.strip())
+        except Exception as e:
+            log.error(f"[SMART] Diarize error: {e}")
+
+    def _generate_smart_suggestion(self, ponto: str, tema: str, conecta: str, transcript: str):
+        """Generate and emit suggestion for smart mode."""
+        import time as _time
+        try:
+            system = self._raw_system_prompt or "Você é um copiloto."
+            is_connected = conecta and "NENHUMA" not in conecta.upper()
+            ctx_connection = ""
+            if is_connected and self._smart_suggestions:
+                for sh in self._smart_suggestions:
+                    if sh["t"].lower() in conecta.lower() or conecta.lower() in sh["t"].lower():
+                        ctx_connection = f"\nConecta com '{sh['t']}': {sh['p'][:80]}\nConecte os dois pontos.\n"
+                        break
+                if not ctx_connection:
+                    ctx_connection = f"\nConecta com: {conecta}.\n"
+
+            # Web search
+            competitor_kw = ["google", "gemini", "azure", "heroku", "oracle", "chatgpt", "openai", "gcp"]
+            txt_lower = (ponto + " " + transcript).lower()
+            has_comp = any(kw in txt_lower for kw in competitor_kw)
+            search_ctx = ""
+            if has_comp:
+                from .search import web_search
+                qp = f"Query em inglês, 8 palavras.\n\n{ponto[:200]}"
+                query = self._bedrock.call_raw("Só a query.", qp, max_tokens=20).strip().strip('"').split("\n")[0]
+                if query and "NONE" not in query.upper():
+                    results = web_search(query + " vs AWS 2026", max_results=3)
+                    if len(results) > 50:
+                        search_ctx = f"\n\nDados da web:\n{results[:400]}"
+
+            is_suggestions = self._behavior_template in ("sugestoes", "discovery")
+            if is_suggestions:
+                snap_inst = (
+                    "Gere 3-4 sugestões como FRASES PRONTAS que o comercial pode falar.\n"
+                    "Formato: [EMOJI] \"Frase pronta\"\n"
+                    "Emojis: 🔴 urgente, ⚠️ atenção, 💡 oportunidade, ✅ próximo passo\n"
+                    "Cada frase ESPECÍFICA ao contexto. PARE após as sugestões."
+                )
+            else:
+                snap_inst = (
+                    "Responda neste formato EXATO:\n"
+                    "📌 [dados técnicos em 3-5 linhas]\n"
+                    "💬 [2-3 formas de falar pro cliente]\n"
+                    "PARE após o 💬."
+                )
+
+            obs = "\n\nSe dados da web forem relevantes, adicione: 📎 OBS: [info factual]\n" if search_ctx else ""
+            comp_hint = " O cliente mencionou concorrente — diferencie AWS." if has_comp else ""
+
+            t0 = _time.time()
+            result = self._bedrock.call_raw(system,
+                f"Dor do cliente:\n{ponto}{ctx_connection}\n\n{snap_inst}{comp_hint}{obs}{search_ctx}",
+                max_tokens=5120)
+            t_sug = _time.time() - t0
+
+            result = self._clean_md(result)
+            result = self._trim_to_sentence(result)
+
+            elapsed = _time.time() - (self._start_time or _time.time())
+            conn_str = f" 🔗 {conecta}" if is_connected else ""
+            log.info(f"[SMART] ✅ Sugestão ({t_sug:.1f}s): {tema}{conn_str}")
+            log.info(f"[SMART] Ponto: {ponto[:100]}")
+            log.info(f"[SMART] Resposta ({len(result)} chars):\n{result}")
+
+            self._smart_suggestions.append({"t": tema, "p": ponto[:80], "m": f"{elapsed/60:.0f}"})
+            self._emit("copilot_response", {"response": result, "had_instruction": False})
+
+        except Exception as e:
+            log.error(f"[SMART] Suggestion error: {e}", exc_info=True)
 
     def _process_monitor_chunk(self, wav_bytes: bytes):
         import time
