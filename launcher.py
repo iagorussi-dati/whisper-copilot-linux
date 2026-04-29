@@ -21,8 +21,10 @@ def main():
     # Set base path for PyInstaller bundle
     if getattr(sys, 'frozen', False):
         base = sys._MEIPASS
+        app_dir = os.path.dirname(sys.executable)
     else:
         base = os.path.dirname(os.path.abspath(__file__))
+        app_dir = base
 
     os.chdir(base)
 
@@ -30,8 +32,18 @@ def main():
     from backend.api import Api
     import webview
     import logging
+    from datetime import datetime
+
+    # Logs go to install folder (writable), not _MEIPASS
+    log_dir = os.path.join(app_dir, "logs")
+    os.makedirs(log_dir, exist_ok=True)
+    log_file = os.path.join(log_dir, f"session_{datetime.now().strftime('%Y-%m-%d_%H-%M-%S')}.log")
 
     logging.basicConfig(level=logging.INFO, format="%(asctime)s [%(name)s] %(message)s")
+    file_handler = logging.FileHandler(log_file, encoding="utf-8")
+    file_handler.setFormatter(logging.Formatter("%(asctime)s [%(name)s] %(message)s"))
+    logging.getLogger().addHandler(file_handler)
+    logging.getLogger("whisper-copilot").info(f"Log file: {log_file}")
 
     api = Api()
     frontend = os.path.join(base, "frontend", "index.html")
